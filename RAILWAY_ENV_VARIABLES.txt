@@ -33,21 +33,29 @@ PUBLIC_BASE_URL=https://${{RAILWAY_PUBLIC_DOMAIN}}
 CORS_ALLOWED_ORIGINS=https://your-admin-url.vercel.app
 
 # ========================================
-# SECURITY SECRETS (Generated)
+# SECURITY SECRETS (⚠️ GENERATE THESE YOURSELF)
 # ========================================
-JWT_SECRET=vNOP+v2WoBjX3eqiC9d3gaHLFr3QVWxCDigbWER1jIM=
-JWT_REFRESH_SECRET=valnd+TtNdaNHOBtMphUCNpmsGNmqTWXs19lv/s2XBQ=
-OTP_HASH_SECRET=gxkFyB2lhbCPKuq7rwYcdOjzaQtQJbL0cuLqO35DHwc=
-PII_ENCRYPTION_SECRET=6WA7sSVczPrBeDTAUPji69USty6ITchdX8LsydXlSdk=
-ADMIN_JWT_SECRET=ZwXzoshMbqistR43FGGcJJJC42HTF0MbQragj9ykW2U=
+# Run this command 5 times to generate random secrets:
+#   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+# 
+# Then paste your generated values below:
+JWT_SECRET=<GENERATE_AND_PASTE_HERE>
+JWT_REFRESH_SECRET=<GENERATE_AND_PASTE_HERE>
+OTP_HASH_SECRET=<GENERATE_AND_PASTE_HERE>
+PII_ENCRYPTION_SECRET=<GENERATE_AND_PASTE_HERE>
+ADMIN_JWT_SECRET=<GENERATE_AND_PASTE_HERE>
 
 # ========================================
 # RAZORPAY (⚠️ USING TEST KEYS - CHANGE TO LIVE BEFORE PRODUCTION)
 # ========================================
+# Test keys (safe for development):
 PAYMENT_PROVIDER_MODE=test
 RAZORPAY_KEY_ID=rzp_test_TGWGDXCj0VWG6f
 RAZORPAY_KEY_SECRET=1vOWeQGb7BScgGHK8WYuy7h2
-RAZORPAY_WEBHOOK_SECRET=Aoq4vdAXE9gDAc0qtYy0qVqazfdKMuja81AuAIAA3ys=
+
+# Generate webhook secret (run once):
+#   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+RAZORPAY_WEBHOOK_SECRET=<GENERATE_AND_PASTE_HERE>
 
 # ========================================
 # SMS PROVIDER (MOCK MODE - Change to MSG91 later)

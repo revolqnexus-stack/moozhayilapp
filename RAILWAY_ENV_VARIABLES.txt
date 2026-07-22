@@ -1,0 +1,91 @@
+# ========================================
+# RAILWAY ENVIRONMENT VARIABLES
+# ========================================
+# Copy this entire block into Railway Dashboard → API Service → Variables → Raw Editor
+# Then update PUBLIC_BASE_URL and CORS_ALLOWED_ORIGINS after deployment
+
+# ========================================
+# CORE SETTINGS
+# ========================================
+NODE_ENV=production
+PORT=3080
+TRUST_PROXY=true
+ENABLE_DEMO_SEEDS=false
+
+# ========================================
+# DATABASE & REDIS (Railway Auto-Provisioned)
+# ========================================
+DATABASE_URL=postgresql://postgres:DBDZDffKbyxXXYPwPBwceeYiqAXlYwmS@postgres.railway.internal:5432/railway
+REDIS_URL=redis://default:hxnlfMRDMdQPfzrvvGnbjOAcPtHTebeU@redis.railway.internal:6379
+
+# ========================================
+# PUBLIC URL
+# ========================================
+# ⚠️ UPDATE THIS AFTER RAILWAY GIVES YOU THE PUBLIC DOMAIN
+# Railway will show something like: moozhayil-api-production.up.railway.app
+PUBLIC_BASE_URL=https://${{RAILWAY_PUBLIC_DOMAIN}}
+
+# ========================================
+# CORS ORIGINS
+# ========================================
+# ⚠️ UPDATE THIS AFTER VERCEL DEPLOYMENT
+# Add your Vercel admin URL here (no trailing slash)
+CORS_ALLOWED_ORIGINS=https://your-admin-url.vercel.app
+
+# ========================================
+# SECURITY SECRETS (Generated)
+# ========================================
+JWT_SECRET=vNOP+v2WoBjX3eqiC9d3gaHLFr3QVWxCDigbWER1jIM=
+JWT_REFRESH_SECRET=valnd+TtNdaNHOBtMphUCNpmsGNmqTWXs19lv/s2XBQ=
+OTP_HASH_SECRET=gxkFyB2lhbCPKuq7rwYcdOjzaQtQJbL0cuLqO35DHwc=
+PII_ENCRYPTION_SECRET=6WA7sSVczPrBeDTAUPji69USty6ITchdX8LsydXlSdk=
+ADMIN_JWT_SECRET=ZwXzoshMbqistR43FGGcJJJC42HTF0MbQragj9ykW2U=
+
+# ========================================
+# RAZORPAY (⚠️ USING TEST KEYS - CHANGE TO LIVE BEFORE PRODUCTION)
+# ========================================
+PAYMENT_PROVIDER_MODE=test
+RAZORPAY_KEY_ID=rzp_test_TGWGDXCj0VWG6f
+RAZORPAY_KEY_SECRET=1vOWeQGb7BScgGHK8WYuy7h2
+RAZORPAY_WEBHOOK_SECRET=Aoq4vdAXE9gDAc0qtYy0qVqazfdKMuja81AuAIAA3ys=
+
+# ========================================
+# SMS PROVIDER (MOCK MODE - Change to MSG91 later)
+# ========================================
+SMS_PROVIDER_MODE=mock
+MSG91_AUTH_KEY=mock
+MSG91_OTP_TEMPLATE_ID=mock
+
+# ========================================
+# STORAGE (LOCAL MODE - Change to S3 later)
+# ========================================
+STORAGE_BACKEND=local
+MEDIA_UPLOAD_DIR=/app/uploads
+
+# ========================================
+# FIREBASE (MOCK MODE - Configure before mobile release)
+# ========================================
+FIREBASE_MODE=mock
+FIREBASE_PROJECT_ID=mock
+FIREBASE_CLIENT_EMAIL=mock@mock.com
+FIREBASE_PRIVATE_KEY=mock
+
+# ========================================
+# KYC PROVIDER (MOCK MODE - Configure before going live)
+# ========================================
+KYC_PROVIDER_MODE=mock
+KYC_PROVIDER_BASE_URL=http://localhost
+KYC_PROVIDER_API_KEY=mock
+KYC_WEBHOOK_SECRET=mock
+
+# ========================================
+# OPTIONAL: SENTRY MONITORING
+# ========================================
+# SENTRY_DSN=<add when you create Sentry project>
+# SENTRY_ENVIRONMENT=production
+
+# ========================================
+# WORKER SERVICE (Copy same variables to Worker service)
+# ========================================
+# All variables above should also be added to the Worker service
+# The worker needs the same database, redis, and configuration

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Razorpay Integration Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background: #528FF0;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background: #3d7ad9;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: none;
+        }
+        .response.success {
+            border-color: #4caf50;
+            background: #f1f8f4;
+        }
+        .response.error {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛒 Razorpay Payment Test</h1>
+        <p>Test the Razorpay Standard Checkout integration</p>
+        
+        <div class="form-group">
+            <label for="amount">Amount (₹):</label>
+            <input type="number" id="amount" value="500" min="1">
+        </div>
+        
+        <div class="form-group">
+            <label for="token">Auth Token:</label>
+            <input type="text" id="token" placeholder="Your JWT token">
+            <small>Get this from login response</small>
+        </div>
+        
+        <button onclick="initiatePayment()">Pay Now</button>
+        
+        <div id="response" class="response"></div>
+    </div>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        const API_BASE = 'http://localhost:3080';
+        const RAZORPAY_KEY_ID = 'YOUR_RAZORPAY_KEY_ID';  // Replace with your test key
+
+        async function initiatePayment() {
+            const amount = document.getElementById('amount').value;
+            const token = document.getElementById('token').value;
+            
+            if (!token) {
+                showResponse('Please provide an auth token', 'error');
+                return;
+            }
+
+            try {
+                // Step 1: Create order on backend
+                showResponse('Creating order...', '');
+                
+                const createOrderResponse = await fetch(`${API_BASE}/api/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        // Adjust this based on your order creation schema
+                        items: [{
+                            product_id: 'test-product',
+                            quantity: 1
+                        }],
+                        delivery_address_id: 'test-address',
+                        amount_paise: parseInt(amount) * 100
+                    })
+                });
+
+                if (!createOrderResponse.ok) {
+                    throw new Error('Failed to create order');
+                }
+
+                const orderData = await createOrderResponse.json();
+                console.log('Order created:', orderData);
+
+                // Extract Razorpay order ID from response
+                const razorpayOrderId = orderData.razorpay_order_id || orderData.payment_session_id;
+                
+                if (!razorpayOrderId) {
+                    throw new Error('No Razorpay order ID in response');
+                }
+
+                // Step 2: Open Razorpay checkout
+                const options = {
+                    key: RAZORPAY_KEY_ID,
+                    amount: parseInt(amount) * 100, // Amount in paise
+                    currency: 'INR',
+                    name: 'Moozhayil Gold & Diamonds',
+                    description: 'Test Payment',
+                    order_id: razorpayOrderId,
+                    handler: function (response) {
+                        verifyPayment(response, token);
+                    },
+                    prefill: {
+                        name: 'Test User',
+                        email: 'test@example.com',
+                        contact: '9999999999'
+                    },
+                    theme: {
+                        color: '#C4961A'
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            showResponse('Payment cancelled by user', 'error');
+                        }
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.on('payment.failed', function (response){
+                    showResponse(`Payment failed: ${response.error.description}`, 'error');
+                    console.error('Payment error:', response.error);
+                });
+                
+                rzp.open();
+
+            } catch (error) {
+                showResponse(`Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        async function verifyPayment(response, token) {
+            showResponse('Verifying payment...', '');
+            
+            try {
+                // Step 3: Verify signature on backend
+                const verifyResponse = await fetch(`${API_BASE}/api/payments/verify-razorpay`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature
+                    })
+                });
+
+                if (!verifyResponse.ok) {
+                    throw new Error('Payment verification failed');
+                }
+
+                const result = await verifyResponse.json();
+                console.log('Verification result:', result);
+                
+                showResponse(
+                    `✅ Payment successful!<br>
+                    Payment ID: ${response.razorpay_payment_id}<br>
+                    Order ID: ${response.razorpay_order_id}`,
+                    'success'
+                );
+
+            } catch (error) {
+                showResponse(`Verification error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        function showResponse(message, type) {
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = message;
+            responseDiv.className = 'response ' + type;
+            responseDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

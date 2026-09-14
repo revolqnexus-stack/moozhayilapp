@@ -29,10 +29,16 @@ class AppAnimations {
   static const heroPage = Duration(milliseconds: 350);
   static const normal = Duration(milliseconds: 250);
   static const navIndicator = Duration(milliseconds: 280);
+  static const goldCountUp = Duration(milliseconds: 400);
+  static const shimmer = Duration(milliseconds: 1200);
+  static const ringFill = Duration(milliseconds: 800);
 
   // ── Premium curves ─────────────────────────────────────────────────────────
   /// Standard ease for most transitions — smooth, precise
   static const standard = Curves.easeInOutCubic;
+  
+  /// Default curve used throughout the app
+  static const curveDefault = Curves.easeInOutCubic;
 
   /// For things that settle naturally (cards, sheets)
   static const decelerate = Curves.easeOut;

@@ -17,11 +17,18 @@ export const reconcilePaymentSchema = z.object({
 
 export const captureCheckoutSchema = z.object({
   payment_session_id: z.string().uuid(),
-  razorpay_payment_id: z.string().min(1),
+  cashfree_order_id: z.string().min(1),
+});
+
+export const verifyRazorpaySignatureSchema = z.object({
   razorpay_order_id: z.string().min(1),
+  razorpay_payment_id: z.string().min(1),
   razorpay_signature: z.string().min(1),
 });
 
 export type VerifyUpiInput = z.infer<typeof verifyUpiSchema>;
 export type CreatePaymentMethodInput = z.infer<typeof createPaymentMethodSchema>;
 export type CaptureCheckoutInput = z.infer<typeof captureCheckoutSchema>;
+export type VerifyRazorpaySignatureInput = z.infer<
+  typeof verifyRazorpaySignatureSchema
+>;

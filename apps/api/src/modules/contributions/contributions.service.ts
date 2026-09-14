@@ -163,9 +163,11 @@ export class ContributionsService {
         amount_display: formatPaise(contribution.amountPaise),
       },
       payment_required: true,
-      payment_session_id: paymentSession.id,
+      payment_session_id: paymentSession.providerSessionId ?? paymentSession.id,
       razorpay_order_id: paymentSession.providerOrderId,
       razorpay_key_id: env.RAZORPAY_KEY_ID ?? null,
+      cashfree_order_id: paymentSession.providerOrderId,
+      cashfree_app_id: env.CASHFREE_APP_ID ?? null,
     };
   }
 
@@ -186,9 +188,16 @@ export class ContributionsService {
 
     const providerOrder = await paymentProviderClient.createOrder({
       amountPaise: contribution.amountPaise,
-      receipt: contribution.id,
+      orderId: contribution.id,
+      customerId: contribution.userId,
+      customerPhone: (
+        await prisma.user.findUniqueOrThrow({
+          where: { id: contribution.userId },
+        })
+      ).phone,
     });
 
+    const env = loadEnv();
     const paymentTx = await prisma.$transaction(async (tx) => {
       const created = await tx.paymentTransaction.create({
         data: {
@@ -197,6 +206,8 @@ export class ContributionsService {
           status: "created",
           amountPaise: contribution.amountPaise,
           providerOrderId: providerOrder.providerOrderId,
+          providerSessionId: providerOrder.paymentSessionId,
+          provider: env.PAYMENT_PROVIDER ?? "razorpay",
           idempotencyKey: `contribution_payment:${contribution.id}`,
         },
       });

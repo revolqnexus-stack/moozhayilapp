@@ -128,10 +128,10 @@ class RazorpayService {
     switch (result) {
       case RazorpaySuccess(:final paymentId, :final orderId, :final signature):
         try {
+          // Use the new Razorpay verification endpoint
           await _apiService.client.post<void>(
-            '/payments/capture-checkout',
+            '/payments/verify-razorpay',
             data: {
-              'payment_session_id': paymentSessionId,
               'razorpay_payment_id': paymentId,
               'razorpay_order_id': orderId,
               'razorpay_signature': signature,
@@ -142,7 +142,7 @@ class RazorpayService {
           if (context.mounted) {
             showPremiumSnackBar(
               context,
-              'Payment capture failed: ${e.message ?? 'Unknown error'}',
+              'Payment verification failed: ${e.message ?? 'Unknown error'}',
               haptic: false,
             );
           }

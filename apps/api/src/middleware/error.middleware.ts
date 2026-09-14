@@ -17,7 +17,10 @@ export type ErrorCode =
   | "UNPROCESSABLE"
   | "RATE_LIMITED"
   | "SERVER_ERROR"
-  | "PROVIDER_UNAVAILABLE";
+  | "PROVIDER_UNAVAILABLE"
+  | "PAYMENT_NOT_COMPLETED"
+  | "PAYMENT_NOT_SUCCESSFUL"
+  | "INVALID_SIGNATURE";
 
 export interface ApiErrorBody {
   error: {

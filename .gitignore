@@ -10,6 +10,9 @@
 !**/.env.production.example
 *.pem
 *.key
+secrets.txt
+*-secrets.txt
+.secrets-generated.txt
 
 # --- OS ---
 .DS_Store

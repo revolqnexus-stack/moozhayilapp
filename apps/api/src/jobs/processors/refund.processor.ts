@@ -35,9 +35,10 @@ export async function processOrderRefund(
       (paymentTx.status === "captured" || paymentTx.status === "reconciled")
     ) {
       await paymentProviderClient.createRefund({
-        providerPaymentId: paymentTx.providerPaymentId,
+        orderId: paymentTx.providerPaymentId,
         amountPaise: paymentTx.amountPaise,
       });
+      refundInitiated = true;
     }
   }
 

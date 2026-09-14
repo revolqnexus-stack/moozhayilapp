@@ -45,10 +45,15 @@ const envSchema = z.object({
   SMS_PROVIDER_MODE: z.enum(["mock", "live"]).default("mock"),
   MSG91_AUTH_KEY: z.string().min(8).optional(),
   MSG91_OTP_TEMPLATE_ID: z.string().min(1).optional(),
+  PAYMENT_PROVIDER: z.enum(["razorpay", "cashfree"]).default("razorpay"),
   PAYMENT_PROVIDER_MODE: z.enum(["mock", "live"]).default("mock"),
   RAZORPAY_KEY_ID: z.string().min(1).optional(),
   RAZORPAY_KEY_SECRET: z.string().min(1).optional(),
   RAZORPAY_WEBHOOK_SECRET: z.string().min(8).optional(),
+  CASHFREE_APP_ID: z.string().min(1).optional(),
+  CASHFREE_SECRET_KEY: z.string().min(1).optional(),
+  CASHFREE_WEBHOOK_SECRET: z.string().min(8).optional(),
+  CASHFREE_ENVIRONMENT: z.enum(["sandbox", "production"]).default("sandbox"),
   FIREBASE_MODE: z.enum(["mock", "live"]).default("mock"),
   FIREBASE_PROJECT_ID: z.string().min(1).optional(),
   FIREBASE_CLIENT_EMAIL: z.string().email().optional(),
@@ -112,9 +117,24 @@ function assertProductionLiveCredentials(data: z.infer<typeof envSchema>) {
     data.SMS_PROVIDER_MODE === "live" && !data.MSG91_OTP_TEMPLATE_ID
       ? "MSG91_OTP_TEMPLATE_ID"
       : null,
-    data.RAZORPAY_KEY_ID ? null : "RAZORPAY_KEY_ID",
-    data.RAZORPAY_KEY_SECRET ? null : "RAZORPAY_KEY_SECRET",
-    data.RAZORPAY_WEBHOOK_SECRET ? null : "RAZORPAY_WEBHOOK_SECRET",
+    data.PAYMENT_PROVIDER === "cashfree" && !data.CASHFREE_APP_ID
+      ? "CASHFREE_APP_ID"
+      : null,
+    data.PAYMENT_PROVIDER === "cashfree" && !data.CASHFREE_SECRET_KEY
+      ? "CASHFREE_SECRET_KEY"
+      : null,
+    data.PAYMENT_PROVIDER === "cashfree" && !data.CASHFREE_WEBHOOK_SECRET
+      ? "CASHFREE_WEBHOOK_SECRET"
+      : null,
+    data.PAYMENT_PROVIDER === "razorpay" && !data.RAZORPAY_KEY_ID
+      ? "RAZORPAY_KEY_ID"
+      : null,
+    data.PAYMENT_PROVIDER === "razorpay" && !data.RAZORPAY_KEY_SECRET
+      ? "RAZORPAY_KEY_SECRET"
+      : null,
+    data.PAYMENT_PROVIDER === "razorpay" && !data.RAZORPAY_WEBHOOK_SECRET
+      ? "RAZORPAY_WEBHOOK_SECRET"
+      : null,
     data.KYC_PROVIDER_BASE_URL ? null : "KYC_PROVIDER_BASE_URL",
     data.KYC_PROVIDER_API_KEY ? null : "KYC_PROVIDER_API_KEY",
     data.FIREBASE_PROJECT_ID ? null : "FIREBASE_PROJECT_ID",
@@ -224,10 +244,21 @@ export function loadEnv(input: NodeJS.ProcessEnv = process.env): Env {
   if (data.NODE_ENV !== "production" && data.NODE_ENV !== "test") {
     if (
       data.PAYMENT_PROVIDER_MODE === "live" &&
+      data.PAYMENT_PROVIDER === "cashfree" &&
+      (!data.CASHFREE_APP_ID || !data.CASHFREE_SECRET_KEY)
+    ) {
+      throw new Error(
+        "PAYMENT_PROVIDER_MODE=live with PAYMENT_PROVIDER=cashfree requires CASHFREE_APP_ID and CASHFREE_SECRET_KEY",
+      );
+    }
+
+    if (
+      data.PAYMENT_PROVIDER_MODE === "live" &&
+      data.PAYMENT_PROVIDER === "razorpay" &&
       (!data.RAZORPAY_KEY_ID || !data.RAZORPAY_KEY_SECRET)
     ) {
       throw new Error(
-        "PAYMENT_PROVIDER_MODE=live requires RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET",
+        "PAYMENT_PROVIDER_MODE=live with PAYMENT_PROVIDER=razorpay requires RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET",
       );
     }
 

@@ -1,0 +1,100 @@
+name: moozhayil-api
+region: blr1  # Bangalore region
+
+services:
+  - name: api
+    github:
+      repo: your-username/moozhayil-gold-diamonds
+      branch: main
+      deploy_on_push: true
+    source_dir: apps/api
+    build_command: npm ci && npm run build && npm run prisma:generate
+    run_command: npm run start:prod
+    environment_slug: node-js
+    instance_size_slug: basic-xxs
+    instance_count: 1
+    http_port: 3080
+    
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 30
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+    
+    envs:
+      - key: NODE_ENV
+        value: production
+      
+      # Add these as encrypted secrets in DO dashboard
+      - key: DATABASE_URL
+        type: SECRET
+      - key: REDIS_URL
+        type: SECRET
+      - key: JWT_SECRET
+        type: SECRET
+      - key: JWT_REFRESH_SECRET
+        type: SECRET
+      - key: OTP_HASH_SECRET
+        type: SECRET
+      - key: PII_ENCRYPTION_SECRET
+        type: SECRET
+      - key: ADMIN_JWT_SECRET
+        type: SECRET
+      - key: RAZORPAY_KEY_ID
+        type: SECRET
+      - key: RAZORPAY_KEY_SECRET
+        type: SECRET
+      - key: RAZORPAY_WEBHOOK_SECRET
+        type: SECRET
+      - key: S3_ACCESS_KEY_ID
+        type: SECRET
+      - key: S3_SECRET_ACCESS_KEY
+        type: SECRET
+      - key: MSG91_AUTH_KEY
+        type: SECRET
+      - key: KYC_PROVIDER_API_KEY
+        type: SECRET
+      - key: FIREBASE_PRIVATE_KEY
+        type: SECRET
+      
+      # Public configuration
+      - key: PORT
+        value: "3080"
+      - key: PAYMENT_PROVIDER
+        value: razorpay
+      - key: PAYMENT_PROVIDER_MODE
+        value: live
+      - key: STORAGE_BACKEND
+        value: s3
+      - key: TRUST_PROXY
+        value: "true"
+      - key: SMS_PROVIDER_MODE
+        value: live
+      - key: KYC_PROVIDER_MODE
+        value: live
+      - key: FIREBASE_MODE
+        value: live
+
+  # Optional: Background worker for processing jobs
+  - name: worker
+    github:
+      repo: your-username/moozhayil-gold-diamonds
+      branch: main
+      deploy_on_push: true
+    source_dir: apps/api
+    build_command: npm ci && npm run build
+    run_command: npm run worker:start
+    environment_slug: node-js
+    instance_size_slug: basic-xxs
+    instance_count: 1
+    
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        type: SECRET
+      - key: REDIS_URL
+        type: SECRET
+      # Share same secrets as API

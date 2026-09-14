@@ -14,7 +14,8 @@ export class WebhooksController {
     res.status(200).json(
       await webhooksService.ingestPaymentWebhook({
         rawBody,
-        signature: req.header("x-razorpay-signature"),
+        signature: req.header("x-webhook-signature"),
+        timestamp: req.header("x-webhook-timestamp"),
         payload,
       }),
     );

@@ -2,7 +2,11 @@ import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/error.middleware";
 import { applyPaymentCapture } from "../payments/payment_completion.service";
 import { paymentProviderClient } from "./payment_provider.client";
-import type { CaptureCheckoutInput, CreatePaymentMethodInput } from "./payments.schema";
+import type {
+  CaptureCheckoutInput,
+  CreatePaymentMethodInput,
+  VerifyRazorpaySignatureInput,
+} from "./payments.schema";
 import { processPaymentReconciliation } from "../../jobs/processors/payment_reconciliation.processor";
 
 function paymentMethodDto(method: {
@@ -103,22 +107,87 @@ export class PaymentsService {
       return { success: true, already_captured: true };
     }
 
-    const signatureValid = paymentProviderClient.verifyCheckoutSignature({
+    // Fetch order status from Cashfree to verify payment
+    const orderStatus = await paymentProviderClient.fetchOrderStatus(
+      input.cashfree_order_id,
+    );
+
+    if (orderStatus.status !== "PAID") {
+      throw new AppError(
+        400,
+        "PAYMENT_NOT_COMPLETED",
+        "Payment has not been completed yet",
+      );
+    }
+
+    // Find successful payment
+    const successPayment = orderStatus.payments.find((p) => p.status === "SUCCESS");
+    if (!successPayment) {
+      throw new AppError(
+        400,
+        "PAYMENT_NOT_SUCCESSFUL",
+        "No successful payment found for this order",
+      );
+    }
+
+    await applyPaymentCapture({
+      paymentTransactionId: paymentTx.id,
+      providerPaymentId: successPayment.providerPaymentId,
+    });
+
+    return { success: true, already_captured: false };
+  }
+
+  async verifyRazorpaySignature(
+    userId: string,
+    input: VerifyRazorpaySignatureInput,
+  ) {
+    // Verify the signature first
+    const isValid = paymentProviderClient.verifyCheckoutSignature({
       orderId: input.razorpay_order_id,
       paymentId: input.razorpay_payment_id,
       signature: input.razorpay_signature,
     });
 
-    if (!signatureValid) {
-      throw new AppError(400, "BAD_REQUEST", "Invalid payment signature");
+    if (!isValid) {
+      throw new AppError(
+        400,
+        "INVALID_SIGNATURE",
+        "Payment signature verification failed",
+      );
     }
 
+    // Find the payment transaction by provider order ID
+    const paymentTx = await prisma.paymentTransaction.findFirst({
+      where: {
+        userId,
+        providerOrderId: input.razorpay_order_id,
+      },
+    });
+
+    if (!paymentTx) {
+      throw new AppError(404, "NOT_FOUND", "Payment session not found");
+    }
+
+    if (paymentTx.status === "captured" || paymentTx.status === "reconciled") {
+      return {
+        success: true,
+        already_captured: true,
+        payment_id: paymentTx.id,
+      };
+    }
+
+    // Capture the payment
     await applyPaymentCapture({
       paymentTransactionId: paymentTx.id,
       providerPaymentId: input.razorpay_payment_id,
     });
 
-    return { success: true, already_captured: false };
+    return {
+      success: true,
+      already_captured: false,
+      payment_id: paymentTx.id,
+    };
   }
 }
 

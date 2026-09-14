@@ -326,9 +326,15 @@ export class OrdersService {
       let paymentTransactionId: string | null = null;
 
       if (requiresOnlinePayment) {
+        const user = await prisma.user.findUniqueOrThrow({
+          where: { id: userId },
+        });
+
         const providerOrder = await paymentProviderClient.createOrder({
           amountPaise: paymentAmountPaise,
-          receipt: order.id,
+          orderId: order.id,
+          customerId: userId,
+          customerPhone: user.phone,
         });
 
         const paymentTx = await tx.paymentTransaction.create({
@@ -338,12 +344,14 @@ export class OrdersService {
             status: env.PAYMENT_PROVIDER_MODE === "mock" ? "pending" : "created",
             amountPaise: paymentAmountPaise,
             providerOrderId: providerOrder.providerOrderId,
+            providerSessionId: providerOrder.paymentSessionId,
+            provider: env.PAYMENT_PROVIDER ?? "razorpay",
             idempotencyKey: `order_payment:${order.id}`,
           },
         });
 
         paymentTransactionId = paymentTx.id;
-        paymentSessionId = paymentTx.id;
+        paymentSessionId = providerOrder.paymentSessionId;
         paymentUrl =
           env.PAYMENT_PROVIDER_MODE === "mock"
             ? `mock://pay/${paymentTx.id}`
@@ -419,8 +427,8 @@ export class OrdersService {
       payment_amount_paise: finalPaymentAmount,
       payment_session_id: paymentSessionId,
       payment_url: paymentUrl,
-      razorpay_order_id: razorpayOrderId,
-      razorpay_key_id: finalPaymentAmount > 0 ? (env.RAZORPAY_KEY_ID ?? null) : null,
+      cashfree_order_id: razorpayOrderId,
+      cashfree_app_id: finalPaymentAmount > 0 ? (env.CASHFREE_APP_ID ?? null) : null,
       aura_mc_waiver_applied: totals.makingChargeWaiverPaise > 0,
       making_charge_waiver_paise: totals.makingChargeWaiverPaise,
       making_charge_waiver_display:

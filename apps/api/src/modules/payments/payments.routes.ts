@@ -35,3 +35,7 @@ paymentsRouter.delete("/methods/:id", (req, res, next) => {
 paymentsRouter.post("/capture-checkout", (req, res, next) => {
   void paymentsController.captureCheckout(req, res).catch(next);
 });
+
+paymentsRouter.post("/verify-razorpay", (req, res, next) => {
+  void paymentsController.verifyRazorpaySignature(req, res).catch(next);
+});

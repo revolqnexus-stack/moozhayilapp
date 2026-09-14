@@ -6,6 +6,7 @@ import {
   createPaymentMethodSchema,
   reconcilePaymentSchema,
   verifyUpiSchema,
+  verifyRazorpaySignatureSchema,
 } from "./payments.schema";
 import { paymentsService } from "./payments.service";
 
@@ -56,6 +57,16 @@ export class PaymentsController {
     res
       .status(200)
       .json(await paymentsService.captureCheckout(req.user.userId, input));
+  }
+
+  async verifyRazorpaySignature(req: Request, res: Response): Promise<void> {
+    if (!req.user) {
+      throw new AppError(401, "UNAUTHORIZED", "Missing access token");
+    }
+    const input = verifyRazorpaySignatureSchema.parse(req.body);
+    res
+      .status(200)
+      .json(await paymentsService.verifyRazorpaySignature(req.user.userId, input));
   }
 }
 

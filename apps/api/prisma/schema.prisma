@@ -174,6 +174,7 @@ enum PaymentMethodType {
 
 enum PaymentProvider {
   razorpay
+  cashfree
 
   @@map("payment_provider")
 }
@@ -764,7 +765,7 @@ model PaymentMethod {
   userId           String            @map("user_id") @db.Uuid
   type             PaymentMethodType
   displayLabel     String            @map("display_label") @db.VarChar(100)
-  provider         PaymentProvider   @default(razorpay)
+  provider         PaymentProvider   @default(cashfree)
   providerToken    String            @map("provider_token") @db.VarChar(500)
   isDefault        Boolean           @default(false) @map("is_default")
   isAutopayEnabled Boolean           @default(false) @map("is_autopay_enabled")
@@ -930,20 +931,21 @@ model UserMilestone {
 }
 
 model PaymentTransaction {
-  id                String                   @id @default(uuid()) @db.Uuid
-  userId            String                   @map("user_id") @db.Uuid
-  provider          PaymentProvider          @default(razorpay)
-  providerPaymentId String?                  @map("provider_payment_id") @db.VarChar(255)
-  providerOrderId   String?                  @map("provider_order_id") @db.VarChar(255)
-  type              PaymentTransactionType
-  status            PaymentTransactionStatus
-  amountPaise       Int                      @map("amount_paise")
-  currency          String                   @default("INR") @db.VarChar(3)
-  idempotencyKey    String?                  @map("idempotency_key") @db.VarChar(100)
-  failureCode       String?                  @map("failure_code") @db.VarChar(100)
-  failureMessage    String?                  @map("failure_message")
-  createdAt         DateTime                 @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id                 String                   @id @default(uuid()) @db.Uuid
+  userId             String                   @map("user_id") @db.Uuid
+  provider           PaymentProvider          @default(razorpay)
+  providerPaymentId  String?                  @map("provider_payment_id") @db.VarChar(255)
+  providerOrderId    String?                  @map("provider_order_id") @db.VarChar(255)
+  providerSessionId  String?                  @map("provider_session_id") @db.VarChar(500)
+  type               PaymentTransactionType
+  status             PaymentTransactionStatus
+  amountPaise        Int                      @map("amount_paise")
+  currency           String                   @default("INR") @db.VarChar(3)
+  idempotencyKey     String?                  @map("idempotency_key") @db.VarChar(100)
+  failureCode        String?                  @map("failure_code") @db.VarChar(100)
+  failureMessage     String?                  @map("failure_message")
+  createdAt          DateTime                 @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   orders        Order[]
@@ -954,6 +956,7 @@ model PaymentTransaction {
   @@index([userId], map: "idx_payment_transactions_user_id")
   @@index([status], map: "idx_payment_transactions_status")
   @@index([providerOrderId], map: "idx_payment_transactions_provider_order_id")
+  @@index([providerSessionId], map: "idx_payment_transactions_provider_session_id")
   @@map("payment_transactions")
 }
 

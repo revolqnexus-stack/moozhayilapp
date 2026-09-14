@@ -14,11 +14,13 @@ export class WebhooksService {
   async ingestPaymentWebhook(input: {
     rawBody: string;
     signature: string | undefined;
+    timestamp: string | undefined;
     payload: Record<string, unknown>;
   }) {
     const signatureValid = paymentProviderClient.verifyWebhookSignature(
       input.rawBody,
       input.signature,
+      input.timestamp,
     );
 
     const eventId =

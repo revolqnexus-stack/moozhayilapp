@@ -18,15 +18,20 @@ function client(): Redis | null {
       maxRetriesPerRequest: null,
       enableOfflineQueue: false,
       retryStrategy: (times) => {
+        console.log(`[redis] retry attempt ${times}`);
         // Retry indefinitely with exponential backoff (max 3 seconds)
         return Math.min(times * 200, 3000);
       },
       reconnectOnError: () => true,
     });
-    redis.on("error", (err) => {
-      // Redis is cache only. API handlers degrade to PostgreSQL on failure.
-      console.error("Redis error:", err.message);
-    });
+    
+    // Lifecycle logging
+    for (const ev of ['connect', 'ready', 'error', 'close', 'reconnecting', 'end']) {
+      redis.on(ev, (arg) => {
+        console.log(`[redis] ${ev}`, arg?.message ?? '');
+      });
+    }
+    
     return redis;
   } catch {
     redis = null;

@@ -15,11 +15,17 @@ function client(): Redis | null {
   try {
     redis = new Redis(loadEnv().REDIS_URL, {
       lazyConnect: true,
-      maxRetriesPerRequest: 1,
+      maxRetriesPerRequest: null,
       enableOfflineQueue: false,
+      retryStrategy: (times) => {
+        // Retry indefinitely with exponential backoff (max 3 seconds)
+        return Math.min(times * 200, 3000);
+      },
+      reconnectOnError: () => true,
     });
-    redis.on("error", () => {
+    redis.on("error", (err) => {
       // Redis is cache only. API handlers degrade to PostgreSQL on failure.
+      console.error("Redis error:", err.message);
     });
     return redis;
   } catch {

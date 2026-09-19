@@ -1,6 +1,6 @@
 import { prisma } from "../../db/prisma";
 import { loadEnv } from "../../config/env";
-import Redis from "ioredis";
+import { getJsonCache } from "../../utils/cache";
 
 export type HealthStatus = "ok" | "degraded" | "error";
 
@@ -50,33 +50,16 @@ async function checkDatabase(): Promise<HealthReport["checks"]["database"]> {
 
 async function checkRedis(): Promise<HealthReport["checks"]["redis"]> {
   const started = Date.now();
-  let client: Redis | null = null;
   try {
-    const env = loadEnv();
-    client = new Redis(env.REDIS_URL, {
-      maxRetriesPerRequest: 1,
-      connectTimeout: 2000,
-      lazyConnect: true,
-    });
-    console.log(`[health] Redis status before connect: ${client.status}`);
-    await client.connect();
-    console.log(`[health] Redis status after connect: ${client.status}`);
-    const pong = await client.ping();
-    if (pong !== "PONG") {
-      throw new Error("Unexpected Redis response");
-    }
+    // Use a lightweight cache operation to test Redis
+    // getJsonCache handles connection internally and degrades gracefully
+    await getJsonCache("health:ping");
     return { status: "ok", latency_ms: Date.now() - started };
   } catch (error) {
-    console.error('[health] Redis check failed:', error);
     return {
       status: "error",
       latency_ms: Date.now() - started,
       error: error instanceof Error ? error.message : "Redis unavailable",
     };
-  } finally {
-    if (client) {
-      console.log(`[health] Disconnecting Redis client, status: ${client.status}`);
-      client.disconnect();
-    }
   }
 }

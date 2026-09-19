@@ -58,13 +58,16 @@ async function checkRedis(): Promise<HealthReport["checks"]["redis"]> {
       connectTimeout: 2000,
       lazyConnect: true,
     });
+    console.log(`[health] Redis status before connect: ${client.status}`);
     await client.connect();
+    console.log(`[health] Redis status after connect: ${client.status}`);
     const pong = await client.ping();
     if (pong !== "PONG") {
       throw new Error("Unexpected Redis response");
     }
     return { status: "ok", latency_ms: Date.now() - started };
   } catch (error) {
+    console.error('[health] Redis check failed:', error);
     return {
       status: "error",
       latency_ms: Date.now() - started,
@@ -72,6 +75,7 @@ async function checkRedis(): Promise<HealthReport["checks"]["redis"]> {
     };
   } finally {
     if (client) {
+      console.log(`[health] Disconnecting Redis client, status: ${client.status}`);
       client.disconnect();
     }
   }

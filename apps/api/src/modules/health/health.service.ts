@@ -1,5 +1,4 @@
 import { prisma } from "../../db/prisma";
-import { loadEnv } from "../../config/env";
 import { getJsonCache } from "../../utils/cache";
 
 export type HealthStatus = "ok" | "degraded" | "error";

@@ -160,7 +160,9 @@ class _ContributeScreenState extends ConsumerState<ContributeScreen> {
         return;
       }
 
-      showPremiumSnackBar(context, CustomerCopy.paymentError, haptic: false);
+      if (mounted) {
+        showPremiumSnackBar(context, CustomerCopy.paymentError, haptic: false);
+      }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }

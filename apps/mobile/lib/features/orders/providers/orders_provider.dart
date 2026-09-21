@@ -42,6 +42,7 @@ class OrdersRepository {
   }
 
   Future<CreateOrderResponse> create({
+    required String quoteId,
     required List<Map<String, dynamic>> items,
     required String deliveryAddressId,
     required String paymentMethod,
@@ -52,6 +53,7 @@ class OrdersRepository {
       final response = await _apiService.client.post<Map<String, dynamic>>(
         '/orders',
         data: {
+          'quote_id': quoteId,
           'items': items,
           'delivery_address_id': deliveryAddressId,
           'payment_method': paymentMethod,
@@ -105,6 +107,7 @@ class OrderActions extends _$OrderActions {
   FutureOr<void> build() {}
 
   Future<CreateOrderResponse> placeOrder({
+    required String quoteId,
     required List<Map<String, dynamic>> items,
     required String deliveryAddressId,
     required String paymentMethod,
@@ -114,6 +117,7 @@ class OrderActions extends _$OrderActions {
     final response = await ref
         .read(ordersRepositoryProvider)
         .create(
+          quoteId: quoteId,
           items: items,
           deliveryAddressId: deliveryAddressId,
           paymentMethod: paymentMethod,

@@ -33,6 +33,8 @@ _CartSummary _$CartSummaryFromJson(Map<String, dynamic> json) => _CartSummary(
   kycGrossTotalPaise: (json['kyc_gross_total_paise'] as num?)?.toInt(),
   itemCount: (json['item_count'] as num).toInt(),
   priceValidUntil: json['price_valid_until'] as String?,
+  serverTime: json['server_time'] as String?,
+  quoteId: json['quote_id'] as String?,
 );
 
 Map<String, dynamic> _$CartSummaryToJson(_CartSummary instance) =>
@@ -43,4 +45,6 @@ Map<String, dynamic> _$CartSummaryToJson(_CartSummary instance) =>
       'kyc_gross_total_paise': instance.kycGrossTotalPaise,
       'item_count': instance.itemCount,
       'price_valid_until': instance.priceValidUntil,
+      'server_time': instance.serverTime,
+      'quote_id': instance.quoteId,
     };

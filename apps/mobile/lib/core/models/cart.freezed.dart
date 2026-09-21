@@ -308,7 +308,7 @@ $ProductCopyWith<$Res> get product {
 /// @nodoc
 mixin _$CartSummary {
 
- List<CartLineItem> get items;@JsonKey(name: 'subtotal_paise') int get subtotalPaise;@JsonKey(name: 'subtotal_display') String get subtotalDisplay;@JsonKey(name: 'item_count') int get itemCount;@JsonKey(name: 'price_valid_until') String? get priceValidUntil;
+ List<CartLineItem> get items;@JsonKey(name: 'subtotal_paise') int get subtotalPaise;@JsonKey(name: 'subtotal_display') String get subtotalDisplay;@JsonKey(name: 'kyc_gross_total_paise') int? get kycGrossTotalPaise;@JsonKey(name: 'item_count') int get itemCount;@JsonKey(name: 'price_valid_until') String? get priceValidUntil;@JsonKey(name: 'server_time') String? get serverTime;@JsonKey(name: 'quote_id') String? get quoteId;
 /// Create a copy of CartSummary
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -321,16 +321,16 @@ $CartSummaryCopyWith<CartSummary> get copyWith => _$CartSummaryCopyWithImpl<Cart
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CartSummary&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.subtotalPaise, subtotalPaise) || other.subtotalPaise == subtotalPaise)&&(identical(other.subtotalDisplay, subtotalDisplay) || other.subtotalDisplay == subtotalDisplay)&&(identical(other.itemCount, itemCount) || other.itemCount == itemCount)&&(identical(other.priceValidUntil, priceValidUntil) || other.priceValidUntil == priceValidUntil));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CartSummary&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.subtotalPaise, subtotalPaise) || other.subtotalPaise == subtotalPaise)&&(identical(other.subtotalDisplay, subtotalDisplay) || other.subtotalDisplay == subtotalDisplay)&&(identical(other.kycGrossTotalPaise, kycGrossTotalPaise) || other.kycGrossTotalPaise == kycGrossTotalPaise)&&(identical(other.itemCount, itemCount) || other.itemCount == itemCount)&&(identical(other.priceValidUntil, priceValidUntil) || other.priceValidUntil == priceValidUntil)&&(identical(other.serverTime, serverTime) || other.serverTime == serverTime)&&(identical(other.quoteId, quoteId) || other.quoteId == quoteId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(items),subtotalPaise,subtotalDisplay,itemCount,priceValidUntil);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(items),subtotalPaise,subtotalDisplay,kycGrossTotalPaise,itemCount,priceValidUntil,serverTime,quoteId);
 
 @override
 String toString() {
-  return 'CartSummary(items: $items, subtotalPaise: $subtotalPaise, subtotalDisplay: $subtotalDisplay, itemCount: $itemCount, priceValidUntil: $priceValidUntil)';
+  return 'CartSummary(items: $items, subtotalPaise: $subtotalPaise, subtotalDisplay: $subtotalDisplay, kycGrossTotalPaise: $kycGrossTotalPaise, itemCount: $itemCount, priceValidUntil: $priceValidUntil, serverTime: $serverTime, quoteId: $quoteId)';
 }
 
 
@@ -341,7 +341,7 @@ abstract mixin class $CartSummaryCopyWith<$Res>  {
   factory $CartSummaryCopyWith(CartSummary value, $Res Function(CartSummary) _then) = _$CartSummaryCopyWithImpl;
 @useResult
 $Res call({
- List<CartLineItem> items,@JsonKey(name: 'subtotal_paise') int subtotalPaise,@JsonKey(name: 'subtotal_display') String subtotalDisplay,@JsonKey(name: 'item_count') int itemCount,@JsonKey(name: 'price_valid_until') String? priceValidUntil
+ List<CartLineItem> items,@JsonKey(name: 'subtotal_paise') int subtotalPaise,@JsonKey(name: 'subtotal_display') String subtotalDisplay,@JsonKey(name: 'kyc_gross_total_paise') int? kycGrossTotalPaise,@JsonKey(name: 'item_count') int itemCount,@JsonKey(name: 'price_valid_until') String? priceValidUntil,@JsonKey(name: 'server_time') String? serverTime,@JsonKey(name: 'quote_id') String? quoteId
 });
 
 
@@ -358,13 +358,16 @@ class _$CartSummaryCopyWithImpl<$Res>
 
 /// Create a copy of CartSummary
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? items = null,Object? subtotalPaise = null,Object? subtotalDisplay = null,Object? itemCount = null,Object? priceValidUntil = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? items = null,Object? subtotalPaise = null,Object? subtotalDisplay = null,Object? kycGrossTotalPaise = freezed,Object? itemCount = null,Object? priceValidUntil = freezed,Object? serverTime = freezed,Object? quoteId = freezed,}) {
   return _then(_self.copyWith(
 items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
 as List<CartLineItem>,subtotalPaise: null == subtotalPaise ? _self.subtotalPaise : subtotalPaise // ignore: cast_nullable_to_non_nullable
 as int,subtotalDisplay: null == subtotalDisplay ? _self.subtotalDisplay : subtotalDisplay // ignore: cast_nullable_to_non_nullable
-as String,itemCount: null == itemCount ? _self.itemCount : itemCount // ignore: cast_nullable_to_non_nullable
+as String,kycGrossTotalPaise: freezed == kycGrossTotalPaise ? _self.kycGrossTotalPaise : kycGrossTotalPaise // ignore: cast_nullable_to_non_nullable
+as int?,itemCount: null == itemCount ? _self.itemCount : itemCount // ignore: cast_nullable_to_non_nullable
 as int,priceValidUntil: freezed == priceValidUntil ? _self.priceValidUntil : priceValidUntil // ignore: cast_nullable_to_non_nullable
+as String?,serverTime: freezed == serverTime ? _self.serverTime : serverTime // ignore: cast_nullable_to_non_nullable
+as String?,quoteId: freezed == quoteId ? _self.quoteId : quoteId // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -450,10 +453,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<CartLineItem> items, @JsonKey(name: 'subtotal_paise')  int subtotalPaise, @JsonKey(name: 'subtotal_display')  String subtotalDisplay, @JsonKey(name: 'item_count')  int itemCount, @JsonKey(name: 'price_valid_until')  String? priceValidUntil)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<CartLineItem> items, @JsonKey(name: 'subtotal_paise')  int subtotalPaise, @JsonKey(name: 'subtotal_display')  String subtotalDisplay, @JsonKey(name: 'kyc_gross_total_paise')  int? kycGrossTotalPaise, @JsonKey(name: 'item_count')  int itemCount, @JsonKey(name: 'price_valid_until')  String? priceValidUntil, @JsonKey(name: 'server_time')  String? serverTime, @JsonKey(name: 'quote_id')  String? quoteId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CartSummary() when $default != null:
-return $default(_that.items,_that.subtotalPaise,_that.subtotalDisplay,_that.itemCount,_that.priceValidUntil);case _:
+return $default(_that.items,_that.subtotalPaise,_that.subtotalDisplay,_that.kycGrossTotalPaise,_that.itemCount,_that.priceValidUntil,_that.serverTime,_that.quoteId);case _:
   return orElse();
 
 }
@@ -471,10 +474,10 @@ return $default(_that.items,_that.subtotalPaise,_that.subtotalDisplay,_that.item
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<CartLineItem> items, @JsonKey(name: 'subtotal_paise')  int subtotalPaise, @JsonKey(name: 'subtotal_display')  String subtotalDisplay, @JsonKey(name: 'item_count')  int itemCount, @JsonKey(name: 'price_valid_until')  String? priceValidUntil)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<CartLineItem> items, @JsonKey(name: 'subtotal_paise')  int subtotalPaise, @JsonKey(name: 'subtotal_display')  String subtotalDisplay, @JsonKey(name: 'kyc_gross_total_paise')  int? kycGrossTotalPaise, @JsonKey(name: 'item_count')  int itemCount, @JsonKey(name: 'price_valid_until')  String? priceValidUntil, @JsonKey(name: 'server_time')  String? serverTime, @JsonKey(name: 'quote_id')  String? quoteId)  $default,) {final _that = this;
 switch (_that) {
 case _CartSummary():
-return $default(_that.items,_that.subtotalPaise,_that.subtotalDisplay,_that.itemCount,_that.priceValidUntil);case _:
+return $default(_that.items,_that.subtotalPaise,_that.subtotalDisplay,_that.kycGrossTotalPaise,_that.itemCount,_that.priceValidUntil,_that.serverTime,_that.quoteId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -491,10 +494,10 @@ return $default(_that.items,_that.subtotalPaise,_that.subtotalDisplay,_that.item
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<CartLineItem> items, @JsonKey(name: 'subtotal_paise')  int subtotalPaise, @JsonKey(name: 'subtotal_display')  String subtotalDisplay, @JsonKey(name: 'item_count')  int itemCount, @JsonKey(name: 'price_valid_until')  String? priceValidUntil)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<CartLineItem> items, @JsonKey(name: 'subtotal_paise')  int subtotalPaise, @JsonKey(name: 'subtotal_display')  String subtotalDisplay, @JsonKey(name: 'kyc_gross_total_paise')  int? kycGrossTotalPaise, @JsonKey(name: 'item_count')  int itemCount, @JsonKey(name: 'price_valid_until')  String? priceValidUntil, @JsonKey(name: 'server_time')  String? serverTime, @JsonKey(name: 'quote_id')  String? quoteId)?  $default,) {final _that = this;
 switch (_that) {
 case _CartSummary() when $default != null:
-return $default(_that.items,_that.subtotalPaise,_that.subtotalDisplay,_that.itemCount,_that.priceValidUntil);case _:
+return $default(_that.items,_that.subtotalPaise,_that.subtotalDisplay,_that.kycGrossTotalPaise,_that.itemCount,_that.priceValidUntil,_that.serverTime,_that.quoteId);case _:
   return null;
 
 }
@@ -506,7 +509,7 @@ return $default(_that.items,_that.subtotalPaise,_that.subtotalDisplay,_that.item
 @JsonSerializable()
 
 class _CartSummary implements CartSummary {
-  const _CartSummary({required final  List<CartLineItem> items, @JsonKey(name: 'subtotal_paise') required this.subtotalPaise, @JsonKey(name: 'subtotal_display') required this.subtotalDisplay, @JsonKey(name: 'item_count') required this.itemCount, @JsonKey(name: 'price_valid_until') this.priceValidUntil}): _items = items;
+  const _CartSummary({required final  List<CartLineItem> items, @JsonKey(name: 'subtotal_paise') required this.subtotalPaise, @JsonKey(name: 'subtotal_display') required this.subtotalDisplay, @JsonKey(name: 'kyc_gross_total_paise') this.kycGrossTotalPaise, @JsonKey(name: 'item_count') required this.itemCount, @JsonKey(name: 'price_valid_until') this.priceValidUntil, @JsonKey(name: 'server_time') this.serverTime, @JsonKey(name: 'quote_id') this.quoteId}): _items = items;
   factory _CartSummary.fromJson(Map<String, dynamic> json) => _$CartSummaryFromJson(json);
 
  final  List<CartLineItem> _items;
@@ -518,8 +521,11 @@ class _CartSummary implements CartSummary {
 
 @override@JsonKey(name: 'subtotal_paise') final  int subtotalPaise;
 @override@JsonKey(name: 'subtotal_display') final  String subtotalDisplay;
+@override@JsonKey(name: 'kyc_gross_total_paise') final  int? kycGrossTotalPaise;
 @override@JsonKey(name: 'item_count') final  int itemCount;
 @override@JsonKey(name: 'price_valid_until') final  String? priceValidUntil;
+@override@JsonKey(name: 'server_time') final  String? serverTime;
+@override@JsonKey(name: 'quote_id') final  String? quoteId;
 
 /// Create a copy of CartSummary
 /// with the given fields replaced by the non-null parameter values.
@@ -534,16 +540,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CartSummary&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.subtotalPaise, subtotalPaise) || other.subtotalPaise == subtotalPaise)&&(identical(other.subtotalDisplay, subtotalDisplay) || other.subtotalDisplay == subtotalDisplay)&&(identical(other.itemCount, itemCount) || other.itemCount == itemCount)&&(identical(other.priceValidUntil, priceValidUntil) || other.priceValidUntil == priceValidUntil));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CartSummary&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.subtotalPaise, subtotalPaise) || other.subtotalPaise == subtotalPaise)&&(identical(other.subtotalDisplay, subtotalDisplay) || other.subtotalDisplay == subtotalDisplay)&&(identical(other.kycGrossTotalPaise, kycGrossTotalPaise) || other.kycGrossTotalPaise == kycGrossTotalPaise)&&(identical(other.itemCount, itemCount) || other.itemCount == itemCount)&&(identical(other.priceValidUntil, priceValidUntil) || other.priceValidUntil == priceValidUntil)&&(identical(other.serverTime, serverTime) || other.serverTime == serverTime)&&(identical(other.quoteId, quoteId) || other.quoteId == quoteId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_items),subtotalPaise,subtotalDisplay,itemCount,priceValidUntil);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_items),subtotalPaise,subtotalDisplay,kycGrossTotalPaise,itemCount,priceValidUntil,serverTime,quoteId);
 
 @override
 String toString() {
-  return 'CartSummary(items: $items, subtotalPaise: $subtotalPaise, subtotalDisplay: $subtotalDisplay, itemCount: $itemCount, priceValidUntil: $priceValidUntil)';
+  return 'CartSummary(items: $items, subtotalPaise: $subtotalPaise, subtotalDisplay: $subtotalDisplay, kycGrossTotalPaise: $kycGrossTotalPaise, itemCount: $itemCount, priceValidUntil: $priceValidUntil, serverTime: $serverTime, quoteId: $quoteId)';
 }
 
 
@@ -554,7 +560,7 @@ abstract mixin class _$CartSummaryCopyWith<$Res> implements $CartSummaryCopyWith
   factory _$CartSummaryCopyWith(_CartSummary value, $Res Function(_CartSummary) _then) = __$CartSummaryCopyWithImpl;
 @override @useResult
 $Res call({
- List<CartLineItem> items,@JsonKey(name: 'subtotal_paise') int subtotalPaise,@JsonKey(name: 'subtotal_display') String subtotalDisplay,@JsonKey(name: 'item_count') int itemCount,@JsonKey(name: 'price_valid_until') String? priceValidUntil
+ List<CartLineItem> items,@JsonKey(name: 'subtotal_paise') int subtotalPaise,@JsonKey(name: 'subtotal_display') String subtotalDisplay,@JsonKey(name: 'kyc_gross_total_paise') int? kycGrossTotalPaise,@JsonKey(name: 'item_count') int itemCount,@JsonKey(name: 'price_valid_until') String? priceValidUntil,@JsonKey(name: 'server_time') String? serverTime,@JsonKey(name: 'quote_id') String? quoteId
 });
 
 
@@ -571,13 +577,16 @@ class __$CartSummaryCopyWithImpl<$Res>
 
 /// Create a copy of CartSummary
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? items = null,Object? subtotalPaise = null,Object? subtotalDisplay = null,Object? itemCount = null,Object? priceValidUntil = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? items = null,Object? subtotalPaise = null,Object? subtotalDisplay = null,Object? kycGrossTotalPaise = freezed,Object? itemCount = null,Object? priceValidUntil = freezed,Object? serverTime = freezed,Object? quoteId = freezed,}) {
   return _then(_CartSummary(
 items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
 as List<CartLineItem>,subtotalPaise: null == subtotalPaise ? _self.subtotalPaise : subtotalPaise // ignore: cast_nullable_to_non_nullable
 as int,subtotalDisplay: null == subtotalDisplay ? _self.subtotalDisplay : subtotalDisplay // ignore: cast_nullable_to_non_nullable
-as String,itemCount: null == itemCount ? _self.itemCount : itemCount // ignore: cast_nullable_to_non_nullable
+as String,kycGrossTotalPaise: freezed == kycGrossTotalPaise ? _self.kycGrossTotalPaise : kycGrossTotalPaise // ignore: cast_nullable_to_non_nullable
+as int?,itemCount: null == itemCount ? _self.itemCount : itemCount // ignore: cast_nullable_to_non_nullable
 as int,priceValidUntil: freezed == priceValidUntil ? _self.priceValidUntil : priceValidUntil // ignore: cast_nullable_to_non_nullable
+as String?,serverTime: freezed == serverTime ? _self.serverTime : serverTime // ignore: cast_nullable_to_non_nullable
+as String?,quoteId: freezed == quoteId ? _self.quoteId : quoteId // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

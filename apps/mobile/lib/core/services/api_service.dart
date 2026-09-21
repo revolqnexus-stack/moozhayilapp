@@ -11,10 +11,11 @@ import 'storage_service.dart';
 part 'api_service.g.dart';
 
 class ApiException implements Exception {
-  const ApiException(this.message, {this.code});
+  const ApiException(this.message, {this.code, this.details});
 
   final String message;
   final String? code;
+  final Map<String, dynamic>? details;
 
   factory ApiException.fromDio(DioException error) {
     final data = error.response?.data;
@@ -24,6 +25,7 @@ class ApiException implements Exception {
         return ApiException(
           apiError['message'] as String? ?? 'Something went wrong',
           code: apiError['code'] as String?,
+          details: apiError['details'] as Map<String, dynamic>?,
         );
       }
     }

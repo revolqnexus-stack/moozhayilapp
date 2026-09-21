@@ -32,6 +32,17 @@ abstract final class IstFormat {
     ).add(istOffset);
   }
 
+  /// "hh:mm a IST"
+  static String formatTimeIst(DateTime utcInstant) {
+    final ist = toIstWallClock(utcInstant);
+    final hour24 = ist.hour;
+    final hour12 = hour24 % 12 == 0 ? 12 : hour24 % 12;
+    final amPm = hour24 >= 12 ? 'PM' : 'AM';
+    final hourText = hour12.toString().padLeft(2, '0');
+    final minute = ist.minute.toString().padLeft(2, '0');
+    return '$hourText:$minute $amPm IST';
+  }
+
   /// "as of hh:mm a, dd MMM IST"
   static String formatRateAsOf(DateTime utcInstant) {
     final ist = toIstWallClock(utcInstant);

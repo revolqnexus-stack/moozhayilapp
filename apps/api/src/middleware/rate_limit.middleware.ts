@@ -75,10 +75,15 @@ function incrementMemory(key: string, windowMs: number): number {
   return hits.length;
 }
 
+function isRateLimitBypassed(): boolean {
+  const nodeEnv = process.env.NODE_ENV;
+  // Staging is for QA/UAT — do not block login with production-grade throttles.
+  return nodeEnv === "development" || nodeEnv === "staging";
+}
+
 export function rateLimit(options: RateLimitOptions) {
   return (req: Request, _res: Response, next: NextFunction): void => {
-    // Only bypass rate limiting for local development, not staging or production.
-    if (process.env.NODE_ENV === "development") {
+    if (isRateLimitBypassed()) {
       next();
       return;
     }

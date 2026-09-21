@@ -84,6 +84,7 @@ Get-Content $EnvFile | ForEach-Object {
 # Render-specific overrides (keep mock providers until live keys exist)
 $vars["PUBLIC_BASE_URL"] = "https://$ServiceHost"
 $vars["NODE_ENV"] = "staging"
+$vars["TRUST_PROXY"] = "true"
 $vars["SMS_PROVIDER_MODE"] = "mock"
 $vars["KYC_PROVIDER_MODE"] = "mock"
 $vars["FIREBASE_MODE"] = "mock"

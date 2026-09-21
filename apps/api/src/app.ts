@@ -29,6 +29,7 @@ import { productsRouter } from "./modules/products/products.routes";
 import { plansRouter } from "./modules/plans/plans.routes";
 import { paymentsRouter } from "./modules/payments/payments.routes";
 import { ordersRouter } from "./modules/orders/orders.routes";
+import { quotesRouter } from "./modules/quotes/quote.routes";
 import { notificationsRouter } from "./modules/notifications/notifications.routes";
 import { auraRouter } from "./modules/aura/aura.routes";
 import { referralsRouter } from "./modules/referrals/referrals.routes";
@@ -105,6 +106,7 @@ export function createApp(options: CreateAppOptions = {}) {
   app.use("/v1/products", productsRouter);
   app.use("/v1/vault", vaultRouter);
   app.use("/v1/cart", cartRouter);
+  app.use("/v1/quotes", quotesRouter);
   app.use("/v1/addresses", addressesRouter);
   app.use("/v1/goals", goalsRouter);
   app.use("/v1/contributions", contributionsRouter);

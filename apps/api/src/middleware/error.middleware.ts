@@ -12,6 +12,7 @@ export type ErrorCode =
   | "NOT_FOUND"
   | "CONFLICT"
   | "PRICE_CHANGED"
+  | "PRICE_EXPIRED"
   | "OUT_OF_STOCK"
   | "INSUFFICIENT_BALANCE"
   | "UNPROCESSABLE"

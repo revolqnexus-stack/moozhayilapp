@@ -1,9 +1,35 @@
+import dotenv from "dotenv";
 import request from "supertest";
+
+dotenv.config();
+
+function stripEmptyEnv(keys: string[]) {
+  for (const key of keys) {
+    if (process.env[key] === "") {
+      delete process.env[key];
+    }
+  }
+}
+
 import { createApp } from "../src/app";
 import { prisma } from "../src/db/prisma";
 import { clearRateLimitBucketsForTests } from "../src/middleware/rate_limit.middleware";
 
+async function createQuote(
+  app: ReturnType<typeof createApp>,
+  accessToken: string,
+  productId: string,
+) {
+  const response = await request(app)
+    .post("/v1/quotes")
+    .set("Authorization", `Bearer ${accessToken}`)
+    .send({ items: [{ product_id: productId, quantity: 1 }] });
+  expect(response.status).toBe(201);
+  return response.body.quote_id as string;
+}
+
 async function cleanOrderTables() {
+  await prisma.priceQuote.deleteMany();
   await prisma.webhookEvent.deleteMany();
   await prisma.idempotencyKey.deleteMany();
   await prisma.inventoryReservation.deleteMany();
@@ -87,13 +113,31 @@ async function seedCatalog() {
 }
 
 describe("Phase 8 orders and payments", () => {
-  const app = createApp();
+  let app: ReturnType<typeof createApp>;
 
   beforeAll(() => {
+    stripEmptyEnv([
+      "KYC_PROVIDER_BASE_URL",
+      "KYC_PROVIDER_API_KEY",
+      "S3_ENDPOINT",
+      "S3_BUCKET",
+      "S3_ACCESS_KEY_ID",
+      "S3_SECRET_ACCESS_KEY",
+      "S3_PUBLIC_BASE_URL",
+      "MSG91_AUTH_KEY",
+      "MSG91_OTP_TEMPLATE_ID",
+      "CASHFREE_APP_ID",
+      "CASHFREE_SECRET_KEY",
+      "FIREBASE_PROJECT_ID",
+      "FIREBASE_CLIENT_EMAIL",
+      "FIREBASE_PRIVATE_KEY",
+      "SENTRY_DSN",
+    ]);
     process.env.NODE_ENV = "test";
     process.env.TEST_OTP_CODE = "123456";
     process.env.PAYMENT_PROVIDER_MODE = "mock";
     process.env.RAZORPAY_WEBHOOK_SECRET = "mock_webhook_secret_for_local_dev";
+    app = createApp();
   });
 
   beforeEach(async () => {
@@ -142,7 +186,9 @@ describe("Phase 8 orders and payments", () => {
       },
     });
 
+    const quoteId = await createQuote(app, auth.accessToken, product.id);
     const payload = {
+      quote_id: quoteId,
       items: [{ product_id: product.id, quantity: 1 }],
       delivery_address_id: address.id,
       payment_method: "gold_balance",
@@ -209,7 +255,9 @@ describe("Phase 8 orders and payments", () => {
       },
     });
 
+    const quoteId = await createQuote(app, auth.accessToken, product.id);
     const payload = {
+      quote_id: quoteId,
       items: [{ product_id: product.id, quantity: 1 }],
       delivery_address_id: address.id,
       payment_method: "gold_balance",
@@ -296,11 +344,13 @@ describe("Phase 8 orders and payments", () => {
       },
     });
 
+    const quoteId = await createQuote(app, auth.accessToken, product.id);
     const created = await request(app)
       .post("/v1/orders")
       .set("Authorization", `Bearer ${auth.accessToken}`)
       .set("Idempotency-Key", "order-cancel-1")
       .send({
+        quote_id: quoteId,
         items: [{ product_id: product.id, quantity: 1 }],
         delivery_address_id: address.id,
         payment_method: "gold_balance",

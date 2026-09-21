@@ -47,15 +47,20 @@ export async function mapProductToDto(
   options: { vaultProductIds?: Set<string> } = {},
 ) {
   const currentRate = await goldRatesService.currentRateForPurity(product.purity);
-  const price = calculateProductPrice({
-    weightGrams: product.weightGrams,
-    ratePerGramPaise: currentRate.ratePerGramPaise,
-    makingChargePct: product.makingChargePct,
-    wastagePct: product.wastagePct,
-    stoneValuePaise: product.stoneValuePaise,
-    gstPct: product.gstPct,
-    rateUpdatedAt: currentRate.effectiveFrom,
-  });
+  const serverTime = new Date();
+  const price = {
+    ...calculateProductPrice({
+      weightGrams: product.weightGrams,
+      ratePerGramPaise: currentRate.ratePerGramPaise,
+      makingChargePct: product.makingChargePct,
+      wastagePct: product.wastagePct,
+      stoneValuePaise: product.stoneValuePaise,
+      gstPct: product.gstPct,
+      rateUpdatedAt: currentRate.effectiveFrom,
+      generatedAt: serverTime,
+    }),
+    server_time: serverTime.toISOString(),
+  };
   const schemeMonthlyPaise = Math.ceil(price.total_paise / 36 / 100) * 100;
 
   return {

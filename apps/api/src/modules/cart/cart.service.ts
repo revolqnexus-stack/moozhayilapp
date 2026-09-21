@@ -2,6 +2,7 @@ import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/error.middleware";
 import { formatPaise } from "../../utils/money";
 import { mapProductToDto, productInclude, type ProductWithRelations } from "../products/product.mapper";
+import { quoteService } from "../quotes/quote.service";
 
 export class CartService {
   async getCart(userId: string) {
@@ -11,7 +12,7 @@ export class CartService {
       orderBy: { addedAt: "desc" },
     });
 
-    return this.buildCartResponse(items);
+    return this.buildCartResponse(userId, items);
   }
 
   async addItem(userId: string, productId: string, quantity: number) {
@@ -38,6 +39,7 @@ export class CartService {
     await prisma.cartItem.create({
       data: { userId, productId, quantity },
     });
+    await quoteService.invalidateActiveQuotes(userId);
 
     return this.getCart(userId);
   }
@@ -52,16 +54,19 @@ export class CartService {
     }
 
     await prisma.cartItem.delete({ where: { id: item.id } });
+    await quoteService.invalidateActiveQuotes(userId);
 
     return this.getCart(userId);
   }
 
   async clear(userId: string) {
     await prisma.cartItem.deleteMany({ where: { userId } });
+    await quoteService.invalidateActiveQuotes(userId);
     return { success: true };
   }
 
   private async buildCartResponse(
+    userId: string,
     items: Array<{
       id: string;
       quantity: number;
@@ -97,14 +102,19 @@ export class CartService {
       return latest;
     }, null);
 
+    const serverTime = new Date();
+    const activeQuote = await quoteService.getLatestActiveQuote(userId);
+
     return {
       items: mappedItems,
-      subtotal_paise: subtotalPaise,
-      subtotal_display: formatPaise(subtotalPaise),
+      subtotal_paise: activeQuote?.total_paise ?? subtotalPaise,
+      subtotal_display: activeQuote?.total_display ?? formatPaise(subtotalPaise),
       /** Gross order total for KYC gate — sum of product.price.total_paise (incl. GST). */
-      kyc_gross_total_paise: subtotalPaise,
+      kyc_gross_total_paise: activeQuote?.kyc_gross_total_paise ?? subtotalPaise,
       item_count: mappedItems.reduce((sum, item) => sum + item.quantity, 0),
-      price_valid_until: priceValidUntil,
+      server_time: serverTime.toISOString(),
+      quote_id: activeQuote?.quote_id ?? null,
+      price_valid_until: activeQuote?.price_valid_until ?? priceValidUntil,
     };
   }
 }

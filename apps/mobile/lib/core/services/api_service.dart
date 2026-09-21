@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../config/api_config.dart';
 import '../models/auth_models.dart';
+import '../time/server_clock_provider.dart';
 import 'storage_service.dart';
 
 part 'api_service.g.dart';
@@ -111,7 +112,8 @@ class ApiService {
 
 @riverpod
 Dio dio(Ref ref) {
-  return Dio(
+  final clock = ref.watch(serverClockProvider);
+  final client = Dio(
     BaseOptions(
       baseUrl: resolveApiBaseUrl(),
       connectTimeout: const Duration(seconds: 15),
@@ -120,6 +122,17 @@ Dio dio(Ref ref) {
       responseType: ResponseType.json,
     ),
   );
+
+  client.interceptors.add(
+    InterceptorsWrapper(
+      onResponse: (response, handler) {
+        clock.syncFromHttpDate(response.headers.value('date'));
+        handler.next(response);
+      },
+    ),
+  );
+
+  return client;
 }
 
 @riverpod

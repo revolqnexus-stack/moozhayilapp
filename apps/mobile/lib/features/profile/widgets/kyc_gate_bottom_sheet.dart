@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../components/buttons/ghost_button.dart';
 import '../../../components/buttons/primary_button.dart';
 import '../../../core/constants/colors.dart';
+import '../../../core/constants/customer_copy.dart';
 import '../../../core/constants/radii.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
@@ -24,9 +25,9 @@ extension KycGateReasonCopy on KycGateReason {
   String get body {
     switch (this) {
       case KycGateReason.goalCreation:
-        return 'KYC is required for Schemes — Aura Plan, Crest, and Gold Nidhi. Shopping and checkout do not need verification.';
+        return CustomerCopy.kycGateGoalBody;
       case KycGateReason.contribution:
-        return 'Scheme contributions require identity verification. You can skip for now and browse the shop freely.';
+        return CustomerCopy.kycGateContributionBody;
     }
   }
 }

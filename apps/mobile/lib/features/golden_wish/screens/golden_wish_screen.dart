@@ -20,6 +20,8 @@ import '../../goals/providers/goals_provider.dart';
 import '../../goals/widgets/goal_card.dart';
 import '../../home/widgets/live_gold_rate_strip.dart';
 import '../../my_gold/providers/gold_balance_provider.dart';
+import '../../../core/services/connectivity_service.dart';
+import '../../../core/time/server_clock_provider.dart';
 import '../../profile/widgets/kyc_gate_bottom_sheet.dart';
 import '../../shop/widgets/shop_section.dart';
 import '../models/golden_wish_plan.dart';
@@ -52,10 +54,21 @@ class _GoldenWishScreenState extends ConsumerState<GoldenWishScreen> {
     final auth = ref.watch(authControllerProvider);
     final plans = ref.watch(goalsListProvider());
     final goldRate = ref.watch(goldBalanceProvider);
+    final clock = ref.watch(serverClockProvider);
+    final isOffline = ref.watch(isOfflineProvider);
 
     final isRateLoading = goldRate.isLoading;
+    final isRateRefreshing = goldRate.isLoading && goldRate.hasValue;
+    final ratePaise = goldRate.maybeWhen(
+      data: (balance) => balance.rateUsed.ratePaise,
+      orElse: () => null,
+    );
     final rateDisplay = goldRate.maybeWhen(
       data: (balance) => balance.rateUsed.rateDisplay,
+      orElse: () => null,
+    );
+    final rateUpdatedAt = goldRate.maybeWhen(
+      data: (balance) => balance.rateUsed.updatedAt,
       orElse: () => null,
     );
     final purityLabel = goldRate.maybeWhen(
@@ -84,9 +97,14 @@ class _GoldenWishScreenState extends ConsumerState<GoldenWishScreen> {
             SectionReveal(
               index: 1,
               child: LiveGoldRateStrip(
+                ratePaise: ratePaise,
                 rateDisplay: rateDisplay,
+                rateUpdatedAtIso: rateUpdatedAt,
+                clock: clock,
                 purityLabel: purityLabel,
                 isLoading: isRateLoading,
+                isRefreshing: isRateRefreshing,
+                isOffline: isOffline,
               ),
             ),
             SectionReveal(

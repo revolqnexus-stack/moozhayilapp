@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../components/buttons/primary_button.dart';
 import '../../../components/buttons/secondary_button.dart';
 import '../../../core/constants/colors.dart';
+import '../../../core/constants/customer_copy.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 import '../../../core/routing/app_routes.dart';
@@ -28,7 +29,7 @@ class KycIntroScreen extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'KYC unlocks Schemes, installments, and redemption when you are ready.',
+                CustomerCopy.kycUnlockSchemes,
                 style: AppTypography.uiBodyLG.copyWith(
                   color: AppColors.slateMist,
                 ),

@@ -14,6 +14,8 @@ import '../../../core/utils/sample_banners.dart';
 import '../../../core/utils/sample_imagery.dart';
 import '../../shop/providers/products_provider.dart';
 import '../../my_gold/providers/gold_balance_provider.dart';
+import '../../../core/services/connectivity_service.dart';
+import '../../../core/time/server_clock_provider.dart';
 import '../widgets/category_pop_carousel.dart';
 import '../widgets/featured_jewellery_section.dart';
 import '../widgets/hero_banner_carousel.dart';
@@ -39,10 +41,21 @@ class HomeScreen extends ConsumerWidget {
       SampleCatalog.products,
     );
     final goldRate = ref.watch(goldBalanceProvider);
+    final clock = ref.watch(serverClockProvider);
+    final isOffline = ref.watch(isOfflineProvider);
 
     final isLoading = goldRate.isLoading;
+    final isRefreshing = goldRate.isLoading && goldRate.hasValue;
+    final ratePaise = goldRate.maybeWhen(
+      data: (b) => b.rateUsed.ratePaise,
+      orElse: () => null,
+    );
     final rateDisplay = goldRate.maybeWhen(
       data: (b) => b.rateUsed.rateDisplay,
+      orElse: () => null,
+    );
+    final rateUpdatedAt = goldRate.maybeWhen(
+      data: (b) => b.rateUsed.updatedAt,
       orElse: () => null,
     );
     final purityLabel = goldRate.maybeWhen(
@@ -65,9 +78,14 @@ class HomeScreen extends ConsumerWidget {
             SectionReveal(
               index: 0,
               child: LiveGoldRateStrip(
+                ratePaise: ratePaise,
                 rateDisplay: rateDisplay,
+                rateUpdatedAtIso: rateUpdatedAt,
+                clock: clock,
                 purityLabel: purityLabel,
                 isLoading: isLoading,
+                isRefreshing: isRefreshing,
+                isOffline: isOffline,
               ),
             ),
 

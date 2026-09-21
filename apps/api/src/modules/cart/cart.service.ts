@@ -101,6 +101,8 @@ export class CartService {
       items: mappedItems,
       subtotal_paise: subtotalPaise,
       subtotal_display: formatPaise(subtotalPaise),
+      /** Gross order total for KYC gate — sum of product.price.total_paise (incl. GST). */
+      kyc_gross_total_paise: subtotalPaise,
       item_count: mappedItems.reduce((sum, item) => sum + item.quantity, 0),
       price_valid_until: priceValidUntil,
     };

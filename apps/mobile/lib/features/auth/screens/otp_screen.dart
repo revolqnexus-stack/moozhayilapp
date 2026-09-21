@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../../components/buttons/primary_button.dart';
 import '../../../components/feedback/error_state.dart';
 import '../../../components/inputs/otp_dot_field.dart';
+import '../../../core/config/staging_config.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
@@ -63,6 +64,16 @@ class OtpScreen extends ConsumerWidget {
                   height: 1.5,
                 ),
               ),
+              if (stagingOtpHint.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  stagingOtpHint,
+                  style: AppTypography.uiCaption.copyWith(
+                    color: AppColors.gold,
+                    height: 1.4,
+                  ),
+                ),
+              ],
               const SizedBox(height: AppSpacing.xxl),
               OtpDotField(
                 value: state.otp,

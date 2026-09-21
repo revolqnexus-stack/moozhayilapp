@@ -11,7 +11,7 @@ abstract final class CustomerErrorCopy {
         return 'We couldn\u2019t send a verification code. Please try again in a moment.';
       }
       if (error.code == 'RATE_LIMITED') {
-        return error.message;
+        return 'Too many attempts. Please wait about 10 minutes, then try again.';
       }
       return error.message;
     }

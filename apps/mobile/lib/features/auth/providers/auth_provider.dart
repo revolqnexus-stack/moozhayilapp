@@ -69,6 +69,10 @@ class AuthController extends _$AuthController {
   }
 
   Future<void> sendOtp() async {
+    if (state.isLoading) {
+      return;
+    }
+
     final previous = state.value ?? const AuthState();
     final phone = normalizeIndianPhone(previous.phone);
     if (!isValidIndianPhone(phone)) {

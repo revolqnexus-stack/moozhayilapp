@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import '../../../components/buttons/primary_button.dart';
 import '../../../components/feedback/error_state.dart';
 import '../../../components/inputs/text_input.dart';
+import '../../../core/config/staging_config.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
@@ -81,6 +82,16 @@ class AuthScreen extends ConsumerWidget {
                         decoration: TextDecoration.none,
                       ),
                     ),
+                    if (stagingOtpHint.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        stagingOtpHint,
+                        style: AppTypography.uiCaption.copyWith(
+                          color: AppColors.gold,
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ],
                     if (auth.hasError) ...[
                       const SizedBox(height: AppSpacing.md),
                       ErrorState(
@@ -109,6 +120,10 @@ class AuthScreen extends ConsumerWidget {
   }
 
   Future<void> _sendOtp(BuildContext context, WidgetRef ref) async {
+    if (ref.read(authControllerProvider).isLoading) {
+      return;
+    }
+
     await ref.read(authControllerProvider.notifier).sendOtp();
     if (context.mounted && !ref.read(authControllerProvider).hasError) {
       context.go(
@@ -123,6 +138,9 @@ class AuthScreen extends ConsumerWidget {
   String _sendErrorHeadline(Object? error) {
     if (error is ApiException && error.code == 'PROVIDER_UNAVAILABLE') {
       return 'We couldn\u2019t send a code';
+    }
+    if (error is ApiException && error.code == 'RATE_LIMITED') {
+      return 'Too many attempts';
     }
 
     return 'We could not send the OTP';

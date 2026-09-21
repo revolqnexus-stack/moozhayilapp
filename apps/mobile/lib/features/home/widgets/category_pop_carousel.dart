@@ -8,8 +8,6 @@ import '../../../core/animations/premium_pressable.dart';
 
 import '../../../core/constants/colors.dart';
 
-import '../../../core/constants/shadows.dart';
-
 import '../../../core/constants/spacing.dart';
 
 import '../../../core/constants/typography.dart';

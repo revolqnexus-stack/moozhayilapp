@@ -108,7 +108,7 @@ final class GoalsListProvider
   }
 }
 
-String _$goalsListHash() => r'16aeeb4e2ff960e28934037043395955226432b7';
+String _$goalsListHash() => r'4d6af7d6c1062463bbe2b0d40a88ccaea8144a5a';
 
 final class GoalsListFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<GoalsListResponse>, String> {

@@ -89,7 +89,7 @@ final class KycStatusProvider
   }
 }
 
-String _$kycStatusHash() => r'decc21118d6aa54b722c15a60e91a1d701df1af1';
+String _$kycStatusHash() => r'bcd818a199ece0fbc4ca86e8a0ac983f8ab71ebe';
 
 @ProviderFor(KycFlowActions)
 const kycFlowActionsProvider = KycFlowActionsProvider._();

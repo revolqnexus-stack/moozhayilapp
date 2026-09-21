@@ -233,7 +233,7 @@ final class OrderActionsProvider
   OrderActions create() => OrderActions();
 }
 
-String _$orderActionsHash() => r'b48f7b760e6ce3a14b11f19ebf5481a71ff5e0df';
+String _$orderActionsHash() => r'716dd4a91ca93601d5788dca73192eb0f1b94c5a';
 
 abstract class _$OrderActions extends $AsyncNotifier<void> {
   FutureOr<void> build();

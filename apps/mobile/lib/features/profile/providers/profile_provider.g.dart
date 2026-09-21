@@ -87,7 +87,7 @@ final class ProfileUserProvider
   }
 }
 
-String _$profileUserHash() => r'9cebf5775fc97d1be5b6d4e1c106b563f7c41ede';
+String _$profileUserHash() => r'5328f9e4ab8b41ea408eda9d481f6bb3fe14321d';
 
 @ProviderFor(ProfileActions)
 const profileActionsProvider = ProfileActionsProvider._();

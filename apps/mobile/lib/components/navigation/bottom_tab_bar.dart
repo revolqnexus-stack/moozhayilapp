@@ -6,7 +6,6 @@ import '../../core/constants/motion.dart';
 import '../../core/constants/typography.dart';
 import '../icons/app_icon.dart';
 import '../icons/app_icons.dart';
-import '../surfaces/glass_surface.dart';
 
 class TabItem {
   const TabItem({

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$GoldRateUsed {
 
- String get purity;@JsonKey(name: 'rate_paise') int get ratePaise;@JsonKey(name: 'rate_display') String get rateDisplay;@JsonKey(name: 'updated_at') String get updatedAt;
+ String get purity;@JsonKey(name: 'rate_paise') int get ratePaise;@JsonKey(name: 'rate_display') String get rateDisplay;@JsonKey(name: 'updated_at') String get updatedAt;@JsonKey(name: 'is_stale') bool? get isStale;@JsonKey(name: 'stale_after_seconds') int? get staleAfterSeconds;
 /// Create a copy of GoldRateUsed
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $GoldRateUsedCopyWith<GoldRateUsed> get copyWith => _$GoldRateUsedCopyWithImpl<G
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GoldRateUsed&&(identical(other.purity, purity) || other.purity == purity)&&(identical(other.ratePaise, ratePaise) || other.ratePaise == ratePaise)&&(identical(other.rateDisplay, rateDisplay) || other.rateDisplay == rateDisplay)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GoldRateUsed&&(identical(other.purity, purity) || other.purity == purity)&&(identical(other.ratePaise, ratePaise) || other.ratePaise == ratePaise)&&(identical(other.rateDisplay, rateDisplay) || other.rateDisplay == rateDisplay)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.isStale, isStale) || other.isStale == isStale)&&(identical(other.staleAfterSeconds, staleAfterSeconds) || other.staleAfterSeconds == staleAfterSeconds));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,purity,ratePaise,rateDisplay,updatedAt);
+int get hashCode => Object.hash(runtimeType,purity,ratePaise,rateDisplay,updatedAt,isStale,staleAfterSeconds);
 
 @override
 String toString() {
-  return 'GoldRateUsed(purity: $purity, ratePaise: $ratePaise, rateDisplay: $rateDisplay, updatedAt: $updatedAt)';
+  return 'GoldRateUsed(purity: $purity, ratePaise: $ratePaise, rateDisplay: $rateDisplay, updatedAt: $updatedAt, isStale: $isStale, staleAfterSeconds: $staleAfterSeconds)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $GoldRateUsedCopyWith<$Res>  {
   factory $GoldRateUsedCopyWith(GoldRateUsed value, $Res Function(GoldRateUsed) _then) = _$GoldRateUsedCopyWithImpl;
 @useResult
 $Res call({
- String purity,@JsonKey(name: 'rate_paise') int ratePaise,@JsonKey(name: 'rate_display') String rateDisplay,@JsonKey(name: 'updated_at') String updatedAt
+ String purity,@JsonKey(name: 'rate_paise') int ratePaise,@JsonKey(name: 'rate_display') String rateDisplay,@JsonKey(name: 'updated_at') String updatedAt,@JsonKey(name: 'is_stale') bool? isStale,@JsonKey(name: 'stale_after_seconds') int? staleAfterSeconds
 });
 
 
@@ -65,13 +65,15 @@ class _$GoldRateUsedCopyWithImpl<$Res>
 
 /// Create a copy of GoldRateUsed
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? purity = null,Object? ratePaise = null,Object? rateDisplay = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? purity = null,Object? ratePaise = null,Object? rateDisplay = null,Object? updatedAt = null,Object? isStale = freezed,Object? staleAfterSeconds = freezed,}) {
   return _then(_self.copyWith(
 purity: null == purity ? _self.purity : purity // ignore: cast_nullable_to_non_nullable
 as String,ratePaise: null == ratePaise ? _self.ratePaise : ratePaise // ignore: cast_nullable_to_non_nullable
 as int,rateDisplay: null == rateDisplay ? _self.rateDisplay : rateDisplay // ignore: cast_nullable_to_non_nullable
 as String,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as String,
+as String,isStale: freezed == isStale ? _self.isStale : isStale // ignore: cast_nullable_to_non_nullable
+as bool?,staleAfterSeconds: freezed == staleAfterSeconds ? _self.staleAfterSeconds : staleAfterSeconds // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -156,10 +158,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String purity, @JsonKey(name: 'rate_paise')  int ratePaise, @JsonKey(name: 'rate_display')  String rateDisplay, @JsonKey(name: 'updated_at')  String updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String purity, @JsonKey(name: 'rate_paise')  int ratePaise, @JsonKey(name: 'rate_display')  String rateDisplay, @JsonKey(name: 'updated_at')  String updatedAt, @JsonKey(name: 'is_stale')  bool? isStale, @JsonKey(name: 'stale_after_seconds')  int? staleAfterSeconds)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GoldRateUsed() when $default != null:
-return $default(_that.purity,_that.ratePaise,_that.rateDisplay,_that.updatedAt);case _:
+return $default(_that.purity,_that.ratePaise,_that.rateDisplay,_that.updatedAt,_that.isStale,_that.staleAfterSeconds);case _:
   return orElse();
 
 }
@@ -177,10 +179,10 @@ return $default(_that.purity,_that.ratePaise,_that.rateDisplay,_that.updatedAt);
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String purity, @JsonKey(name: 'rate_paise')  int ratePaise, @JsonKey(name: 'rate_display')  String rateDisplay, @JsonKey(name: 'updated_at')  String updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String purity, @JsonKey(name: 'rate_paise')  int ratePaise, @JsonKey(name: 'rate_display')  String rateDisplay, @JsonKey(name: 'updated_at')  String updatedAt, @JsonKey(name: 'is_stale')  bool? isStale, @JsonKey(name: 'stale_after_seconds')  int? staleAfterSeconds)  $default,) {final _that = this;
 switch (_that) {
 case _GoldRateUsed():
-return $default(_that.purity,_that.ratePaise,_that.rateDisplay,_that.updatedAt);case _:
+return $default(_that.purity,_that.ratePaise,_that.rateDisplay,_that.updatedAt,_that.isStale,_that.staleAfterSeconds);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +199,10 @@ return $default(_that.purity,_that.ratePaise,_that.rateDisplay,_that.updatedAt);
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String purity, @JsonKey(name: 'rate_paise')  int ratePaise, @JsonKey(name: 'rate_display')  String rateDisplay, @JsonKey(name: 'updated_at')  String updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String purity, @JsonKey(name: 'rate_paise')  int ratePaise, @JsonKey(name: 'rate_display')  String rateDisplay, @JsonKey(name: 'updated_at')  String updatedAt, @JsonKey(name: 'is_stale')  bool? isStale, @JsonKey(name: 'stale_after_seconds')  int? staleAfterSeconds)?  $default,) {final _that = this;
 switch (_that) {
 case _GoldRateUsed() when $default != null:
-return $default(_that.purity,_that.ratePaise,_that.rateDisplay,_that.updatedAt);case _:
+return $default(_that.purity,_that.ratePaise,_that.rateDisplay,_that.updatedAt,_that.isStale,_that.staleAfterSeconds);case _:
   return null;
 
 }
@@ -212,13 +214,15 @@ return $default(_that.purity,_that.ratePaise,_that.rateDisplay,_that.updatedAt);
 @JsonSerializable()
 
 class _GoldRateUsed implements GoldRateUsed {
-  const _GoldRateUsed({required this.purity, @JsonKey(name: 'rate_paise') required this.ratePaise, @JsonKey(name: 'rate_display') required this.rateDisplay, @JsonKey(name: 'updated_at') required this.updatedAt});
+  const _GoldRateUsed({required this.purity, @JsonKey(name: 'rate_paise') required this.ratePaise, @JsonKey(name: 'rate_display') required this.rateDisplay, @JsonKey(name: 'updated_at') required this.updatedAt, @JsonKey(name: 'is_stale') this.isStale, @JsonKey(name: 'stale_after_seconds') this.staleAfterSeconds});
   factory _GoldRateUsed.fromJson(Map<String, dynamic> json) => _$GoldRateUsedFromJson(json);
 
 @override final  String purity;
 @override@JsonKey(name: 'rate_paise') final  int ratePaise;
 @override@JsonKey(name: 'rate_display') final  String rateDisplay;
 @override@JsonKey(name: 'updated_at') final  String updatedAt;
+@override@JsonKey(name: 'is_stale') final  bool? isStale;
+@override@JsonKey(name: 'stale_after_seconds') final  int? staleAfterSeconds;
 
 /// Create a copy of GoldRateUsed
 /// with the given fields replaced by the non-null parameter values.
@@ -233,16 +237,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GoldRateUsed&&(identical(other.purity, purity) || other.purity == purity)&&(identical(other.ratePaise, ratePaise) || other.ratePaise == ratePaise)&&(identical(other.rateDisplay, rateDisplay) || other.rateDisplay == rateDisplay)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GoldRateUsed&&(identical(other.purity, purity) || other.purity == purity)&&(identical(other.ratePaise, ratePaise) || other.ratePaise == ratePaise)&&(identical(other.rateDisplay, rateDisplay) || other.rateDisplay == rateDisplay)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.isStale, isStale) || other.isStale == isStale)&&(identical(other.staleAfterSeconds, staleAfterSeconds) || other.staleAfterSeconds == staleAfterSeconds));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,purity,ratePaise,rateDisplay,updatedAt);
+int get hashCode => Object.hash(runtimeType,purity,ratePaise,rateDisplay,updatedAt,isStale,staleAfterSeconds);
 
 @override
 String toString() {
-  return 'GoldRateUsed(purity: $purity, ratePaise: $ratePaise, rateDisplay: $rateDisplay, updatedAt: $updatedAt)';
+  return 'GoldRateUsed(purity: $purity, ratePaise: $ratePaise, rateDisplay: $rateDisplay, updatedAt: $updatedAt, isStale: $isStale, staleAfterSeconds: $staleAfterSeconds)';
 }
 
 
@@ -253,7 +257,7 @@ abstract mixin class _$GoldRateUsedCopyWith<$Res> implements $GoldRateUsedCopyWi
   factory _$GoldRateUsedCopyWith(_GoldRateUsed value, $Res Function(_GoldRateUsed) _then) = __$GoldRateUsedCopyWithImpl;
 @override @useResult
 $Res call({
- String purity,@JsonKey(name: 'rate_paise') int ratePaise,@JsonKey(name: 'rate_display') String rateDisplay,@JsonKey(name: 'updated_at') String updatedAt
+ String purity,@JsonKey(name: 'rate_paise') int ratePaise,@JsonKey(name: 'rate_display') String rateDisplay,@JsonKey(name: 'updated_at') String updatedAt,@JsonKey(name: 'is_stale') bool? isStale,@JsonKey(name: 'stale_after_seconds') int? staleAfterSeconds
 });
 
 
@@ -270,13 +274,15 @@ class __$GoldRateUsedCopyWithImpl<$Res>
 
 /// Create a copy of GoldRateUsed
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? purity = null,Object? ratePaise = null,Object? rateDisplay = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? purity = null,Object? ratePaise = null,Object? rateDisplay = null,Object? updatedAt = null,Object? isStale = freezed,Object? staleAfterSeconds = freezed,}) {
   return _then(_GoldRateUsed(
 purity: null == purity ? _self.purity : purity // ignore: cast_nullable_to_non_nullable
 as String,ratePaise: null == ratePaise ? _self.ratePaise : ratePaise // ignore: cast_nullable_to_non_nullable
 as int,rateDisplay: null == rateDisplay ? _self.rateDisplay : rateDisplay // ignore: cast_nullable_to_non_nullable
 as String,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as String,
+as String,isStale: freezed == isStale ? _self.isStale : isStale // ignore: cast_nullable_to_non_nullable
+as bool?,staleAfterSeconds: freezed == staleAfterSeconds ? _self.staleAfterSeconds : staleAfterSeconds // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

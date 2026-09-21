@@ -136,7 +136,7 @@ final class AuraConversationProvider
   }
 }
 
-String _$auraConversationHash() => r'3ab64ec47f40f510eb2d505ffce967872595a14a';
+String _$auraConversationHash() => r'ab101b1515d89c6f6a961b5e0e3d07feb570f23a';
 
 final class AuraConversationFamily extends $Family
     with

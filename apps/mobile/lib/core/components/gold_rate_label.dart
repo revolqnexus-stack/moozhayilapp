@@ -114,8 +114,8 @@ class GoldRateLabel extends StatelessWidget {
     final rate = _rateLine ?? 'rate unavailable';
     final parts = <String>[
       'Gold rate $rate per gram',
-      if (_asOfLine != null) _asOfLine!,
-      if (_statusLine != null) _statusLine!,
+      ?_asOfLine,
+      ?_statusLine,
       purityLabel,
     ];
     return parts.join(', ');

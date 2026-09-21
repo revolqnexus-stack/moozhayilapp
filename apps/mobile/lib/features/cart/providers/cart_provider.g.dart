@@ -87,7 +87,7 @@ final class CartSummaryProvider
   }
 }
 
-String _$cartSummaryHash() => r'2dcfac31eaba98ca0f383e6a35a2a9b65cbef656';
+String _$cartSummaryHash() => r'd028532f92131e93c910465f13b82674dd9b1044';
 
 @ProviderFor(CartActions)
 const cartActionsProvider = CartActionsProvider._();

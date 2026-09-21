@@ -441,28 +441,27 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                             const SizedBox(height: AppSpacing.lg),
                             Text('Payment', style: AppTypography.headingSM),
                             const SizedBox(height: AppSpacing.sm),
-                            Column(
-                              children: [
-                                _PaymentOption(
-                                  label: 'UPI / Card',
-                                  value: 'upi',
-                                  groupValue: _paymentMethod,
-                                  onChanged: (value) => setState(() {
-                                    if (value == null) return;
-                                    _paymentMethod = value;
-                                  }),
-                                ),
-                                _PaymentOption(
-                                  label: 'Cash on delivery',
-                                  value: 'cod',
-                                  groupValue: _paymentMethod,
-                                  onChanged: (value) => setState(() {
-                                    if (value == null) return;
-                                    _paymentMethod = value;
-                                    _useGoldBalance = false;
-                                  }),
-                                ),
-                              ],
+                            RadioGroup<String>(
+                              groupValue: _paymentMethod,
+                              onChanged: (value) => setState(() {
+                                if (value == null) return;
+                                _paymentMethod = value;
+                                if (value == 'cod') {
+                                  _useGoldBalance = false;
+                                }
+                              }),
+                              child: Column(
+                                children: [
+                                  _PaymentOption(
+                                    label: 'UPI / Card',
+                                    value: 'upi',
+                                  ),
+                                  _PaymentOption(
+                                    label: 'Cash on delivery',
+                                    value: 'cod',
+                                  ),
+                                ],
+                              ),
                             ),
                             goldBalance.when(
                               data: (balance) {
@@ -681,10 +680,12 @@ class _AddressOption extends StatelessWidget {
             width: 0.5,
           ),
         ),
-        child: RadioListTile<String>(
-          value: address.id,
-          groupValue: selected ? address.id : null,
-          onChanged: (_) => onTap(),
+        child: ListTile(
+          onTap: onTap,
+          leading: Icon(
+            selected ? Icons.radio_button_checked : Icons.radio_button_off,
+            color: selected ? AppColors.gold : AppColors.textMuted,
+          ),
           title: Text(address.fullName, style: AppTypography.uiBodyMD),
           subtitle: Text(
             '${address.line1}, ${address.city} ${address.pincode}',
@@ -697,17 +698,10 @@ class _AddressOption extends StatelessWidget {
 }
 
 class _PaymentOption extends StatelessWidget {
-  const _PaymentOption({
-    required this.label,
-    required this.value,
-    required this.groupValue,
-    required this.onChanged,
-  });
+  const _PaymentOption({required this.label, required this.value});
 
   final String label;
   final String value;
-  final String groupValue;
-  final ValueChanged<String?> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -715,8 +709,6 @@ class _PaymentOption extends StatelessWidget {
       contentPadding: EdgeInsets.zero,
       title: Text(label, style: AppTypography.uiBodyMD),
       value: value,
-      groupValue: groupValue,
-      onChanged: onChanged,
     );
   }
 }

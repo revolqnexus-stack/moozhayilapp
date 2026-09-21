@@ -48,7 +48,7 @@ class _PriceValidityBannerState extends State<PriceValidityBanner> {
   }
 
   void _maybeAnnounce() {
-    if (widget.guard.isExpired) {
+    if (!mounted || widget.guard.isExpired) {
       return;
     }
     final remaining = widget.guard.remaining;
@@ -62,7 +62,13 @@ class _PriceValidityBannerState extends State<PriceValidityBanner> {
     }
     if (label != null && label != _lastAnnounced) {
       _lastAnnounced = label;
-      SemanticsService.announce(label, TextDirection.ltr);
+      if (MediaQuery.maybeSupportsAnnounceOf(context) ?? false) {
+        SemanticsService.sendAnnouncement(
+          View.of(context),
+          label,
+          Directionality.of(context),
+        );
+      }
     }
   }
 

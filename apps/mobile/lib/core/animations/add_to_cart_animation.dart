@@ -82,8 +82,7 @@ class _AddToCartFlyingImageState extends State<AddToCartFlyingImage>
               child: Image.network(
                 widget.productImageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
-                    Container(color: Colors.grey[200]),
+                errorBuilder: (_, _, _) => Container(color: Colors.grey[200]),
               ),
             ),
           ),

@@ -1,0 +1,36 @@
+# Flutter test baseline — parent of 033c29a (Fix 4 commit)
+# Captured: 2026-09-21
+# Command: flutter test --no-pub (with ProgramFiles(x86) set on Windows)
+# Result: 53 passed, 14 failed
+
+## Failing tests (14)
+
+test/components/app_shell_test.dart: AppShell smoke test renders without throwing
+test/components/app_shell_test.dart: AppShell smoke test drawer exposes primary navigation links
+test/components/app_shell_test.dart: AppShell smoke test drawer navigates to Shop branch
+test/components/app_shell_test.dart: AppShell smoke test drawer navigates to Schemes branch
+test/components/app_shell_test.dart: AppShell smoke test drawer navigates to advisor branch
+test/components/app_shell_test.dart: AppShell smoke test bottom tab bar shows five primary tabs
+test/components/app_shell_test.dart: AppShell smoke test tapping Schemes tab navigates to Schemes branch
+test/components/app_shell_test.dart: AppShell smoke test tapping AI tab navigates to advisor branch
+test/components/app_shell_test.dart: AppShell smoke test tapping Shop tab navigates to Shop branch
+test/components/app_shell_test.dart: AppShell smoke test top bar Dream Vault icon opens Dream Vault screen
+test/components/app_shell_test.dart: AppShell smoke test tapping Profile tab navigates to Profile branch
+test/components/app_shell_test.dart: AppShell smoke test drawer navigates to Profile branch
+test/components/app_shell_test.dart: AppShell smoke test top app bar shows brand wordmark on home
+test/widget_test.dart: app shell smoke test
+
+## Failure modes
+
+- app_shell_test.dart (13): ErrorWidget.builder was changed by the test (harness does not restore builder)
+- widget_test.dart (1): semantics label "Moozhayil Gold & Diamonds" not found
+
+## Gate for Fix 4+
+
+- flutter analyze: 0 errors
+- flutter test: no new failures vs this list (53 pass / 14 fail acceptable until harness is repaired)
+- New widget tests must NOT reuse app_shell_test.dart / widget_test.dart harness
+
+## Diff vs 033c29a HEAD (2026-09-21)
+
+Identical — 14 failures, same test names, same counts.

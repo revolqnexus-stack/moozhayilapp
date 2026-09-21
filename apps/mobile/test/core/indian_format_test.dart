@@ -18,7 +18,7 @@ void main() {
       expect(IndianFormat.formatInrPaise(10000000), '₹1,00,000');
     });
 
-    test('formats lakhs and crores', () {
+    test('formats one crore rupees in paise (Rs 1,23,45,678)', () {
       expect(IndianFormat.formatInrPaise(1234567800), '₹1,23,45,678');
     });
 
@@ -45,6 +45,11 @@ void main() {
       expect(IndianFormat.formatGrams('37.45'), '37.4g');
     });
 
+    test('floors negative grams toward zero (display rule)', () {
+      expect(IndianFormat.formatGrams('-0.99'), '-0.9g');
+      expect(IndianFormat.formatGrams('-1.15'), '-1.1g');
+    });
+
     test('prefers API display field when provided', () {
       expect(
         IndianFormat.formatGramsDisplay(
@@ -57,9 +62,25 @@ void main() {
   });
 
   group('IndianFormat.formatGramsDouble', () {
-    test('floors animated double values', () {
+    test('uses string truncation, not unsafe float scaling', () {
       expect(IndianFormat.formatGramsDouble(0.99), '0.9g');
-      expect(IndianFormat.formatGramsDouble(0.9999), '0.9g');
+      expect(IndianFormat.formatGramsDouble(0.29), '0.2g');
+      expect(IndianFormat.formatGramsDouble(1.15), '1.1g');
+    });
+
+    test('handles boundary tenths via string path', () {
+      expect(IndianFormat.formatGrams('4.35'), '4.3g');
+      expect(
+        IndianFormat.formatGramsDouble(
+          double.parse('4.35'),
+        ),
+        '4.3g',
+      );
+    });
+
+    test('exact one-decimal values stay stable', () {
+      expect(IndianFormat.formatGramsDouble(5.0), '5.0g');
+      expect(IndianFormat.formatGramsDouble(0.0), '0.0g');
     });
   });
 

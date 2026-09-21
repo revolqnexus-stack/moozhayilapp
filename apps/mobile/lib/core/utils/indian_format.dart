@@ -79,13 +79,52 @@ abstract final class IndianFormat {
     return includeSuffix ? '${body}g' : body;
   }
 
-  /// Floors [grams] to one decimal place for live counters and animations.
+  /// Floors [grams] to one decimal via string truncation — never `floor(x * 10^n)`.
   static String formatGramsDouble(
     double grams, {
     bool includeSuffix = true,
   }) {
-    final micro = (grams * 10000).floor();
-    return formatGramsFromMicro(micro, includeSuffix: includeSuffix);
+    return formatGrams(
+      doubleToGramsRawTruncated(grams),
+      includeSuffix: includeSuffix,
+    );
+  }
+
+  /// Truncates a [double] to [maxFractionDigits] decimal places as a decimal string.
+  static String doubleToGramsRawTruncated(
+    double grams, {
+    int maxFractionDigits = 4,
+  }) {
+    if (grams.isNaN || grams.isInfinite) {
+      return '0';
+    }
+
+    final negative = grams < 0;
+    final absText = grams.abs().toString();
+    if (absText.contains('e') || absText.contains('E')) {
+      return negative ? '-0' : '0';
+    }
+
+    final truncated = _truncateDecimalString(absText, maxFractionDigits);
+    return negative ? '-$truncated' : truncated;
+  }
+
+  static String _truncateDecimalString(String positiveDecimal, int maxFractionDigits) {
+    final parts = positiveDecimal.split('.');
+    final whole = parts.first;
+    if (parts.length == 1) {
+      return whole;
+    }
+
+    final fraction = parts[1];
+    final truncated = fraction.length > maxFractionDigits
+        ? fraction.substring(0, maxFractionDigits)
+        : fraction;
+    final trimmed = truncated.replaceAll(RegExp(r'0+$'), '');
+    if (trimmed.isEmpty) {
+      return whole;
+    }
+    return '$whole.$trimmed';
   }
 
   /// Computes a floored gram display from [weightGrams] and [percentComplete].

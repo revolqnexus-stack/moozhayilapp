@@ -1,6 +1,7 @@
 import type { KycStatus } from "@prisma/client";
 import {
   ENHANCED_MONTHLY_CONTRIBUTION_PAISE,
+  ORDER_KYC_THRESHOLD_PAISE,
   VERIFIED_KYC_STATUSES,
 } from "../config/kyc.constants";
 import { AppError } from "../middleware/error.middleware";
@@ -64,21 +65,45 @@ export function checkContributionGate(
   return { allowed: true };
 }
 
-export function checkRedemptionGate(_kycStatus: KycStatus): KycGateResult {
-  // Shop checkout and My Gold redemption do not require KYC.
+export function checkRedemptionGate(kycStatus: KycStatus): KycGateResult {
+  if (!isVerified(kycStatus)) {
+    return {
+      allowed: false,
+      code: "KYC_REQUIRED",
+      message: "Complete KYC verification to use My Gold",
+    };
+  }
+
   return { allowed: true };
 }
 
 export function checkCheckoutGate(
-  _kycStatus: KycStatus,
-  _totalPaise: number,
-  _panVerified: boolean,
+  kycStatus: KycStatus,
+  totalPaise: number,
+  usesGoldBalance: boolean,
 ): KycGateResult {
-  // KYC is enforced for Schemes only (goals and contributions).
+  if (usesGoldBalance) {
+    const redemption = checkRedemptionGate(kycStatus);
+    if (!redemption.allowed) {
+      return redemption;
+    }
+  }
+
+  if (totalPaise > ORDER_KYC_THRESHOLD_PAISE && !isVerified(kycStatus)) {
+    return {
+      allowed: false,
+      code: "KYC_REQUIRED",
+      message: "Orders above ₹50,000 require identity verification",
+    };
+  }
+
   return { allowed: true };
 }
 
-export function assertKycGate(result: KycGateResult): void {
+export function assertKycGate(
+  result: KycGateResult,
+  kycStatus: KycStatus,
+): void {
   if (result.allowed) {
     return;
   }
@@ -87,5 +112,6 @@ export function assertKycGate(result: KycGateResult): void {
     403,
     result.code ?? "KYC_REQUIRED",
     result.message ?? "KYC verification required",
+    { kyc_status: kycStatus },
   );
 }

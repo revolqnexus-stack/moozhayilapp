@@ -16,6 +16,7 @@ import {
   calculateGramsFromPaise,
   calculateValuePaiseFromGrams,
 } from "../../utils/gold";
+import { assertKycGate, checkCheckoutGate } from "../../utils/kyc_gates";
 import { goldRatesService } from "../gold_rates/gold_rates.service";
 import { goldLedgerService } from "../gold_ledger/gold_ledger.service";
 import { goldBalanceService } from "../gold_ledger/gold_balance.service";
@@ -123,7 +124,7 @@ export class OrdersService {
 
   private async createOrder(
     userId: string,
-    _kycStatus: KycStatus,
+    kycStatus: KycStatus,
     input: CreateOrderInput,
   ) {
     const address = await prisma.address.findFirst({
@@ -154,6 +155,14 @@ export class OrdersService {
       auraMcWaiverGoal !== null,
     );
     const totals = this.aggregateTotals(lines);
+
+    const usesGoldIntent =
+      input.payment_method === "gold_balance" ||
+      Boolean(input.use_gold_balance_grams);
+    assertKycGate(
+      checkCheckoutGate(kycStatus, totals.totalPaise, usesGoldIntent),
+      kycStatus,
+    );
 
     const rate = await goldRatesService.currentRateForPurity(
       GOAL_ACCUMULATION_PURITY,

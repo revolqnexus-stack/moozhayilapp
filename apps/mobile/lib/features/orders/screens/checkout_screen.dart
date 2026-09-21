@@ -17,6 +17,7 @@ import '../../../core/models/address.dart';
 import '../../../core/models/gold_balance.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/utils/indian_format.dart';
+import '../../../core/kyc/kyc_gate_coordinator.dart';
 import '../../../core/services/razorpay_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../cart/providers/cart_provider.dart';
@@ -53,7 +54,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String _paymentMethod = 'upi';
   bool _useGoldBalance = false;
   bool _isPlacing = false;
-  late final RazorpayCheckout _razorpayCheckout;
+  late final RazorpayCheckoutGateway _razorpayCheckout;
 
   @override
   void initState() {
@@ -74,6 +75,26 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     if (cart == null || cart.items.isEmpty || addressId == null) {
       return;
+    }
+
+    final usesGold =
+        _useGoldBalance && _paymentMethod != 'cod';
+    final kycGrossTotalPaise =
+        cart.kycGrossTotalPaise ?? cart.subtotalPaise;
+    final gateReason = checkoutKycReason(
+      orderTotalPaise: kycGrossTotalPaise,
+      usesGoldBalance: usesGold,
+    );
+    if (gateReason != null) {
+      final allowed = await ensureKycAllowsAction(
+        context: context,
+        ref: ref,
+        reason: gateReason,
+        returnRoute: AppRoutes.checkout,
+        orderTotalPaise: kycGrossTotalPaise,
+        usesGoldBalance: usesGold,
+      );
+      if (!allowed || !mounted) return;
     }
 
     setState(() => _isPlacing = true);
@@ -149,13 +170,32 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
       context.go('/orders/confirmation/${response.order.id}');
     } catch (error) {
-      if (mounted) {
-        showPremiumSnackBar(
-          context,
-          CustomerErrorCopy.message(error),
-          haptic: false,
-        );
+      if (!mounted) return;
+
+      final kycGrossTotalPaise =
+          cart.kycGrossTotalPaise ?? cart.subtotalPaise;
+      final gateReason = checkoutKycReason(
+        orderTotalPaise: kycGrossTotalPaise,
+        usesGoldBalance: _useGoldBalance && _paymentMethod != 'cod',
+      );
+      if (gateReason != null &&
+          await handleKycApiError(
+            context: context,
+            ref: ref,
+            error: error,
+            reason: gateReason,
+            returnRoute: AppRoutes.checkout,
+            orderTotalPaise: kycGrossTotalPaise,
+            usesGoldBalance: _useGoldBalance && _paymentMethod != 'cod',
+          )) {
+        return;
       }
+
+      showPremiumSnackBar(
+        context,
+        CustomerErrorCopy.message(error),
+        haptic: false,
+      );
     } finally {
       if (mounted) {
         setState(() => _isPlacing = false);

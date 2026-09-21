@@ -9,14 +9,13 @@ import '../../../components/buttons/primary_button.dart';
 import '../../../components/feedback/premium_snackbar.dart';
 import '../../../core/animations/section_reveal.dart';
 import '../../../core/constants/colors.dart';
-import '../../../core/constants/kyc_thresholds.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../components/icons/plan_monogram_seal.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../goals/providers/goal_create_provider.dart';
-import '../../profile/widgets/kyc_gate_bottom_sheet.dart';
+import '../../../core/kyc/kyc_gate_coordinator.dart';
 import '../../shop/widgets/shop_section.dart';
 import '../models/golden_wish_plan.dart';
 import '../providers/plans_provider.dart';
@@ -258,11 +257,11 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
     }
   }
 
-  void _startEnrollment(
+  Future<void> _startEnrollment(
     BuildContext context,
     WidgetRef ref,
     GoldenWishPlan plan,
-  ) {
+  ) async {
     final kycStatus = ref.read(authControllerProvider).value?.user?.kycStatus;
 
     if (kycStatus == null) {
@@ -275,14 +274,13 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
       return;
     }
 
-    if (!isKycVerified(kycStatus)) {
-      showKycGateBottomSheet(
-        context: context,
-        reason: KycGateReason.goalCreation,
-        returnRoute: AppRoutes.goalsCreate,
-      );
-      return;
-    }
+    final allowed = await ensureKycAllowsAction(
+      context: context,
+      ref: ref,
+      reason: KycGateReason.goalCreation,
+      returnRoute: AppRoutes.goalsCreate,
+    );
+    if (!allowed || !context.mounted) return;
 
     final scheme = GoldenWishSchemeType.fromApiValue(plan.schemeType);
     ref.read(goalCreateDraftStoreProvider.notifier).setScheme(scheme);

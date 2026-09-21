@@ -547,16 +547,33 @@ Update `02-design-system.md` to match `radii.dart:4–27` — not 8–20px round
 | **Closure notes** | `formatGramsDouble` now string-truncates (no `floor(x*10^n)`). `toStringAsFixed` absent from `lib/` for money/grams. `grams_counter_animation.dart` analyze errors were **pre-existing on parent** (fixed collaterally). Rs 1,23,45,678 = `1234567800` paise (crore grouping level) |
 | **Follow-ups** | Static marketing ₹ strings unchanged. API display fields still rendered as returned on cart/PDP |
 
-### Fix 3: KYC copy + GoldRateLabel — **done**
+### Fix 3: KYC copy + GoldRateLabel — **closed**
 
 | Item | Detail |
 |------|--------|
-| **Status** | Done |
-| **Files changed** | `customer_copy.dart`, `kyc_gate_bottom_sheet.dart`, `kyc_intro_screen.dart`, `gold_rate_label.dart`, `live_gold_rate_strip.dart`, `my_gold_hero.dart`, `home_screen.dart`, `golden_wish_screen.dart`, `my_gold_screen.dart`, `server_clock.dart`, `server_clock_provider.dart`, `ist_format.dart`, `gold_rate_freshness.dart`, `api_service.dart` (Date header sync) |
-| **Tests added** | `gold_rate_label_test.dart`, `gold_rate_freshness_test.dart`, `server_clock_test.dart`, `ist_format_test.dart` |
-| **Backend gaps** | No dedicated `server_time` JSON field — offset derived from HTTP `Date` header only; `usesDeviceTimeFallback` until first response. `rate_updated_at` present on gold balance (`updated_at`) and product price; PDP/cart use product payload |
-| **Other rate surfaces (not wired)** | `shop_masthead.dart` `_RateChip`, `aura_gold_insights_screen.dart` — still plain `rateDisplay` text |
-| **Follow-ups** | Schemes `RefreshIndicator` invalidates goals but not gold balance on pull (pre-existing) |
+| **Status** | Closed (closure commit on `fix/closure-fix3-fix2`) |
+| **Parent** | `726ed89` |
+| **Files changed** | Server: `gold_rates.constants.ts`, `gold_rates.service.ts`, `gold_balance.service.ts` (`is_stale`, `stale_after_seconds`, `rate.effectiveFrom`). Client: `gold_rate_label.dart`, `gold_rate_freshness.dart`, `gold_rate_config.dart` (8h fallback only), `server_clock.dart` (`max(stopwatch, wall)`), `server_clock_lifecycle.dart`, `customer_copy.dart`, wired on home/schemes/shop/my-gold; misleading “live” copy fixed (onboarding, aura, shop masthead, golden wish plan) |
+| **Tests added** | `gold_rate_freshness_test.dart`, `gold_rate_label_test.dart`, `server_clock_test.dart` (suspend, forward/back clock jump, Age header ignored) |
+| **Rate staleness (C4)** | **Two states:** client cache stale (refresh helps) vs source stale (server `is_stale`; refetch same rate → `sourceUnchanged`, no refresh loop). **Weekend/holiday:** server returns last `gold_rate_history` row with `effectiveTo: null`; `is_stale` becomes true after 8h — no newer row exists. **Orders:** stale rate still prices (no server block); report only. |
+| **Backend gaps** | No `server_time` JSON yet (Fix 1). HTTP `Date` sync only until then |
+| **Follow-ups** | Aura AI injects rate into chat with no timestamp (not changed). Schemes pull-to-refresh still does not invalidate gold balance (pre-existing) |
+
+### Fix 2: KYC gates — **closed (backend + client separate commits)**
+
+| Item | Detail |
+|------|--------|
+| **Status** | Closed on `fix/closure-fix3-fix2` — **not merged to main** |
+| **Contribute correction** | **Server was already enforced** (`requireKycBasic` + `checkContributionGate`). Audit P0 #2 was **client UX** (no gate sheet before Razorpay) |
+| **Backend** | `kyc_gates.ts`; `orders.service.ts` gate after `aggregateTotals`, before stock/ledger/Razorpay; `cart.service.ts` exposes `kyc_gross_total_paise`. KYC read from **DB via auth session** (`auth.middleware.ts`), not JWT claim |
+| **Backend tests** | `kyc_gates.test.ts` (5); `kyc_enforcement.integration.test.ts` (8 route-level: redeem 403 ×3 + zero side effects, contribute 403, high-value 403, verified not KYC-blocked, webhook no auth, in-flight count) |
+| **Caller table (gold debit / payment init)** | `orders.service.createOrder` → gated. `contributions.service` contribute-initiate → gated (pre-existing). `gold_ledger.postRedemptionDebit` → domain fn; only called from `orders.service` after gate. Admin/CRM: no direct debit/payment-init paths found |
+| **₹50k (C5)** | Server: `totals.totalPaise` (gross). Client: `cart.kycGrossTotalPaise` (same field). Boundary: 5_000_000 allowed, 5_000_001 blocked — `kyc_gates.test.ts` + `decide_kyc_gate_test.dart` |
+| **Client** | `decide_kycGate`, `KycGateCoordinator`, `KycGateBottomSheet`, `KycRedemptionPanel`, `RazorpayCheckoutGateway`; choke points: contribute, checkout, my gold redeem, goal creation (4 entry points) |
+| **Client test matrix** | Pure matrix: `kyc_gate_matrix_test.dart`, `decide_kyc_gate_test.dart`. Widget: `contribute_kyc_gate_test.dart`, `kyc_flow_test.dart`. **MISSING:** Razorpay `open()` count per cell, deep-link contribute, status change while sheet open — follow-up before release |
+| **In-flight schemes (C8)** | Query pattern in integration test: active goals where owner `kycStatus` ∉ verified → staging-only volume expected. **Missed installment:** derived in `aura.service.ts` via `auraMissedInstallmentMonths(nextContributionDate, today)` — calendar months behind schedule; no KYC exemption today. **Decision:** pause without penalty — **not implemented** (needs job/rule change; compliance to confirm) |
+| **Decisions logged** | Stale: server-provided. ₹50k: gross, strictly > 5M paise. In-flight: pause without penalty (pending impl). Price lock: server quote (Fix 1) |
+| **Open follow-ups** | Fix 1 price validity; Fix 5 A/B; client matrix gaps; in-flight pause; Aura chat rate timestamp; live-device pass |
 
 ---
 

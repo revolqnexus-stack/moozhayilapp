@@ -1,12 +1,23 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:moozhayil/core/constants/kyc_thresholds.dart';
+import 'package:moozhayil/core/kyc/decide_kyc_gate.dart';
 import 'package:moozhayil/core/models/kyc_status.dart';
 import 'package:moozhayil/features/profile/providers/profile_provider.dart';
 
 void main() {
   group('KYC thresholds', () {
-    test('checkout does not require KYC', () {
-      expect(kycGateRequiredForCheckout(10_000_000, 'not_started'), isFalse);
-      expect(panGateRequiredForCheckout(25_000_000, false), isFalse);
+    test('checkout requires KYC above order threshold when unverified', () {
+      expect(
+        kycGateRequiredForCheckout(
+          KycThresholds.orderKycRequiredPaise + 1,
+          'not_started',
+        ),
+        isTrue,
+      );
+      expect(
+        kycGateRequiredForCheckout(1_000_000, 'basic_verified'),
+        isFalse,
+      );
     });
   });
 
@@ -25,6 +36,18 @@ void main() {
       expect(model.kycStatus, 'in_review');
       expect(model.aadhaarVerified, isTrue);
       expect(model.selfieVerified, isTrue);
+    });
+  });
+
+  group('decideKycGate redemption', () {
+    test('verified user may redeem', () {
+      expect(
+        decideKycGate(
+          kycStatus: 'basic_verified',
+          reason: KycGateReason.redemption,
+        ),
+        isA<KycGateAllow>(),
+      );
     });
   });
 }

@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/config/dev_preview.dart';
+import '../../../core/constants/kyc_thresholds.dart';
+import '../../../core/kyc/decide_kyc_gate.dart';
 import '../../../core/models/user.dart';
 import '../../../core/services/api_service.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -79,6 +81,14 @@ class ProfileActions extends _$ProfileActions {
   }
 }
 
-bool kycGateRequiredForCheckout(int totalPaise, String kycStatus) => false;
+bool kycGateRequiredForCheckout(int totalPaise, String kycStatus) {
+  return checkoutKycReason(
+        orderTotalPaise: totalPaise,
+        usesGoldBalance: false,
+      ) !=
+      null &&
+      !isKycVerified(kycStatus);
+}
 
-bool panGateRequiredForCheckout(int totalPaise, bool panVerified) => false;
+bool panGateRequiredForCheckout(int totalPaise, bool panVerified) =>
+    totalPaise > KycThresholds.panRequiredPaise && !panVerified;

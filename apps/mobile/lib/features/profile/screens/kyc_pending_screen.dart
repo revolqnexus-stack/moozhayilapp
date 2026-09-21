@@ -9,6 +9,7 @@ import '../../../components/feedback/error_state.dart';
 import '../../../components/feedback/loading_shimmer.dart';
 import '../../../components/navigation/top_app_bar.dart';
 import '../../../core/constants/colors.dart';
+import '../../../core/constants/customer_copy.dart';
 import '../../../core/constants/kyc_thresholds.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
@@ -52,7 +53,9 @@ class KycPendingScreen extends ConsumerWidget {
                 Text(
                   isKycVerified(kyc.kycStatus)
                       ? 'You are now a verified member.'
-                      : 'This usually takes about 30 minutes. We will notify you when it is done.',
+                      : CustomerCopy.kycPendingReviewSla(
+                          KycThresholds.estimatedReviewMinutes,
+                        ),
                   style: AppTypography.uiBodyMD.copyWith(
                     color: AppColors.slateMist,
                   ),

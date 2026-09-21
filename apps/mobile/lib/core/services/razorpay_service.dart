@@ -40,9 +40,22 @@ final class RazorpayCancelled extends RazorpayResult {
   const RazorpayCancelled();
 }
 
+/// Test seam — screens hold a gateway; tests inject a fake that records opens.
+abstract interface class RazorpayCheckoutGateway {
+  Future<RazorpayResult> open({
+    required String keyId,
+    required String razorpayOrderId,
+    required int amountPaise,
+    required String description,
+    String? userPhone,
+  });
+
+  void dispose();
+}
+
 /// Opens the Razorpay checkout sheet and resolves via a [Completer].
 /// Create one per screen; call [dispose] in the screen's [dispose] method.
-class RazorpayCheckout {
+class RazorpayCheckout implements RazorpayCheckoutGateway {
   RazorpayCheckout() {
     _razorpay = Razorpay();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _onSuccess);
@@ -55,6 +68,7 @@ class RazorpayCheckout {
 
   /// Opens the sheet and returns a Future that resolves when the user
   /// completes, cancels, or encounters an error.
+  @override
   Future<RazorpayResult> open({
     required String keyId,
     required String razorpayOrderId,
@@ -76,6 +90,7 @@ class RazorpayCheckout {
     return _completer!.future;
   }
 
+  @override
   void dispose() => _razorpay.clear();
 
   void _onSuccess(PaymentSuccessResponse response) => _completer?.complete(
@@ -109,7 +124,7 @@ class RazorpayService {
   /// Returns `true` when payment was captured successfully on the server.
   Future<bool> pay({
     required BuildContext context,
-    required RazorpayCheckout checkout,
+    required RazorpayCheckoutGateway checkout,
     required String keyId,
     required String razorpayOrderId,
     required int amountPaise,

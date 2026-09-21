@@ -2,6 +2,9 @@
 -keep class io.flutter.** { *; }
 -keep class io.flutter.plugins.** { *; }
 
+# Play Core (optional deferred components — referenced by Flutter embedding)
+-dontwarn com.google.android.play.core.**
+
 # Razorpay
 -keepclassmembers class com.razorpay.** { *; }
 -keep class com.razorpay.** { *; }

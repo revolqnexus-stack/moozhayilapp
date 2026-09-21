@@ -25,15 +25,17 @@ class ConfirmationScreen extends ConsumerStatefulWidget {
 class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
   var _submitting = false;
   var _showSuccess = false;
+  GoalCreateDraft? _successDraft;
+
+  bool _requiresFirstPaymentHandoff(GoldenWishSchemeType scheme) =>
+      scheme.isLumpSum || scheme.isRateProtected;
 
   Future<void> _submit() async {
     setState(() => _submitting = true);
     final draft = ref.read(goalCreateDraftStoreProvider);
 
     try {
-      await ref
-          .read(goalsRepositoryProvider)
-          .create(
+      final response = await ref.read(goalsRepositoryProvider).create(
             schemeType: draft.schemeType.apiValue,
             goalType: draft.goalType,
             name: draft.name.trim(),
@@ -47,9 +49,21 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
       ref.read(goalCreateDraftStoreProvider.notifier).reset();
 
       if (!mounted) return;
+
+      if (_requiresFirstPaymentHandoff(draft.schemeType)) {
+        context.go(
+          AppRoutes.goalContributeFirstPayment(
+            goalId: response.goal.id,
+            amountPaise: draft.monthlyAmountPaise,
+          ),
+        );
+        return;
+      }
+
       setState(() {
         _submitting = false;
         _showSuccess = true;
+        _successDraft = draft;
       });
     } catch (error) {
       if (!mounted) return;
@@ -64,11 +78,12 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
     final scheme = draft.schemeType;
     final amountLabel = IndianFormat.formatInrPaise(draft.monthlyAmountPaise);
 
-    if (_showSuccess) {
-      final isAura = draft.schemeType == GoldenWishSchemeType.aura;
+    if (_showSuccess && _successDraft != null) {
+      final successDraft = _successDraft!;
+      final isAura = successDraft.schemeType == GoldenWishSchemeType.aura;
       return LuxurySuccessOverlay(
-        title: draft.successTitle,
-        subtitle: draft.successSubtitle,
+        title: successDraft.successTitle,
+        subtitle: successDraft.successSubtitle,
         sealLetter: isAura ? 'A' : null,
         primaryActionLabel: 'View My Plans',
         onPrimaryAction: () => context.go(AppRoutes.myPlans),
@@ -100,11 +115,24 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
                 ),
               ),
             ],
+            if (_requiresFirstPaymentHandoff(scheme)) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                CustomerCopy.enrollmentHandoffHint,
+                style: AppTypography.uiBodySM.copyWith(
+                  color: AppColors.gold,
+                ),
+              ),
+            ],
             if (draft.targetProductName != null)
               Text('Toward ${draft.targetProductName}'),
             const Spacer(),
             PrimaryButton(
-              label: _submitting ? 'Creating…' : 'Start my plan',
+              label: _submitting
+                  ? 'Creating…'
+                  : (_requiresFirstPaymentHandoff(scheme)
+                      ? 'Create plan & continue'
+                      : 'Start my plan'),
               onTap: _submitting || !draft.isValid ? null : _submit,
             ),
           ],

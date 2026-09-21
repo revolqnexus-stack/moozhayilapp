@@ -66,7 +66,8 @@ class PriceBreakdownSheet extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           PrimaryButton(
             label: CustomerCopy.priceLockConfirmPay,
-            onPressed: onConfirm,
+            isFullWidth: true,
+            onTap: onConfirm,
           ),
         ],
       ),

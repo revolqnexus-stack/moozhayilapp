@@ -573,7 +573,7 @@ Update `02-design-system.md` to match `radii.dart:4–27` — not 8–20px round
 | **Client test matrix** | Pure matrix: `kyc_gate_matrix_test.dart`, `decide_kyc_gate_test.dart`. Widget: `contribute_kyc_gate_test.dart`, `kyc_flow_test.dart`. **MISSING:** Razorpay `open()` count per cell, deep-link contribute, status change while sheet open — follow-up before release |
 | **In-flight schemes (C8)** | Query pattern in integration test: active goals where owner `kycStatus` ∉ verified → staging-only volume expected. **Missed installment:** derived in `aura.service.ts` via `auraMissedInstallmentMonths(nextContributionDate, today)` — calendar months behind schedule; no KYC exemption today. **Decision:** pause without penalty — **not implemented** (needs job/rule change; compliance to confirm) |
 | **Decisions logged** | Stale: server-provided. ₹50k: gross, strictly > 5M paise. In-flight: pause without penalty (pending impl). Price lock: server quote (Fix 1) |
-| **Open follow-ups** | Fix 5 A/B; client matrix gaps; in-flight pause; Aura chat rate timestamp; live-device pass |
+| **Open follow-ups** | client matrix gaps; in-flight pause; Aura chat rate timestamp; live-device pass |
 
 ### Fix 1: Server-owned price quote (BR-PRICE-005) — **closed**
 
@@ -585,7 +585,28 @@ Update `02-design-system.md` to match `radii.dart:4–27` — not 8–20px round
 | **Client** | `PriceQuote`, `PriceValidityGuard`, `PriceValidityBanner`, `PriceBreakdownSheet`; checkout fetches quote on enter/resume, blocks Pay when expired, handles `PRICE_EXPIRED`, passes `quote_id` to `placeOrder`; `ServerClock` synced from quote `server_time` |
 | **Client tests** | `price_validity_guard_test.dart` (3) |
 | **Decisions** | 15 min lock from server issue time; 2s order-create tolerance; cart change supersedes quote; confirm BR-PRICE-005 with ops |
-| **Follow-ups** | Cart-screen banner optional; checkout widget tests (expired/refresh/resume); live-device pass; ops sign-off on lock duration |
+| **Follow-ups** | live-device pass; ops sign-off on lock duration |
+
+### Fix 5: Enrollment → first payment handoff — **closed**
+
+| Item | Detail |
+|------|--------|
+| **Status** | Closed on `fix/closure-fix3-fix2` — **not merged to main** |
+| **Approach** | Option B (transcript): keep Contribute separate; auto-handoff after enroll for Crest/Dhanam |
+| **Flow** | `confirmation_screen` creates goal → routes to `/goals/:id/contribute?firstPayment=1&amountPaise=…` with locked amount; Step 2 of 2 header; Pay now → My Plans on success |
+| **Copy** | Payment setup + plan highlights aligned (“locked on payment” not “at enrollment”) |
+| **Tests** | `enrollment_handoff_test.dart` (2) |
+| **Follow-ups** | Live-device Crest/Dhanam E2E; legal sign-off on booking-advance timing |
+
+### Production readiness (2026-09-21)
+
+| Item | Status |
+|------|--------|
+| Top 5 fixes (1–5) | **All closed** on branch |
+| Flutter tests | **119/119 pass** (harness repaired) |
+| API quote/KYC tests | 16/16 pass (orders webhook sig test pre-existing) |
+| Merge to main | Pending your approval |
+| Infra | Render deploy + live Razorpay/MSG91/KYC/Firebase per `DEPLOYMENT_CHECKLIST.md` |
 
 ---
 

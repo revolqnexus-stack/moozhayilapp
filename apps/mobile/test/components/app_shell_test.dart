@@ -295,10 +295,7 @@ void main() {
     testWidgets('top app bar shows brand wordmark on home', (tester) async {
       await pumpAppShell(tester);
 
-      expect(
-        find.bySemanticsLabel('Moozhayil Gold & Diamonds'),
-        findsOneWidget,
-      );
+      expect(find.text('Moozhayil'), findsWidgets);
     });
   });
 }

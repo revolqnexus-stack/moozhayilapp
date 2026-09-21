@@ -343,8 +343,16 @@ GoRouter createAppRouter({AuthState? authState}) => GoRouter(
       routes: [
         GoRoute(
           path: 'contribute',
-          builder: (context, state) =>
-              ContributeScreen(goalId: state.pathParameters['goalId']!),
+          builder: (context, state) {
+            final query = state.uri.queryParameters;
+            final firstPayment = query['firstPayment'] == '1';
+            final amountPaise = int.tryParse(query['amountPaise'] ?? '');
+            return ContributeScreen(
+              goalId: state.pathParameters['goalId']!,
+              firstPayment: firstPayment,
+              lockedAmountPaise: amountPaise,
+            );
+          },
         ),
       ],
     ),

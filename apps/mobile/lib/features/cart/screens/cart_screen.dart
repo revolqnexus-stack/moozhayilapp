@@ -20,6 +20,7 @@ import '../../../core/constants/customer_copy.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/cart_provider.dart';
+import '../widgets/cart_price_lock_banner.dart';
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({super.key, this.inTabShell = false});
@@ -63,6 +64,7 @@ class CartScreen extends ConsumerWidget {
 
             return Column(
               children: [
+                CartPriceLockBanner(summary: summary),
                 if (inTabShell)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
@@ -247,13 +249,6 @@ class _CartFooter extends ConsumerWidget {
               Text(summary.subtotalDisplay, style: AppTypography.priceMD),
             ],
           ),
-          if (summary.priceValidUntil != null) ...[
-            const SizedBox(height: AppSpacing.xxs),
-            Text(
-              'Prices valid until ${summary.priceValidUntil}',
-              style: AppTypography.uiCaption,
-            ),
-          ],
           const SizedBox(height: AppSpacing.md),
           PrimaryButton(
             label: hasUnavailable

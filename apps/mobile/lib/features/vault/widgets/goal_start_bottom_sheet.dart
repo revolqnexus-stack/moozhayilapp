@@ -5,14 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../../../components/buttons/ghost_button.dart';
 import '../../../components/buttons/primary_button.dart';
 import '../../../core/constants/colors.dart';
-import '../../../core/constants/kyc_thresholds.dart';
 import '../../../core/constants/radii.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 import '../../../core/models/vault_item.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../profile/widgets/kyc_gate_bottom_sheet.dart';
+import '../../../core/kyc/kyc_gate_coordinator.dart';
 
 Future<void> showGoalStartBottomSheet({
   required BuildContext context,
@@ -35,17 +34,25 @@ Future<void> showGoalStartBottomSheet({
       productName: item.product.name,
       monthlyDisplay: monthlyDisplay,
       months: months,
-      onStartGoal: () {
+      onStartGoal: () async {
         Navigator.of(context).pop();
         final user = ref.read(authControllerProvider).value?.user;
-        if (user != null && !isKycVerified(user.kycStatus)) {
-          showKycGateBottomSheet(
-            context: context,
-            reason: KycGateReason.goalCreation,
-            returnRoute: AppRoutes.goalsCreate,
+        if (user == null) {
+          context.push(
+            Uri(
+              path: AppRoutes.auth,
+              queryParameters: {'from': AppRoutes.goalsCreate},
+            ).toString(),
           );
           return;
         }
+        final allowed = await ensureKycAllowsAction(
+          context: context,
+          ref: ref,
+          reason: KycGateReason.goalCreation,
+          returnRoute: AppRoutes.goalsCreate,
+        );
+        if (!allowed || !context.mounted) return;
         context.push(AppRoutes.goalsCreate);
       },
       onDismiss: () => Navigator.of(context).pop(),

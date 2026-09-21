@@ -8,14 +8,13 @@ import '../../../components/feedback/empty_state.dart';
 import '../../../components/feedback/error_state.dart';
 import '../../../components/feedback/loading_shimmer.dart';
 import '../../../core/constants/colors.dart';
-import '../../../core/constants/kyc_thresholds.dart';
 import '../../../core/constants/customer_copy.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 import '../../../core/models/goal.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../profile/widgets/kyc_gate_bottom_sheet.dart';
+import '../../../core/kyc/kyc_gate_coordinator.dart';
 import '../providers/goals_provider.dart';
 import '../widgets/goal_card.dart';
 
@@ -104,7 +103,11 @@ class GoalsScreen extends ConsumerWidget {
     );
   }
 
-  void _startCreate(BuildContext context, WidgetRef ref, String? kycStatus) {
+  Future<void> _startCreate(
+    BuildContext context,
+    WidgetRef ref,
+    String? kycStatus,
+  ) async {
     if (kycStatus == null) {
       context.push(
         Uri(
@@ -115,14 +118,13 @@ class GoalsScreen extends ConsumerWidget {
       return;
     }
 
-    if (!isKycVerified(kycStatus)) {
-      showKycGateBottomSheet(
-        context: context,
-        reason: KycGateReason.goalCreation,
-        returnRoute: AppRoutes.goalsCreate,
-      );
-      return;
-    }
+    final allowed = await ensureKycAllowsAction(
+      context: context,
+      ref: ref,
+      reason: KycGateReason.goalCreation,
+      returnRoute: AppRoutes.goalsCreate,
+    );
+    if (!allowed || !context.mounted) return;
 
     context.push(AppRoutes.goalsCreateMoment);
   }

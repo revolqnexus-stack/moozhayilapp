@@ -17,6 +17,8 @@ import '../../../core/constants/spacing.dart';
 
 import '../../../core/constants/typography.dart';
 
+import '../../../core/kyc/kyc_gate_coordinator.dart';
+import '../../../core/routing/app_routes.dart';
 import '../../../core/services/razorpay_service.dart';
 import '../../../core/utils/indian_format.dart';
 
@@ -40,7 +42,7 @@ class _ContributeScreenState extends ConsumerState<ContributeScreen> {
 
   var _submitting = false;
 
-  late final RazorpayCheckout _razorpayCheckout;
+  late final RazorpayCheckoutGateway _razorpayCheckout;
 
   @override
   void initState() {
@@ -75,6 +77,15 @@ class _ContributeScreenState extends ConsumerState<ContributeScreen> {
   }
 
   Future<void> _submit() async {
+    final allowed = await ensureKycAllowsAction(
+      context: context,
+      ref: ref,
+      reason: KycGateReason.contribution,
+      returnRoute: AppRoutes.goalContribute.replaceFirst(':goalId', widget.goalId),
+      contributionAmountPaise: _amountPaise,
+    );
+    if (!allowed || !mounted) return;
+
     setState(() => _submitting = true);
 
     try {
@@ -135,8 +146,19 @@ class _ContributeScreenState extends ConsumerState<ContributeScreen> {
       if (!mounted) return;
 
       Navigator.of(context).pop();
-    } catch (_) {
+    } catch (error) {
       if (!mounted) return;
+
+      if (await handleKycApiError(
+        context: context,
+        ref: ref,
+        error: error,
+        reason: KycGateReason.contribution,
+        returnRoute:
+            AppRoutes.goalContribute.replaceFirst(':goalId', widget.goalId),
+      )) {
+        return;
+      }
 
       showPremiumSnackBar(context, CustomerCopy.paymentError, haptic: false);
     } finally {

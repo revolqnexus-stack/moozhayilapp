@@ -12,6 +12,8 @@ _GoldRateUsed _$GoldRateUsedFromJson(Map<String, dynamic> json) =>
       ratePaise: (json['rate_paise'] as num).toInt(),
       rateDisplay: json['rate_display'] as String,
       updatedAt: json['updated_at'] as String,
+      isStale: json['is_stale'] as bool?,
+      staleAfterSeconds: (json['stale_after_seconds'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$GoldRateUsedToJson(_GoldRateUsed instance) =>
@@ -20,6 +22,8 @@ Map<String, dynamic> _$GoldRateUsedToJson(_GoldRateUsed instance) =>
       'rate_paise': instance.ratePaise,
       'rate_display': instance.rateDisplay,
       'updated_at': instance.updatedAt,
+      'is_stale': instance.isStale,
+      'stale_after_seconds': instance.staleAfterSeconds,
     };
 
 _GoldBalance _$GoldBalanceFromJson(Map<String, dynamic> json) => _GoldBalance(

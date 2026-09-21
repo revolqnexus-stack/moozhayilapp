@@ -38,7 +38,7 @@ class _OnboardingCarouselScreenState extends State<OnboardingCarouselScreen> {
       key: 'onboard-3',
       title: 'A maison\nyou can trust',
       body:
-          'KYC-backed purchases, live gold rates, and pieces made to last generations.',
+          'KYC-backed purchases, daily gold rates, and pieces made to last generations.',
     ),
   ];
 

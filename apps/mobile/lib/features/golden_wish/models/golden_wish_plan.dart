@@ -64,7 +64,7 @@ const goldenWishPlans = <GoldenWishPlan>[
     detailHeadline: 'One payment. Weight secured.',
     detailBody:
         'Crest is for when you have a lump sum and want certainty. Pay your advance '
-        'today and your gold weight is locked at the current rate.',
+        'today and your gold weight is locked at today\u2019s published rate.',
     highlights: [
       'Single advance from ₹500',
       'Gold weight locked at enrollment',

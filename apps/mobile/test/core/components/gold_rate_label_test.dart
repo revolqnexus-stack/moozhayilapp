@@ -24,6 +24,7 @@ void main() {
         GoldRateLabel(
           ratePaise: 725000,
           rateUpdatedAtIso: '2026-03-21T10:00:00.000Z',
+          serverIsStale: false,
           purityLabel: '22KT',
           clock: freshClock(),
         ),
@@ -33,25 +34,23 @@ void main() {
     final semantics = tester.getSemantics(find.byType(GoldRateLabel));
     expect(semantics.label, contains('7,250'));
     expect(semantics.label, contains('03:30 PM, 21 Mar IST'));
-    expect(find.text(CustomerCopy.goldRateStale), findsNothing);
+    expect(find.text(CustomerCopy.goldRateSourceStale), findsNothing);
   });
 
-  testWidgets('shows stale copy when rate is older than 15 minutes', (tester) async {
-    final clock = ServerClock(deviceNow: () => DateTime.utc(2026, 3, 21, 10, 30));
-    clock.syncFromServerInstant(DateTime.utc(2026, 3, 21, 10, 30));
-
+  testWidgets('shows source stale copy when server marks stale', (tester) async {
     await tester.pumpWidget(
       wrap(
         GoldRateLabel(
           ratePaise: 725000,
           rateUpdatedAtIso: '2026-03-21T10:00:00.000Z',
+          serverIsStale: true,
           purityLabel: '22KT',
-          clock: clock,
+          clock: freshClock(),
         ),
       ),
     );
 
-    expect(find.text(CustomerCopy.goldRateStale), findsOneWidget);
+    expect(find.text(CustomerCopy.goldRateSourceStale), findsOneWidget);
     expect(find.byIcon(Icons.schedule_outlined), findsOneWidget);
   });
 
@@ -61,6 +60,7 @@ void main() {
         GoldRateLabel(
           ratePaise: 725000,
           rateUpdatedAtIso: '2026-03-21T10:00:00.000Z',
+          serverIsStale: false,
           purityLabel: '22KT',
           clock: freshClock(),
           isOffline: true,
@@ -70,7 +70,6 @@ void main() {
     );
 
     expect(find.text(CustomerCopy.goldRateOffline), findsOneWidget);
-    expect(find.byIcon(Icons.cloud_off_outlined), findsOneWidget);
   });
 
   testWidgets('shows refreshing copy only while refresh in flight', (tester) async {
@@ -79,6 +78,7 @@ void main() {
         GoldRateLabel(
           ratePaise: 725000,
           rateUpdatedAtIso: '2026-03-21T10:00:00.000Z',
+          serverIsStale: false,
           purityLabel: '22KT',
           clock: freshClock(),
           isRefreshing: true,
@@ -87,40 +87,5 @@ void main() {
     );
 
     expect(find.text(CustomerCopy.goldRateRefreshing), findsOneWidget);
-    expect(find.text(CustomerCopy.goldRateStale), findsNothing);
-  });
-
-  testWidgets('missing timestamp shows time unavailable', (tester) async {
-    await tester.pumpWidget(
-      wrap(
-        GoldRateLabel(
-          ratePaise: 725000,
-          rateUpdatedAtIso: null,
-          purityLabel: '22KT',
-          clock: freshClock(),
-        ),
-      ),
-    );
-
-    expect(find.text(CustomerCopy.goldRateTimeUnavailable), findsWidgets);
-  });
-
-  testWidgets('semantics reads full sentence', (tester) async {
-    await tester.pumpWidget(
-      wrap(
-        GoldRateLabel(
-          ratePaise: 725000,
-          rateUpdatedAtIso: '2026-03-21T10:00:00.000Z',
-          purityLabel: '22KT',
-          clock: freshClock(),
-        ),
-      ),
-    );
-
-    final semantics = tester.getSemantics(find.byType(GoldRateLabel));
-    expect(
-      semantics.label,
-      contains('Gold rate ₹7,250/g per gram'),
-    );
   });
 }

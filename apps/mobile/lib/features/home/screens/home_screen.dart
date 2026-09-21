@@ -58,6 +58,10 @@ class HomeScreen extends ConsumerWidget {
       data: (b) => b.rateUsed.updatedAt,
       orElse: () => null,
     );
+    final serverIsStale = goldRate.maybeWhen(
+      data: (b) => b.rateUsed.isStale,
+      orElse: () => null,
+    );
     final purityLabel = goldRate.maybeWhen(
       data: (b) => _formatPurity(b.rateUsed.purity),
       orElse: () => '22KT',
@@ -81,11 +85,15 @@ class HomeScreen extends ConsumerWidget {
                 ratePaise: ratePaise,
                 rateDisplay: rateDisplay,
                 rateUpdatedAtIso: rateUpdatedAt,
+                serverIsStale: serverIsStale,
                 clock: clock,
                 purityLabel: purityLabel,
                 isLoading: isLoading,
                 isRefreshing: isRefreshing,
                 isOffline: isOffline,
+                onRefreshRate: () {
+                  ref.invalidate(goldBalanceProvider);
+                },
               ),
             ),
 

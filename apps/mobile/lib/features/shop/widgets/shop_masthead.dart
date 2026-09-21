@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../components/feedback/loading_shimmer.dart';
+import '../../../core/components/gold_rate_label.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
+import '../../../core/time/server_clock.dart';
 import 'shop_search_field.dart';
 import 'shop_section.dart';
 
@@ -12,14 +13,28 @@ class ShopMasthead extends StatelessWidget {
   const ShopMasthead({
     super.key,
     required this.onSearchTap,
+    required this.clock,
+    this.ratePaise,
     this.rateDisplay,
+    this.rateUpdatedAtIso,
+    this.serverIsStale,
     this.isRateLoading = false,
+    this.isRateRefreshing = false,
+    this.isOffline = false,
+    this.onRefreshRate,
     this.pieceCount,
   });
 
   final VoidCallback onSearchTap;
+  final ServerClock clock;
+  final int? ratePaise;
   final String? rateDisplay;
+  final String? rateUpdatedAtIso;
+  final bool? serverIsStale;
   final bool isRateLoading;
+  final bool isRateRefreshing;
+  final bool isOffline;
+  final VoidCallback? onRefreshRate;
   final int? pieceCount;
 
   @override
@@ -49,8 +64,8 @@ class ShopMasthead extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       pieceCount != null
-                          ? '$pieceCount hallmarked pieces · priced from today\u2019s gold rate'
-                          : 'Hallmarked jewellery · priced from today\u2019s gold rate',
+                          ? '$pieceCount hallmarked pieces · priced from the daily gold rate'
+                          : 'Hallmarked jewellery · priced from the daily gold rate',
                       style: AppTypography.uiBodySM.copyWith(
                         color: AppColors.textSecondary,
                         height: 1.45,
@@ -60,47 +75,28 @@ class ShopMasthead extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              _RateChip(rateDisplay: rateDisplay, isLoading: isRateLoading),
+              SizedBox(
+                width: 140,
+                child: GoldRateLabel(
+                  ratePaise: ratePaise,
+                  rateDisplayFallback: rateDisplay,
+                  rateUpdatedAtIso: rateUpdatedAtIso,
+                  serverIsStale: serverIsStale,
+                  purityLabel: '22KT',
+                  clock: clock,
+                  isLoading: isRateLoading,
+                  isRefreshing: isRateRefreshing,
+                  isOffline: isOffline,
+                  showingCachedRate: isOffline,
+                  compact: true,
+                  onStaleRefresh: onRefreshRate,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
           ShopSearchEntry(onTap: onSearchTap),
         ],
-      ),
-    );
-  }
-}
-
-class _RateChip extends StatelessWidget {
-  const _RateChip({this.rateDisplay, required this.isLoading});
-
-  final String? rateDisplay;
-  final bool isLoading;
-
-  @override
-  Widget build(BuildContext context) {
-    if (isLoading && rateDisplay == null) {
-      return const LoadingShimmer(width: 88, height: 28);
-    }
-
-    final label = rateDisplay ?? '₹6,850/g';
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.ink,
-        border: Border.all(
-          color: AppColors.gold.withValues(alpha: 0.35),
-          width: 0.5,
-        ),
-      ),
-      child: Text(
-        label,
-        style: AppTypography.uiMicro.copyWith(
-          color: AppColors.goldLight,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 0.8,
-        ),
       ),
     );
   }

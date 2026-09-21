@@ -10,7 +10,6 @@ import '../../../components/feedback/loading_shimmer.dart';
 import '../../../core/animations/section_reveal.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/customer_copy.dart';
-import '../../../core/constants/kyc_thresholds.dart';
 import '../../../core/constants/motion.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/routing/app_routes.dart';
@@ -22,7 +21,7 @@ import '../../home/widgets/live_gold_rate_strip.dart';
 import '../../my_gold/providers/gold_balance_provider.dart';
 import '../../../core/services/connectivity_service.dart';
 import '../../../core/time/server_clock_provider.dart';
-import '../../profile/widgets/kyc_gate_bottom_sheet.dart';
+import '../../../core/kyc/kyc_gate_coordinator.dart';
 import '../../shop/widgets/shop_section.dart';
 import '../models/golden_wish_plan.dart';
 import '../widgets/golden_wish_home_band.dart';
@@ -75,6 +74,10 @@ class _GoldenWishScreenState extends ConsumerState<GoldenWishScreen> {
       data: (balance) => _formatPurity(balance.rateUsed.purity),
       orElse: () => '22KT',
     );
+    final serverIsStale = goldRate.maybeWhen(
+      data: (balance) => balance.rateUsed.isStale,
+      orElse: () => null,
+    );
 
     return ColoredBox(
       color: AppColors.paper,
@@ -82,7 +85,10 @@ class _GoldenWishScreenState extends ConsumerState<GoldenWishScreen> {
         onRefresh: () async {
           ref.invalidate(goalsListProvider());
           ref.invalidate(goldBalanceProvider);
-          await ref.read(goalsListProvider().future);
+          await Future.wait([
+            ref.read(goalsListProvider().future),
+            ref.read(goldBalanceProvider.future),
+          ]);
         },
         child: ListView(
           padding: const EdgeInsets.only(bottom: AppSpacing.x3l),
@@ -100,11 +106,15 @@ class _GoldenWishScreenState extends ConsumerState<GoldenWishScreen> {
                 ratePaise: ratePaise,
                 rateDisplay: rateDisplay,
                 rateUpdatedAtIso: rateUpdatedAt,
+                serverIsStale: serverIsStale,
                 clock: clock,
                 purityLabel: purityLabel,
                 isLoading: isRateLoading,
                 isRefreshing: isRateRefreshing,
                 isOffline: isOffline,
+                onRefreshRate: () {
+                  ref.invalidate(goldBalanceProvider);
+                },
               ),
             ),
             SectionReveal(
@@ -229,12 +239,12 @@ class _GoldenWishScreenState extends ConsumerState<GoldenWishScreen> {
     );
   }
 
-  void _startEnrollment(
+  Future<void> _startEnrollment(
     BuildContext context,
     WidgetRef ref,
     String? kycStatus,
     GoldenWishPlan plan,
-  ) {
+  ) async {
     if (kycStatus == null) {
       context.push(
         Uri(
@@ -245,14 +255,13 @@ class _GoldenWishScreenState extends ConsumerState<GoldenWishScreen> {
       return;
     }
 
-    if (!isKycVerified(kycStatus)) {
-      showKycGateBottomSheet(
-        context: context,
-        reason: KycGateReason.goalCreation,
-        returnRoute: AppRoutes.goalsCreate,
-      );
-      return;
-    }
+    final allowed = await ensureKycAllowsAction(
+      context: context,
+      ref: ref,
+      reason: KycGateReason.goalCreation,
+      returnRoute: AppRoutes.goalsCreate,
+    );
+    if (!allowed || !context.mounted) return;
 
     final scheme = GoldenWishSchemeType.fromApiValue(plan.schemeType);
     ref.read(goalCreateDraftStoreProvider.notifier).setScheme(scheme);

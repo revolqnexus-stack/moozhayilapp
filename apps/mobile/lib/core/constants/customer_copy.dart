@@ -62,10 +62,53 @@ abstract final class CustomerCopy {
       'You can browse and save to Dream Vault without it. '
       'Orders above ₹50,000 require verification.';
 
-  // Gold rate label
+  static const kycGateRedemptionBody =
+      'Complete verification to use My Gold toward a purchase. '
+      'Browsing and Dream Vault need no verification.';
+
+  static const kycGateHighValueOrderBody =
+      'Orders above ₹50,000 require identity verification before checkout.';
+
+  static const kycGateEnhancedBody =
+      'Contributions above ₹50,000 require enhanced verification with Aadhaar and PAN.';
+
+  static String kycPendingReviewSla(int minutes) =>
+      'This usually takes about $minutes minutes. We will notify you when it is done.';
+
+  static const kycStatusUnknownBody =
+      'We could not confirm your verification status. Check your connection and try again.';
+
+  static const kycRejectionGeneric =
+      'We could not verify your documents. You may resubmit after review.';
+
+  static const kycRejectionNameMismatch =
+      'The name on your documents did not match. Please resubmit with matching details.';
+
+  static const kycRejectionDocumentUnreadable =
+      'We could not read one of your documents clearly. Please capture a clearer photo.';
+
+  static const kycRejectionSelfieMismatch =
+      'Your selfie did not match your ID photo. Please try again in good lighting.';
+
+  static const kycRejectionExpiredDocument =
+      'One of your documents appears expired. Please submit a current document.';
+
+  static const kycRedemptionPanelTitle = 'Complete verification to use My Gold';
+
+  static const kycRedemptionPanelBody =
+      'Redeeming saved gold toward jewellery requires identity verification.';
+
+  // Gold rate label (daily admin-set rate — not a live feed)
+  static const goldRateHeadline = 'Gold rate';
   static const goldRateRefreshing = 'Refreshing…';
-  static const goldRateOffline = "You're offline. Showing last known rate.";
-  static const goldRateStale = 'Rate may be outdated.';
+  static const goldRateOffline =
+      "You're offline. Showing last known rate.";
+  static const goldRateClientCacheStale =
+      'Showing last known rate. Tap to refresh.';
+  static const goldRateSourceStale =
+      "Today's rate has not been updated yet.";
+  static const goldRateSourceUnchanged =
+      "Still showing today's published rate.";
   static const goldRateTimeUnavailable = 'Time unavailable';
 
   static String goldRateUnavailable(String purityLabel) =>

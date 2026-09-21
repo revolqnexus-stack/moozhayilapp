@@ -114,6 +114,21 @@ abstract final class CustomerCopy {
   static String goldRateUnavailable(String purityLabel) =>
       'Gold rate unavailable · $purityLabel';
 
+  // Price lock (server-issued quote)
+  static String priceLockUntilIst(String timeIst) =>
+      'Rate locked until $timeIst';
+  static String priceLockCountdownMmSs(int minutes, int seconds) =>
+      'Rate locked · ${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')} left';
+  static const priceLockExpired = 'Rate lock expired';
+  static const priceLockRefreshing = 'Refreshing rate…';
+  static const priceLockRefresh = 'Refresh';
+  static const priceLockChangedTitle = 'Price updated';
+  static const priceLockChangedBody =
+      'The gold rate changed while refreshing your quote. Confirm the new total to continue.';
+  static const priceLockPreviousTotal = 'Previous total';
+  static const priceLockUpdatedTotal = 'Updated total';
+  static const priceLockConfirmPay = 'Confirm and pay';
+
   static const planCompletePrefix = 'Plan complete';
 
   /// Summary line suffix, e.g. "3 active plans".

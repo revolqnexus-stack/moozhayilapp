@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/models/cart.dart';
+import '../../../core/models/price_quote.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/utils/indian_format.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -50,6 +51,17 @@ class CartRepository {
   Future<void> clear() async {
     try {
       await _apiService.client.delete<void>('/cart');
+    } on DioException catch (error) {
+      throw ApiException.fromDio(error);
+    }
+  }
+
+  Future<PriceQuote> createQuoteFromCart() async {
+    try {
+      final response = await _apiService.client.post<Map<String, dynamic>>(
+        '/quotes/from-cart',
+      );
+      return PriceQuote.fromJson(response.data!);
     } on DioException catch (error) {
       throw ApiException.fromDio(error);
     }

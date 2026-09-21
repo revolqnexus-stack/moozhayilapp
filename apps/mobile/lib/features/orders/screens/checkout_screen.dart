@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../../../core/utils/customer_error_copy.dart';
 
@@ -18,7 +20,13 @@ import '../../../core/models/gold_balance.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/utils/indian_format.dart';
 import '../../../core/kyc/kyc_gate_coordinator.dart';
+import '../../../core/models/price_quote.dart';
+import '../../../core/pricing/price_validity_guard.dart';
+import '../../../core/services/api_service.dart';
 import '../../../core/services/razorpay_service.dart';
+import '../../../core/time/server_clock_provider.dart';
+import '../../../core/widgets/price_breakdown_sheet.dart';
+import '../../../core/widgets/price_validity_banner.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../cart/providers/cart_provider.dart';
 import '../../my_gold/providers/gold_balance_provider.dart';
@@ -49,22 +57,95 @@ int _totalDuePaise({
   return subtotalPaise - credit;
 }
 
-class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
+class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
+    with WidgetsBindingObserver {
   String? _selectedAddressId;
   String _paymentMethod = 'upi';
   bool _useGoldBalance = false;
   bool _isPlacing = false;
+  bool _isRefreshingQuote = false;
+  PriceQuote? _quote;
   late final RazorpayCheckoutGateway _razorpayCheckout;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _useGoldBalance = widget.redeemWithGold;
     _razorpayCheckout = RazorpayCheckout();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_ensureQuote());
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(serverClockProvider).markUnsyncedPendingResync();
+      unawaited(_ensureQuote());
+    }
+  }
+
+  Future<void> _applyQuote(PriceQuote quote, {String? previousTotalDisplay}) async {
+    final clock = ref.read(serverClockProvider);
+    final serverTime = DateTime.tryParse(quote.serverTime)?.toUtc();
+    if (serverTime != null) {
+      clock.syncFromServerInstant(serverTime);
+    }
+
+    if (previousTotalDisplay != null &&
+        previousTotalDisplay != quote.totalDisplay &&
+        mounted) {
+      final confirmed = await PriceBreakdownSheet.show(
+        context,
+        oldTotalDisplay: previousTotalDisplay,
+        newTotalDisplay: quote.totalDisplay,
+      );
+      if (confirmed != true) {
+        return;
+      }
+    }
+
+    if (mounted) {
+      setState(() => _quote = quote);
+    }
+  }
+
+  Future<void> _ensureQuote({bool forceRefresh = false}) async {
+    if (_isRefreshingQuote) return;
+    final previous = _quote?.totalDisplay;
+    setState(() => _isRefreshingQuote = true);
+    try {
+      final quote =
+          await ref.read(cartRepositoryProvider).createQuoteFromCart();
+      await _applyQuote(quote, previousTotalDisplay: forceRefresh ? previous : null);
+    } finally {
+      if (mounted) {
+        setState(() => _isRefreshingQuote = false);
+      }
+    }
+  }
+
+  PriceValidityGuard? _guardForQuote() {
+    final quote = _quote;
+    if (quote == null) {
+      return null;
+    }
+    final validUntil = DateTime.tryParse(quote.priceValidUntil)?.toUtc();
+    final serverTime = DateTime.tryParse(quote.serverTime)?.toUtc();
+    if (validUntil == null || serverTime == null) {
+      return null;
+    }
+    return PriceValidityGuard(
+      validUntilUtc: validUntil,
+      serverTimeAtIssueUtc: serverTime,
+      clock: ref.read(serverClockProvider),
+    );
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _razorpayCheckout.dispose();
     super.dispose();
   }
@@ -77,10 +158,21 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       return;
     }
 
+    final guard = _guardForQuote();
+    if (_quote == null || guard == null) {
+      await _ensureQuote();
+      if (!mounted || _quote == null) return;
+    } else if (guard.isExpired) {
+      await _ensureQuote(forceRefresh: true);
+      if (!mounted || _guardForQuote()?.isExpired == true) return;
+    }
+
+    final quote = _quote!;
+
     final usesGold =
         _useGoldBalance && _paymentMethod != 'cod';
     final kycGrossTotalPaise =
-        cart.kycGrossTotalPaise ?? cart.subtotalPaise;
+        quote.kycGrossTotalPaise ?? quote.totalPaise;
     final gateReason = checkoutKycReason(
       orderTotalPaise: kycGrossTotalPaise,
       usesGoldBalance: usesGold,
@@ -129,6 +221,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       final response = await ref
           .read(orderActionsProvider.notifier)
           .placeOrder(
+            quoteId: quote.quoteId,
             items: items,
             deliveryAddressId: addressId,
             paymentMethod: method,
@@ -188,6 +281,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             orderTotalPaise: kycGrossTotalPaise,
             usesGoldBalance: _useGoldBalance && _paymentMethod != 'cod',
           )) {
+        return;
+      }
+
+      if (error is ApiException && error.code == 'PRICE_EXPIRED') {
+        final fresh = error.details?['fresh_quote'];
+        if (fresh is Map<String, dynamic>) {
+          await _applyQuote(
+            PriceQuote.fromJson(fresh),
+            previousTotalDisplay: _quote?.totalDisplay,
+          );
+          return;
+        }
+        await _ensureQuote(forceRefresh: true);
         return;
       }
 
@@ -254,8 +360,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     _selectedAddressId = defaultAddress ?? addressList.first.id;
                   }
 
+                  final guard = _guardForQuote();
+                  final payBlocked =
+                      _quote == null || guard == null || guard.isExpired;
+
                   return Column(
                     children: [
+                      if (guard != null)
+                        PriceValidityBanner(
+                          guard: guard,
+                          isRefreshing: _isRefreshingQuote,
+                          onRefresh: () => _ensureQuote(forceRefresh: true),
+                        ),
                       Expanded(
                         child: ListView(
                           padding: const EdgeInsets.all(
@@ -494,9 +610,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           isFullWidth: true,
                           isDisabled:
                               _isPlacing ||
+                              payBlocked ||
+                              _isRefreshingQuote ||
                               _selectedAddressId == null ||
                               addressList.isEmpty,
-                          onTap: _isPlacing || _selectedAddressId == null
+                          onTap: _isPlacing ||
+                                  payBlocked ||
+                                  _isRefreshingQuote ||
+                                  _selectedAddressId == null
                               ? null
                               : _placeOrder,
                         ),

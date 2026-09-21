@@ -30,6 +30,8 @@ abstract class CartSummary with _$CartSummary {
     @JsonKey(name: 'kyc_gross_total_paise') int? kycGrossTotalPaise,
     @JsonKey(name: 'item_count') required int itemCount,
     @JsonKey(name: 'price_valid_until') String? priceValidUntil,
+    @JsonKey(name: 'server_time') String? serverTime,
+    @JsonKey(name: 'quote_id') String? quoteId,
   }) = _CartSummary;
 
   factory CartSummary.fromJson(Map<String, dynamic> json) =>

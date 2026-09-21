@@ -2,17 +2,30 @@ import 'package:flutter/material.dart';
 
 import '../../../core/animations/fade_slide_in.dart';
 import '../../../core/animations/gold_shimmer_text.dart';
+import '../../../core/components/gold_rate_label.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/motion.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 import '../../../core/models/gold_balance.dart';
+import '../../../core/time/server_clock.dart';
 
 /// Hero band on My Gold — ink ground, gold shimmer balance.
 class MyGoldHero extends StatelessWidget {
-  const MyGoldHero({super.key, required this.balance});
+  const MyGoldHero({
+    super.key,
+    required this.balance,
+    required this.clock,
+    this.isOffline = false,
+    this.isRefreshing = false,
+    this.isLoading = false,
+  });
 
   final GoldBalance balance;
+  final ServerClock clock;
+  final bool isOffline;
+  final bool isRefreshing;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -52,12 +65,17 @@ class MyGoldHero extends StatelessWidget {
             delay: const Duration(milliseconds: 260),
             duration: AppMotion.normal,
             offsetY: 4,
-            child: Text(
-              balance.rateUsed.rateDisplay.toUpperCase(),
-              style: AppTypography.uiMicro.copyWith(
-                color: AppColors.goldLight,
-                letterSpacing: 8 * 0.18,
-              ),
+            child: GoldRateLabel(
+              ratePaise: balance.rateUsed.ratePaise,
+              rateDisplayFallback: balance.rateUsed.rateDisplay,
+              rateUpdatedAtIso: balance.rateUsed.updatedAt,
+              purityLabel: balance.rateUsed.purity.toUpperCase(),
+              clock: clock,
+              isOffline: isOffline,
+              isRefreshing: isRefreshing,
+              isLoading: isLoading,
+              showingCachedRate: isOffline,
+              variant: GoldRateLabelVariant.dark,
             ),
           ),
         ],

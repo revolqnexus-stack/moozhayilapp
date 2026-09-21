@@ -47,8 +47,29 @@ abstract final class CustomerCopy {
   // Scheme enrollment
   static const linkPieceOptional = 'Optional: link a dream piece to your plan.';
 
-  // Profile / KYC
-  static const kycUnlockSchemes = 'Optional — required to join Schemes';
+  // Profile / KYC (BR-KYC-001: schemes, installments, My Gold; browsing open)
+  static const kycUnlockSchemes =
+      'Required to enroll in Schemes, pay installments and use My Gold. '
+      'Browsing needs no verification.';
+
+  static const kycGateGoalBody =
+      'Required to enroll in Schemes, pay installments and use My Gold. '
+      'Browsing and Dream Vault need no verification. '
+      'Orders above ₹50,000 require verification.';
+
+  static const kycGateContributionBody =
+      'Installments and My Gold require identity verification. '
+      'You can browse and save to Dream Vault without it. '
+      'Orders above ₹50,000 require verification.';
+
+  // Gold rate label
+  static const goldRateRefreshing = 'Refreshing…';
+  static const goldRateOffline = "You're offline. Showing last known rate.";
+  static const goldRateStale = 'Rate may be outdated.';
+  static const goldRateTimeUnavailable = 'Time unavailable';
+
+  static String goldRateUnavailable(String purityLabel) =>
+      'Gold rate unavailable · $purityLabel';
 
   static const planCompletePrefix = 'Plan complete';
 

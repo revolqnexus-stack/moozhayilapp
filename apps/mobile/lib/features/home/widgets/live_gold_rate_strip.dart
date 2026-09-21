@@ -1,24 +1,34 @@
 import 'package:flutter/material.dart';
 
-import '../../../components/feedback/loading_shimmer.dart';
 import '../../../core/animations/gold_pulse.dart';
+import '../../../core/components/gold_rate_label.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/motion.dart';
 import '../../../core/constants/spacing.dart';
-import '../../../core/constants/typography.dart';
+import '../../../core/time/server_clock.dart';
 
 /// Official live gold rate strip — slim premium information band.
 class LiveGoldRateStrip extends StatefulWidget {
   const LiveGoldRateStrip({
     super.key,
+    this.ratePaise,
     this.rateDisplay,
+    this.rateUpdatedAtIso,
+    required this.clock,
     this.purityLabel = '22KT',
     this.isLoading = false,
+    this.isRefreshing = false,
+    this.isOffline = false,
   });
 
+  final int? ratePaise;
   final String? rateDisplay;
+  final String? rateUpdatedAtIso;
+  final ServerClock clock;
   final String purityLabel;
   final bool isLoading;
+  final bool isRefreshing;
+  final bool isOffline;
 
   @override
   State<LiveGoldRateStrip> createState() => _LiveGoldRateStripState();
@@ -26,7 +36,9 @@ class LiveGoldRateStrip extends StatefulWidget {
 
 class _LiveGoldRateStripState extends State<LiveGoldRateStrip>
     with SingleTickerProviderStateMixin {
-  String? _cachedRate;
+  int? _cachedRatePaise;
+  String? _cachedRateDisplay;
+  String? _cachedUpdatedAt;
   late final AnimationController _pulseController;
   late final Animation<double> _pulse;
 
@@ -45,15 +57,23 @@ class _LiveGoldRateStripState extends State<LiveGoldRateStrip>
   @override
   void didUpdateWidget(LiveGoldRateStrip oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final newRate = _resolvedRate;
-    if (newRate != null) {
-      _cachedRate = newRate;
+    if (widget.ratePaise != null) {
+      _cachedRatePaise = widget.ratePaise;
     }
-    if ((!widget.isLoading && oldWidget.isLoading && newRate != null) ||
-        (!widget.isLoading &&
-            _cachedRate != null &&
-            newRate != null &&
-            _cachedRate != newRate)) {
+    if (widget.rateDisplay != null && widget.rateDisplay!.isNotEmpty) {
+      _cachedRateDisplay = widget.rateDisplay;
+    }
+    if (widget.rateUpdatedAtIso != null && widget.rateUpdatedAtIso!.isNotEmpty) {
+      _cachedUpdatedAt = widget.rateUpdatedAtIso;
+    }
+
+    final hadRate = oldWidget.ratePaise != null || _cachedRatePaise != null;
+    final hasRate = widget.ratePaise != null || _cachedRatePaise != null;
+    if ((!widget.isLoading && oldWidget.isLoading && hasRate) ||
+        (hadRate &&
+            hasRate &&
+            oldWidget.ratePaise != widget.ratePaise &&
+            !widget.isLoading)) {
       _pulseController.forward(from: 0).then((_) {
         if (mounted) _pulseController.reverse();
       });
@@ -66,33 +86,19 @@ class _LiveGoldRateStripState extends State<LiveGoldRateStrip>
     super.dispose();
   }
 
-  String? get _resolvedRate {
-    if (widget.isLoading && _cachedRate != null) {
-      return _cachedRate;
-    }
-    if (widget.isLoading) return null;
-    final rate = widget.rateDisplay;
-    if (rate == null || rate.isEmpty || rate == '—') {
-      return null;
-    }
-    return rate;
-  }
-
-  bool get _showRateShimmer => widget.isLoading && _cachedRate == null;
-
-  String get _displayLine {
-    final rate = _resolvedRate ?? _cachedRate;
-    if (rate != null) {
-      return 'Live Gold Rate · $rate · ${widget.purityLabel}';
-    }
-    if (widget.isLoading) {
-      return 'Fetching today\u2019s gold rate\u2026';
-    }
-    return 'Gold rate unavailable · ${widget.purityLabel}';
-  }
+  bool get _showingCachedRate =>
+      widget.isOffline &&
+      (widget.ratePaise != null ||
+          _cachedRatePaise != null ||
+          widget.rateDisplay != null ||
+          _cachedRateDisplay != null);
 
   @override
   Widget build(BuildContext context) {
+    final ratePaise = widget.ratePaise ?? _cachedRatePaise;
+    final rateDisplay = widget.rateDisplay ?? _cachedRateDisplay;
+    final updatedAt = widget.rateUpdatedAtIso ?? _cachedUpdatedAt;
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: AppColors.pearl,
@@ -125,49 +131,22 @@ class _LiveGoldRateStripState extends State<LiveGoldRateStrip>
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            if (_showRateShimmer)
-              Expanded(
-                child: LoadingShimmer(
-                  width: double.infinity,
-                  height: 14,
-                  borderRadius: 2,
-                ),
-              )
-            else
-              Expanded(
-                child: AnimatedSwitcher(
-                  duration: AppMotion.normal,
-                  switchInCurve: AppMotion.entrance,
-                  switchOutCurve: AppMotion.exit,
-                  transitionBuilder: (child, animation) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position: Tween<Offset>(
-                          begin: const Offset(0, 0.06),
-                          end: Offset.zero,
-                        ).animate(animation),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: Text(
-                    key: ValueKey(_displayLine),
-                    _displayLine,
-                    style: AppTypography.uiBodySM.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                      letterSpacing: 0.2,
-                      height: 1.2,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
+            Expanded(
+              child: GoldRateLabel(
+                ratePaise: ratePaise,
+                rateDisplayFallback: rateDisplay,
+                rateUpdatedAtIso: updatedAt,
+                purityLabel: widget.purityLabel,
+                clock: widget.clock,
+                isLoading: widget.isLoading && ratePaise == null && rateDisplay == null,
+                isRefreshing: widget.isRefreshing,
+                isOffline: widget.isOffline,
+                showingCachedRate: _showingCachedRate,
+                compact: true,
               ),
+            ),
             const SizedBox(width: AppSpacing.sm),
-            if (widget.isLoading)
+            if (widget.isLoading && !widget.isRefreshing)
               const GoldPulse(size: 7)
             else
               ScaleTransition(

@@ -535,15 +535,28 @@ Update `02-design-system.md` to match `radii.dart:4–27` — not 8–20px round
 
 ## Fix log
 
-### Fix 4: Shared INR and gram formatting — **done**
+### Fix 4: Shared INR and gram formatting — **done (closed)**
 
 | Item | Detail |
 |------|--------|
 | **Status** | Done |
-| **Files changed** | `apps/mobile/lib/core/utils/indian_format.dart` (new), `apps/mobile/lib/core/constants/typography.dart`, `checkout_screen.dart`, `contribute_screen.dart`, `goal_detail_screen.dart`, `order_detail_screen.dart`, `amount_screen.dart`, `confirmation_screen.dart`, `goal_enrollment_step_header.dart`, `my_gold_hero.dart`, `dream_vault_card.dart`, `grams_counter_animation.dart`, `vault_animations.dart`, `cart_provider.dart`, `gold_balance_provider.dart`, `goals_provider.dart` |
-| **Tests added** | `apps/mobile/test/core/indian_format_test.dart` (11 cases: paise 0/999/1k/99,999/1L/1.23Cr, negative, showPaise; gram floor 0.99→0.9g, formatGramsDouble, formatGramsPercentOf, API display preference) |
-| **Backend gaps** | None — display-only; API `*_display` fields remain source of truth where provided |
-| **Follow-ups** | Marketing copy in `golden_wish_plan.dart` and `sample_catalog.dart` still uses hardcoded ₹ strings (static content, not computed). Shop/cart/PDP continue to render API `totalDisplay` / `subtotalDisplay` as returned |
+| **Commit** | `033c29a` + closure amend |
+| **Files changed** | `indian_format.dart`, `typography.dart`, checkout/schemes/my-gold formatters, providers, animations; closure: `docs/test-baseline.txt`, `api_money_format_parity_test.dart`, expanded `indian_format_test.dart` |
+| **Tests added** | 34 core tests pass; full suite **72 pass / 14 fail** — identical 14 failures vs parent of `033c29a` (see `docs/test-baseline.txt`). Gate: no new failures + analyze 0 errors |
+| **Backend gaps** | None for formatting — verified `apps/api/src/utils/money.ts` uses `Intl.NumberFormat("en-IN")`; client `formatInrPaise` matches at ₹97,899, ₹1,23,456, ₹1,23,45,678 |
+| **Closure notes** | `formatGramsDouble` now string-truncates (no `floor(x*10^n)`). `toStringAsFixed` absent from `lib/` for money/grams. `grams_counter_animation.dart` analyze errors were **pre-existing on parent** (fixed collaterally). Rs 1,23,45,678 = `1234567800` paise (crore grouping level) |
+| **Follow-ups** | Static marketing ₹ strings unchanged. API display fields still rendered as returned on cart/PDP |
+
+### Fix 3: KYC copy + GoldRateLabel — **done**
+
+| Item | Detail |
+|------|--------|
+| **Status** | Done |
+| **Files changed** | `customer_copy.dart`, `kyc_gate_bottom_sheet.dart`, `kyc_intro_screen.dart`, `gold_rate_label.dart`, `live_gold_rate_strip.dart`, `my_gold_hero.dart`, `home_screen.dart`, `golden_wish_screen.dart`, `my_gold_screen.dart`, `server_clock.dart`, `server_clock_provider.dart`, `ist_format.dart`, `gold_rate_freshness.dart`, `api_service.dart` (Date header sync) |
+| **Tests added** | `gold_rate_label_test.dart`, `gold_rate_freshness_test.dart`, `server_clock_test.dart`, `ist_format_test.dart` |
+| **Backend gaps** | No dedicated `server_time` JSON field — offset derived from HTTP `Date` header only; `usesDeviceTimeFallback` until first response. `rate_updated_at` present on gold balance (`updated_at`) and product price; PDP/cart use product payload |
+| **Other rate surfaces (not wired)** | `shop_masthead.dart` `_RateChip`, `aura_gold_insights_screen.dart` — still plain `rateDisplay` text |
+| **Follow-ups** | Schemes `RefreshIndicator` invalidates goals but not gold balance on pull (pre-existing) |
 
 ---
 

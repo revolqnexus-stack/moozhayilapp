@@ -94,7 +94,7 @@ final class GoldBalanceProvider
   }
 }
 
-String _$goldBalanceHash() => r'75062572bd1d4c6cef0a797ac6f8e4d77be84ce1';
+String _$goldBalanceHash() => r'0b6539b87705ab3c64787409d3ad3cecac43a0c3';
 
 @ProviderFor(goldLedger)
 const goldLedgerProvider = GoldLedgerProvider._();

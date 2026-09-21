@@ -17,6 +17,8 @@ import '../../../core/utils/customer_error_copy.dart';
 import '../../cart/providers/cart_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../vault/widgets/vault_aware_product_card.dart';
+import '../../../core/services/connectivity_service.dart';
+import '../../../core/time/server_clock_provider.dart';
 import '../providers/gold_balance_provider.dart';
 import '../widgets/gold_ledger.dart';
 import '../widgets/my_gold_hero.dart';
@@ -28,6 +30,8 @@ class MyGoldScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authControllerProvider).value?.user;
     final balance = ref.watch(goldBalanceProvider);
+    final clock = ref.watch(serverClockProvider);
+    final isOffline = ref.watch(isOfflineProvider);
     final ledger = ref.watch(goldLedgerProvider);
     final redeemable = ref.watch(redeemableProductsProvider);
 
@@ -50,7 +54,13 @@ class MyGoldScreen extends ConsumerWidget {
               AppSpacing.x3l,
             ),
             children: [
-              MyGoldHero(balance: data),
+              MyGoldHero(
+                balance: data,
+                clock: clock,
+                isOffline: isOffline,
+                isRefreshing: balance.isLoading && balance.hasValue,
+                isLoading: balance.isLoading,
+              ),
               const SizedBox(height: AppSpacing.xxl),
               const SectionHeader(
                 eyebrow: 'Every gram counts',

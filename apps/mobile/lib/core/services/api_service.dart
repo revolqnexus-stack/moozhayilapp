@@ -126,7 +126,10 @@ Dio dio(Ref ref) {
   client.interceptors.add(
     InterceptorsWrapper(
       onResponse: (response, handler) {
-        clock.syncFromHttpDate(response.headers.value('date'));
+        clock.syncFromHttpDate(
+          response.headers.value('date'),
+          ageHeader: response.headers.value('age'),
+        );
         handler.next(response);
       },
     ),

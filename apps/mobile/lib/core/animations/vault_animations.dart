@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+
 import '../constants/animations.dart';
 import '../constants/colors.dart';
+import '../utils/indian_format.dart';
 
 /// Premium vault opening animation: vault opens to reveal accumulated gold.
 /// Used when scheme matures or goal completes.
@@ -140,7 +142,7 @@ class _VaultOpeningAnimationState extends State<VaultOpeningAnimation>
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '${widget.goldGrams.toStringAsFixed(4)}g',
+                        IndianFormat.formatGramsDouble(widget.goldGrams),
                         style: TextStyle(
                           fontSize: widget.size * 0.12,
                           fontWeight: FontWeight.w500,

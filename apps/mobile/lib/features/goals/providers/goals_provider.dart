@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/models/goal.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/utils/indian_format.dart';
 import '../../auth/providers/auth_provider.dart';
 
 part 'goals_provider.g.dart';
@@ -126,12 +127,12 @@ Future<GoalsListResponse> goalsList(Ref ref, {String status = 'all'}) async {
       goals: const [],
       summary: GoalsSummary(
         totalGrams: '0.0000',
-        totalGramsDisplay: '0.0g',
+        totalGramsDisplay: IndianFormat.formatGrams('0'),
         totalValuePaise: 0,
-        totalValueDisplay: '₹0',
+        totalValueDisplay: IndianFormat.formatInrPaise(0),
         activeCount: 0,
         monthlyTotalPaise: 0,
-        monthlyTotalDisplay: '₹0/mo',
+        monthlyTotalDisplay: '${IndianFormat.formatInrPaise(0)}/mo',
       ),
     );
   }

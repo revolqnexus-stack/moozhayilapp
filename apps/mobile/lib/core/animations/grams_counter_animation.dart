@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+
 import '../constants/animations.dart';
 import '../constants/colors.dart';
+import '../utils/indian_format.dart';
 
 /// Premium number counter for gold grams that counts upward smoothly.
 /// Used when grams are credited (contributions, bonuses, adjustments).
@@ -11,7 +13,7 @@ class GramsCounterAnimation extends StatefulWidget {
     this.startValue = 0.0,
     this.style,
     this.suffix = 'g',
-    this.decimals = 4,
+    this.decimals = 1,
   });
 
   final double startValue;
@@ -85,10 +87,10 @@ class _GramsCounterAnimationState extends State<GramsCounterAnimation>
               AppColors.goldLight,
               AppColors.gold,
             ],
-            stops: const [0.0, _controller.value, 1.0],
+            stops: [0.0, _controller.value, 1.0],
           ).createShader(bounds),
           child: Text(
-            '${_counter.value.toStringAsFixed(widget.decimals)}${widget.suffix}',
+            '${IndianFormat.formatGramsDouble(_counter.value, includeSuffix: false)}${widget.suffix}',
             style: widget.style ??
                 const TextStyle(
                   fontSize: 24,
@@ -132,7 +134,7 @@ class _AmountCounterAnimationState extends State<AmountCounterAnimation>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: AnimationPresets.numberCounter,
+      duration: AppAnimations.numberCounter,
     );
 
     _counter = IntTween(
@@ -172,8 +174,10 @@ class _AmountCounterAnimationState extends State<AmountCounterAnimation>
   }
 
   String _formatAmount(int paise) {
-    final rupees = (paise / 100).toStringAsFixed(2);
-    return '${widget.prefix}$rupees';
+    if (widget.prefix != IndianFormat.rupeeSymbol) {
+      return '${widget.prefix}${IndianFormat.formatInrPaise(paise).replaceFirst(IndianFormat.rupeeSymbol, '')}';
+    }
+    return IndianFormat.formatInrPaise(paise);
   }
 
   @override

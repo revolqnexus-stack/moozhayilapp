@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/colors.dart';
+import '../../../core/utils/indian_format.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 import '../providers/goal_create_provider.dart';
@@ -81,15 +82,15 @@ String goalPaymentSummary({
   required int durationMonths,
   required GoldenWishSchemeType scheme,
 }) {
-  final rupees = amountPaise ~/ 100;
+  final amount = IndianFormat.formatInrPaise(amountPaise);
   return switch (scheme) {
     GoldenWishSchemeType.aura =>
-      '₹$rupees/month · $durationMonths installments · pay from Contribute after enroll',
+      '$amount/month · $durationMonths installments · pay from Contribute after enroll',
     GoldenWishSchemeType.crest =>
-      '₹$rupees advance · pay from Contribute after enroll to lock weight',
+      '$amount advance · pay from Contribute after enroll to lock weight',
     GoldenWishSchemeType.dhanam =>
-      '₹$rupees booking · pay from Contribute after enroll',
+      '$amount booking · pay from Contribute after enroll',
     GoldenWishSchemeType.goldNidhi =>
-      'From ₹$rupees per deposit · pay anytime from Contribute',
+      'From $amount per deposit · pay anytime from Contribute',
   };
 }

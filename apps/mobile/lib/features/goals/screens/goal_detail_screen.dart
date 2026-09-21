@@ -14,6 +14,7 @@ import '../../../components/feedback/premium_snackbar.dart';
 import '../../../components/navigation/top_app_bar.dart';
 import '../../../components/overlays/confirmation_bottom_sheet.dart';
 import '../../../core/constants/colors.dart';
+import '../../../core/utils/indian_format.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 import '../../../core/models/goal.dart';
@@ -209,11 +210,10 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          '₹${(item.amountPaise / 100).round()}',
-                                          style: AppTypography.uiBodyMD
-                                              .copyWith(
-                                                fontWeight: FontWeight.w500,
-                                              ),
+                                          IndianFormat.formatInrPaise(
+                                            item.amountPaise,
+                                          ),
+                                          style: AppTypography.priceTabular,
                                         ),
                                         Text(
                                           item.contributionMonth,

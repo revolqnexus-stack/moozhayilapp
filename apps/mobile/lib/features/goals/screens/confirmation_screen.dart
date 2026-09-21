@@ -11,6 +11,7 @@ import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 import '../../../core/constants/customer_copy.dart';
 import '../../../core/routing/app_routes.dart';
+import '../../../core/utils/indian_format.dart';
 import '../providers/goal_create_provider.dart';
 import '../providers/goals_provider.dart';
 
@@ -61,7 +62,7 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
   Widget build(BuildContext context) {
     final draft = ref.watch(goalCreateDraftStoreProvider);
     final scheme = draft.schemeType;
-    final amount = draft.monthlyAmountPaise ~/ 100;
+    final amountLabel = IndianFormat.formatInrPaise(draft.monthlyAmountPaise);
 
     if (_showSuccess) {
       final isAura = draft.schemeType == GoldenWishSchemeType.aura;
@@ -86,7 +87,7 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
           children: [
             Text(draft.name, style: AppTypography.headingMD),
             const SizedBox(height: AppSpacing.md),
-            Text(_summaryLine(scheme, amount)),
+            Text(_summaryLine(scheme, amountLabel)),
             const SizedBox(height: AppSpacing.sm),
             Text(_footerLine(scheme), style: AppTypography.uiBodySM),
             if (scheme == GoldenWishSchemeType.aura) ...[
@@ -112,15 +113,15 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
     );
   }
 
-  String _summaryLine(GoldenWishSchemeType scheme, int amount) =>
+  String _summaryLine(GoldenWishSchemeType scheme, String amount) =>
       switch (scheme) {
-        GoldenWishSchemeType.aura => '₹$amount/mo · 11 monthly installments',
+        GoldenWishSchemeType.aura => '$amount/mo · 11 monthly installments',
         GoldenWishSchemeType.crest =>
-          '₹$amount advance · weight locked on payment',
+          '$amount advance · weight locked on payment',
         GoldenWishSchemeType.dhanam =>
-          '₹$amount booking advance · rate protection for 12 months',
+          '$amount booking advance · rate protection for 12 months',
         GoldenWishSchemeType.goldNidhi =>
-          '₹$amount minimum deposit · open-ended savings',
+          '$amount minimum deposit · open-ended savings',
       };
 
   String _footerLine(GoldenWishSchemeType scheme) => switch (scheme) {

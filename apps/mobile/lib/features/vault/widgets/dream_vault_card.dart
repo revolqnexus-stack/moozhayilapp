@@ -10,6 +10,7 @@ import '../../../core/constants/colors.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 import '../../../core/models/vault_item.dart';
+import '../../../core/utils/indian_format.dart';
 
 class DreamVaultCard extends StatelessWidget {
   const DreamVaultCard({
@@ -210,12 +211,10 @@ class _DreamVaultPreviewCard extends StatelessWidget {
   }
 
   String _currentGrams(String weightGrams) {
-    final parsed = double.tryParse(weightGrams) ?? 0;
-    final current = parsed * item.affordability.percentComplete / 100;
-    if (current == 0) {
-      return '0g';
-    }
-    return '${current.toStringAsFixed(1)}g';
+    return IndianFormat.formatGramsPercentOf(
+      weightGrams,
+      item.affordability.percentComplete,
+    );
   }
 }
 

@@ -8,6 +8,7 @@ import '../../../core/constants/colors.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 import '../../../core/routing/app_routes.dart';
+import '../../../core/utils/indian_format.dart';
 import '../providers/goal_create_provider.dart';
 import '../widgets/goal_enrollment_step_header.dart';
 
@@ -36,11 +37,12 @@ class AmountScreen extends ConsumerWidget {
             GoalEnrollmentStepHeader(
               step: GoalEnrollmentStep.amount,
               title: draft.amountLabel,
-              subtitle: 'Minimum ₹$minRupees · multiples of ₹$stepRupees',
+              subtitle:
+                  'Minimum ${IndianFormat.formatInrPaise(minRupees * 100)} · multiples of ${IndianFormat.formatInrPaise(stepRupees * 100)}',
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              '₹$snappedRupees',
+              IndianFormat.formatInrPaise(snappedRupees * 100),
               style: AppTypography.displayLG.copyWith(
                 fontSize: 36,
                 fontWeight: FontWeight.w300,
@@ -59,7 +61,7 @@ class AmountScreen extends ConsumerWidget {
                 min: minRupees.toDouble(),
                 max: maxRupees.toDouble(),
                 divisions: (maxRupees - minRupees) ~/ stepRupees,
-                label: '₹$snappedRupees',
+                label: IndianFormat.formatInrPaise(snappedRupees * 100),
                 onChanged: (value) {
                   final amount = ((value / stepRupees).round() * stepRupees)
                       .clamp(minRupees, maxRupees);
@@ -103,6 +105,6 @@ class AmountScreen extends ConsumerWidget {
     GoldenWishSchemeType.dhanam =>
       '12-month booking · lower of booking-day or redemption-day rate applies',
     GoldenWishSchemeType.goldNidhi =>
-      'Open-ended plan · deposit any time from ₹500 · no fixed maturity',
+      'Open-ended plan · deposit any time from ${IndianFormat.formatInrPaise(50000)} · no fixed maturity',
   };
 }

@@ -16,6 +16,7 @@ import '../../../core/constants/typography.dart';
 import '../../../core/models/address.dart';
 import '../../../core/models/gold_balance.dart';
 import '../../../core/routing/app_routes.dart';
+import '../../../core/utils/indian_format.dart';
 import '../../../core/services/razorpay_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../cart/providers/cart_provider.dart';
@@ -31,23 +32,6 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<CheckoutScreen> createState() => _CheckoutScreenState();
-}
-
-String _formatPaise(int paise) {
-  final rupees = paise ~/ 100;
-  final text = rupees.toString();
-  if (text.length <= 3) {
-    return '₹$text';
-  }
-
-  final buffer = StringBuffer('₹');
-  for (var index = 0; index < text.length; index++) {
-    if (index > 0 && (text.length - index) % 3 == 0) {
-      buffer.write(',');
-    }
-    buffer.write(text[index]);
-  }
-  return buffer.toString();
 }
 
 int _totalDuePaise({
@@ -394,8 +378,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                         ),
                                       ),
                                       Text(
-                                        '-${_formatPaise(credit)}',
-                                        style: AppTypography.uiBodyMD.copyWith(
+                                        '-${IndianFormat.formatInrPaise(credit)}',
+                                        style: AppTypography.priceTabular.copyWith(
                                           color: AppColors.gold,
                                         ),
                                       ),
@@ -424,8 +408,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                       style: AppTypography.headingSM,
                                     ),
                                     Text(
-                                      _formatPaise(totalDue),
-                                      style: AppTypography.priceMD,
+                                      IndianFormat.formatInrPaise(totalDue),
+                                      style: AppTypography.priceTabular.copyWith(
+                                        fontSize: AppTypography.priceMD.fontSize,
+                                        fontWeight: AppTypography.priceMD.fontWeight,
+                                        color: AppTypography.priceMD.color,
+                                      ),
                                     ),
                                   ],
                                 );

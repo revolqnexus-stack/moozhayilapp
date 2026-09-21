@@ -18,6 +18,7 @@ import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 
 import '../../../core/services/razorpay_service.dart';
+import '../../../core/utils/indian_format.dart';
 
 import '../../../core/utils/app_haptics.dart';
 
@@ -145,7 +146,7 @@ class _ContributeScreenState extends ConsumerState<ContributeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final rupees = _amountPaise ~/ 100;
+    final amountLabel = IndianFormat.formatInrPaise(_amountPaise);
 
     return Scaffold(
       backgroundColor: AppColors.warmIvory,
@@ -162,7 +163,7 @@ class _ContributeScreenState extends ConsumerState<ContributeScreen> {
             Text('Contribution amount', style: AppTypography.headingMD),
 
             Slider(
-              value: rupees.toDouble().clamp(1000, 50000),
+              value: (_amountPaise ~/ 100).toDouble().clamp(1000, 50000),
 
               min: 1000,
 
@@ -170,13 +171,20 @@ class _ContributeScreenState extends ConsumerState<ContributeScreen> {
 
               divisions: 49,
 
-              label: '₹$rupees',
+              label: amountLabel,
 
               onChanged: (value) =>
                   setState(() => _amountPaise = value.round() * 100),
             ),
 
-            Text('₹$rupees', style: AppTypography.headingSM),
+            Text(
+              amountLabel,
+              style: AppTypography.priceTabular.copyWith(
+                fontSize: AppTypography.headingSM.fontSize,
+                fontWeight: FontWeight.w400,
+                fontFamily: AppTypography.headingSM.fontFamily,
+              ),
+            ),
 
             const Spacer(),
 

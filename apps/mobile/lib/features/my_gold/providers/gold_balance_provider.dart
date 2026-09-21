@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/models/gold_balance.dart';
 import '../../../core/models/product.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/utils/indian_format.dart';
 import '../../auth/providers/auth_provider.dart';
 
 part 'gold_balance_provider.g.dart';
@@ -72,15 +73,15 @@ GoldBalanceRepository goldBalanceRepository(Ref ref) {
 Future<GoldBalance> goldBalance(Ref ref) async {
   final auth = ref.watch(authControllerProvider);
   if (auth.value?.step != AuthFlowStep.signedIn) {
-    return const GoldBalance(
+    return GoldBalance(
       totalGrams: '0.0000',
-      totalGramsDisplay: '0.0g',
+      totalGramsDisplay: IndianFormat.formatGrams('0'),
       totalValuePaise: 0,
-      totalValueDisplay: '₹0',
+      totalValueDisplay: IndianFormat.formatInrPaise(0),
       rateUsed: GoldRateUsed(
         purity: '22k',
         ratePaise: 0,
-        rateDisplay: '₹0/g',
+        rateDisplay: '${IndianFormat.formatInrPaise(0)}/g',
         updatedAt: '',
       ),
     );

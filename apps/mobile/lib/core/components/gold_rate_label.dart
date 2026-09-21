@@ -20,6 +20,8 @@ class GoldRateLabel extends StatelessWidget {
     required this.ratePaise,
     this.rateDisplayFallback,
     this.rateUpdatedAtIso,
+    this.serverIsStale,
+    this.refetchReturnedSameStaleRate = false,
     required this.purityLabel,
     required this.clock,
     this.isLoading = false,
@@ -28,11 +30,14 @@ class GoldRateLabel extends StatelessWidget {
     this.showingCachedRate = false,
     this.compact = false,
     this.variant = GoldRateLabelVariant.light,
+    this.onStaleRefresh,
   });
 
   final int? ratePaise;
   final String? rateDisplayFallback;
   final String? rateUpdatedAtIso;
+  final bool? serverIsStale;
+  final bool refetchReturnedSameStaleRate;
   final String purityLabel;
   final ServerClock clock;
   final bool isLoading;
@@ -41,6 +46,14 @@ class GoldRateLabel extends StatelessWidget {
   final bool showingCachedRate;
   final bool compact;
   final GoldRateLabelVariant variant;
+  final VoidCallback? onStaleRefresh;
+
+  bool get _canRefreshStale =>
+      onStaleRefresh != null &&
+      !isOffline &&
+      !isRefreshing &&
+      (_freshness == GoldRateFreshness.clientCacheStale ||
+          _freshness == GoldRateFreshness.missingTimestamp);
 
   String? get _rateLine {
     if (ratePaise != null) {
@@ -58,6 +71,8 @@ class GoldRateLabel extends StatelessWidget {
         clock: clock,
         isOffline: isOffline,
         showingCachedRate: showingCachedRate,
+        serverIsStale: serverIsStale,
+        refetchReturnedSameStaleRate: refetchReturnedSameStaleRate,
       );
 
   String? get _asOfLine {
@@ -78,8 +93,12 @@ class GoldRateLabel extends StatelessWidget {
     switch (_freshness) {
       case GoldRateFreshness.offlineCached:
         return CustomerCopy.goldRateOffline;
-      case GoldRateFreshness.stale:
-        return CustomerCopy.goldRateStale;
+      case GoldRateFreshness.clientCacheStale:
+        return CustomerCopy.goldRateClientCacheStale;
+      case GoldRateFreshness.sourceStale:
+        return CustomerCopy.goldRateSourceStale;
+      case GoldRateFreshness.sourceUnchanged:
+        return CustomerCopy.goldRateSourceUnchanged;
       case GoldRateFreshness.missingTimestamp:
         return CustomerCopy.goldRateTimeUnavailable;
       case GoldRateFreshness.fresh:
@@ -141,6 +160,9 @@ class GoldRateLabel extends StatelessWidget {
     final asOf = _asOfLine;
     final status = _statusLine;
     final showBanner = _showStatusBanner;
+    final headline = variant == GoldRateLabelVariant.dark
+        ? 'RATE · '
+        : '${CustomerCopy.goldRateHeadline} · ';
 
     return Semantics(
       label: _semanticsLabel(),
@@ -160,11 +182,7 @@ class GoldRateLabel extends StatelessWidget {
                 height: 1.25,
               ),
               children: [
-                TextSpan(
-                  text: variant == GoldRateLabelVariant.dark
-                      ? 'RATE · '
-                      : 'Live Gold Rate · ',
-                ),
+                TextSpan(text: headline),
                 TextSpan(
                   text: rate,
                   style: AppTypography.priceTabular.copyWith(
@@ -184,9 +202,9 @@ class GoldRateLabel extends StatelessWidget {
               message: status!,
               isRefreshing: isRefreshing,
               isOffline: _freshness == GoldRateFreshness.offlineCached,
-              isStale: _freshness == GoldRateFreshness.stale ||
-                  _freshness == GoldRateFreshness.missingTimestamp,
+              isActionable: _canRefreshStale,
               variant: variant,
+              onTap: _canRefreshStale ? onStaleRefresh : null,
             ),
           ],
         ],
@@ -200,19 +218,21 @@ class _RateStatusRow extends StatelessWidget {
     required this.message,
     required this.isRefreshing,
     required this.isOffline,
-    required this.isStale,
+    required this.isActionable,
     required this.variant,
+    this.onTap,
   });
 
   final String message;
   final bool isRefreshing;
   final bool isOffline;
-  final bool isStale;
+  final bool isActionable;
   final GoldRateLabelVariant variant;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final color = isOffline || isStale
+    final color = isOffline || isActionable
         ? (variant == GoldRateLabelVariant.dark
             ? AppColors.goldLight
             : AppColors.warningFill)
@@ -220,32 +240,46 @@ class _RateStatusRow extends StatelessWidget {
             ? AppColors.paper.withValues(alpha: 0.55)
             : AppColors.textMuted);
 
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 48),
-      child: Row(
-        children: [
-          AppIcon(
-            isRefreshing
-                ? Icons.autorenew
-                : isOffline
-                    ? Icons.cloud_off_outlined
-                    : Icons.schedule_outlined,
-            size: 14,
-            color: color,
-          ),
-          const SizedBox(width: AppSpacing.xxs),
-          Expanded(
-            child: Text(
-              message,
-              style: AppTypography.uiBodySM.copyWith(
-                color: color,
-                fontSize: 12,
-                height: 1.2,
-              ),
+    final row = Row(
+      children: [
+        AppIcon(
+          isRefreshing
+              ? Icons.autorenew
+              : isOffline
+                  ? Icons.cloud_off_outlined
+                  : Icons.schedule_outlined,
+          size: 14,
+          color: color,
+        ),
+        const SizedBox(width: AppSpacing.xxs),
+        Expanded(
+          child: Text(
+            message,
+            style: AppTypography.uiBodySM.copyWith(
+              color: color,
+              fontSize: 12,
+              height: 1.2,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
+    );
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 48),
+      child: onTap == null
+          ? row
+          : Semantics(
+              button: true,
+              label: '$message. Tap to refresh rate.',
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: onTap,
+                  child: row,
+                ),
+              ),
+            ),
     );
   }
 }

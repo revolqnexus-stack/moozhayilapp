@@ -19,6 +19,7 @@ class MyGoldHero extends StatelessWidget {
     this.isOffline = false,
     this.isRefreshing = false,
     this.isLoading = false,
+    this.onStaleRefresh,
   });
 
   final GoldBalance balance;
@@ -26,6 +27,7 @@ class MyGoldHero extends StatelessWidget {
   final bool isOffline;
   final bool isRefreshing;
   final bool isLoading;
+  final VoidCallback? onStaleRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +71,7 @@ class MyGoldHero extends StatelessWidget {
               ratePaise: balance.rateUsed.ratePaise,
               rateDisplayFallback: balance.rateUsed.rateDisplay,
               rateUpdatedAtIso: balance.rateUsed.updatedAt,
+              serverIsStale: balance.rateUsed.isStale,
               purityLabel: balance.rateUsed.purity.toUpperCase(),
               clock: clock,
               isOffline: isOffline,
@@ -76,6 +79,7 @@ class MyGoldHero extends StatelessWidget {
               isLoading: isLoading,
               showingCachedRate: isOffline,
               variant: GoldRateLabelVariant.dark,
+              onStaleRefresh: onStaleRefresh,
             ),
           ),
         ],

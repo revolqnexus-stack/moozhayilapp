@@ -9,6 +9,10 @@ import { formatPaise } from "../../utils/money";
 import { goldLedgerService } from "./gold_ledger.service";
 import { GOAL_ACCUMULATION_PURITY } from "../../config/goals.constants";
 import { apiPurity } from "../gold_rates/gold_rates.service";
+import {
+  GOLD_RATE_STALE_AFTER_SECONDS,
+  isGoldRateStale,
+} from "../../config/gold_rates.constants";
 
 export class GoldBalanceService {
   async getBalance(userId: string) {
@@ -29,6 +33,8 @@ export class GoldBalanceService {
         rate_paise: rate.ratePerGramPaise,
         rate_display: `${formatPaise(rate.ratePerGramPaise)}/g`,
         updated_at: rate.effectiveFrom.toISOString(),
+        is_stale: isGoldRateStale(rate.effectiveFrom),
+        stale_after_seconds: GOLD_RATE_STALE_AFTER_SECONDS,
       },
     };
   }

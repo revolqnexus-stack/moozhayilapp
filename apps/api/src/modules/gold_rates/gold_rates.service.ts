@@ -1,5 +1,9 @@
 import type { Purity } from "@prisma/client";
 import { prisma } from "../../db/prisma";
+import {
+  GOLD_RATE_STALE_AFTER_SECONDS,
+  isGoldRateStale,
+} from "../../config/gold_rates.constants";
 import { getJsonCache, setJsonCache } from "../../utils/cache";
 import { formatPaise } from "../../utils/money";
 
@@ -46,8 +50,8 @@ export class GoldRatesService {
               updated_at: rate.effectiveFrom.toISOString(),
               change_pct_today: 0,
               change_pct_30d: 0,
-              is_stale:
-                Date.now() - rate.effectiveFrom.getTime() > 8 * 60 * 60 * 1000,
+              is_stale: isGoldRateStale(rate.effectiveFrom),
+              stale_after_seconds: GOLD_RATE_STALE_AFTER_SECONDS,
             },
           ]),
       ),

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'core/constants/colors.dart';
 import 'core/routing/app_router.dart';
+import 'core/widgets/server_clock_lifecycle.dart';
 import 'features/auth/providers/auth_provider.dart';
 
 /// Root widget of the Moozhayil application.
@@ -32,7 +33,9 @@ class MoozhayilApp extends ConsumerWidget {
         ErrorWidget.builder = (FlutterErrorDetails details) {
           return _AppErrorWidget(details: details);
         };
-        return child ?? const SizedBox.shrink();
+        return ServerClockLifecycle(
+          child: child ?? const SizedBox.shrink(),
+        );
       },
     );
   }

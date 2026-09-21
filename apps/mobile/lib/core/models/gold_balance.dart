@@ -12,6 +12,8 @@ abstract class GoldRateUsed with _$GoldRateUsed {
     @JsonKey(name: 'rate_paise') required int ratePaise,
     @JsonKey(name: 'rate_display') required String rateDisplay,
     @JsonKey(name: 'updated_at') required String updatedAt,
+    @JsonKey(name: 'is_stale') bool? isStale,
+    @JsonKey(name: 'stale_after_seconds') int? staleAfterSeconds,
   }) = _GoldRateUsed;
 
   factory GoldRateUsed.fromJson(Map<String, dynamic> json) =>

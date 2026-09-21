@@ -7,6 +7,8 @@ import '../../../core/constants/colors.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/utils/sample_catalog.dart';
 import '../../my_gold/providers/gold_balance_provider.dart';
+import '../../../core/services/connectivity_service.dart';
+import '../../../core/time/server_clock_provider.dart';
 import '../providers/products_provider.dart';
 import '../widgets/shop_catalog_section.dart';
 import '../widgets/shop_collections_rail.dart';
@@ -36,9 +38,23 @@ class ShopScreen extends ConsumerWidget {
       SampleCatalog.occasions,
     );
     final goldRate = ref.watch(goldBalanceProvider);
+    final clock = ref.watch(serverClockProvider);
+    final isOffline = ref.watch(isOfflineProvider);
 
+    final ratePaise = goldRate.maybeWhen(
+      data: (b) => b.rateUsed.ratePaise,
+      orElse: () => null,
+    );
     final rateDisplay = goldRate.maybeWhen(
       data: (b) => b.rateUsed.rateDisplay,
+      orElse: () => null,
+    );
+    final rateUpdatedAt = goldRate.maybeWhen(
+      data: (b) => b.rateUsed.updatedAt,
+      orElse: () => null,
+    );
+    final serverIsStale = goldRate.maybeWhen(
+      data: (b) => b.rateUsed.isStale,
       orElse: () => null,
     );
 
@@ -58,8 +74,15 @@ class ShopScreen extends ConsumerWidget {
               index: 0,
               child: ShopMasthead(
                 onSearchTap: () => context.push(AppRoutes.shopSearch),
+                clock: clock,
+                ratePaise: ratePaise,
                 rateDisplay: rateDisplay,
+                rateUpdatedAtIso: rateUpdatedAt,
+                serverIsStale: serverIsStale,
                 isRateLoading: goldRate.isLoading,
+                isRateRefreshing: goldRate.isLoading && goldRate.hasValue,
+                isOffline: isOffline,
+                onRefreshRate: () => ref.invalidate(goldBalanceProvider),
                 pieceCount: products.length,
               ),
             ),

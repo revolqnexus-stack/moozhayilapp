@@ -7,28 +7,32 @@ import '../../../core/constants/motion.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/time/server_clock.dart';
 
-/// Official live gold rate strip — slim premium information band.
+/// Daily gold rate strip — slim premium information band.
 class LiveGoldRateStrip extends StatefulWidget {
   const LiveGoldRateStrip({
     super.key,
     this.ratePaise,
     this.rateDisplay,
     this.rateUpdatedAtIso,
+    this.serverIsStale,
     required this.clock,
     this.purityLabel = '22KT',
     this.isLoading = false,
     this.isRefreshing = false,
     this.isOffline = false,
+    this.onRefreshRate,
   });
 
   final int? ratePaise;
   final String? rateDisplay;
   final String? rateUpdatedAtIso;
+  final bool? serverIsStale;
   final ServerClock clock;
   final String purityLabel;
   final bool isLoading;
   final bool isRefreshing;
   final bool isOffline;
+  final VoidCallback? onRefreshRate;
 
   @override
   State<LiveGoldRateStrip> createState() => _LiveGoldRateStripState();
@@ -136,6 +140,7 @@ class _LiveGoldRateStripState extends State<LiveGoldRateStrip>
                 ratePaise: ratePaise,
                 rateDisplayFallback: rateDisplay,
                 rateUpdatedAtIso: updatedAt,
+                serverIsStale: widget.serverIsStale,
                 purityLabel: widget.purityLabel,
                 clock: widget.clock,
                 isLoading: widget.isLoading && ratePaise == null && rateDisplay == null,
@@ -143,6 +148,7 @@ class _LiveGoldRateStripState extends State<LiveGoldRateStrip>
                 isOffline: widget.isOffline,
                 showingCachedRate: _showingCachedRate,
                 compact: true,
+                onStaleRefresh: widget.onRefreshRate,
               ),
             ),
             const SizedBox(width: AppSpacing.sm),

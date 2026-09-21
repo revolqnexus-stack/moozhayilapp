@@ -21,6 +21,9 @@ import '../../../core/services/connectivity_service.dart';
 import '../../../core/time/server_clock_provider.dart';
 import '../providers/gold_balance_provider.dart';
 import '../widgets/gold_ledger.dart';
+import '../../../core/kyc/kyc_gate_coordinator.dart';
+import '../../profile/providers/kyc_provider.dart';
+import '../widgets/kyc_redemption_panel.dart';
 import '../widgets/my_gold_hero.dart';
 
 class MyGoldScreen extends ConsumerWidget {
@@ -34,6 +37,18 @@ class MyGoldScreen extends ConsumerWidget {
     final isOffline = ref.watch(isOfflineProvider);
     final ledger = ref.watch(goldLedgerProvider);
     final redeemable = ref.watch(redeemableProductsProvider);
+    final kyc = ref.watch(kycStatusProvider);
+    final KycGateBlock? redemptionBlock = kyc.maybeWhen(
+      data: (status) {
+        final decision = decideKycGate(
+          kycStatus: status.kycStatus,
+          reason: KycGateReason.redemption,
+        );
+        return decision is KycGateBlock ? decision : null;
+      },
+      orElse: () => null,
+    );
+    final redemptionBlocked = redemptionBlock != null;
 
     return Scaffold(
       backgroundColor: AppColors.paper,
@@ -60,6 +75,7 @@ class MyGoldScreen extends ConsumerWidget {
                 isOffline: isOffline,
                 isRefreshing: balance.isLoading && balance.hasValue,
                 isLoading: balance.isLoading,
+                onStaleRefresh: () => ref.invalidate(goldBalanceProvider),
               ),
               const SizedBox(height: AppSpacing.xxl),
               const SectionHeader(
@@ -112,21 +128,31 @@ class MyGoldScreen extends ConsumerWidget {
                     const LoadingShimmer(width: double.infinity, height: 80),
                 error: (_, _) => const SizedBox.shrink(),
               ),
+              if (redemptionBlock != null) ...[
+                const SizedBox(height: AppSpacing.lg),
+                KycRedemptionPanel(
+                  block: redemptionBlock,
+                  isLoading: kyc.isLoading,
+                  returnRoute: AppRoutes.myGold,
+                ),
+              ],
               const SizedBox(height: AppSpacing.lg),
               OutlinedButton(
-                onPressed: () {
-                  if (user == null) {
-                    context.push(
-                      Uri(
-                        path: AppRoutes.auth,
-                        queryParameters: {'from': AppRoutes.myGoldRedeem},
-                      ).toString(),
-                    );
-                    return;
-                  }
+                onPressed: redemptionBlocked
+                    ? null
+                    : () {
+                        if (user == null) {
+                          context.push(
+                            Uri(
+                              path: AppRoutes.auth,
+                              queryParameters: {'from': AppRoutes.myGoldRedeem},
+                            ).toString(),
+                          );
+                          return;
+                        }
 
-                  context.push(AppRoutes.myGoldRedeem);
-                },
+                        context.push(AppRoutes.myGoldRedeem);
+                      },
                 child: const Text('Browse all redeemable pieces'),
               ),
             ],
@@ -154,6 +180,15 @@ class RedeemScreen extends ConsumerWidget {
     WidgetRef ref,
     String productId,
   ) async {
+    final allowed = await ensureKycAllowsAction(
+      context: context,
+      ref: ref,
+      reason: KycGateReason.redemption,
+      returnRoute: AppRoutes.myGoldRedeem,
+      usesGoldBalance: true,
+    );
+    if (!allowed || !context.mounted) return;
+
     try {
       await ref.read(cartActionsProvider.notifier).addProduct(productId);
       if (context.mounted) {
@@ -173,6 +208,18 @@ class RedeemScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final redeemable = ref.watch(redeemableProductsProvider);
+    final kyc = ref.watch(kycStatusProvider);
+    final KycGateBlock? redemptionBlock = kyc.maybeWhen(
+      data: (status) {
+        final decision = decideKycGate(
+          kycStatus: status.kycStatus,
+          reason: KycGateReason.redemption,
+        );
+        return decision is KycGateBlock ? decision : null;
+      },
+      orElse: () => null,
+    );
+    final redemptionBlocked = redemptionBlock != null;
 
     return Scaffold(
       backgroundColor: AppColors.paper,
@@ -213,6 +260,14 @@ class RedeemScreen extends ConsumerWidget {
                           height: 1.5,
                         ),
                       ),
+                      if (redemptionBlock != null) ...[
+                        const SizedBox(height: AppSpacing.md),
+                        KycRedemptionPanel(
+                          block: redemptionBlock,
+                          isLoading: kyc.isLoading,
+                          returnRoute: AppRoutes.myGoldRedeem,
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -228,8 +283,10 @@ class RedeemScreen extends ConsumerWidget {
                   itemBuilder: (context, index) => VaultAwareProductCard(
                     product: products[index],
                     variant: ProductCardVariant.horizontal,
-                    onTap: () =>
-                        _redeemProduct(context, ref, products[index].id),
+                    onTap: redemptionBlocked
+                        ? null
+                        : () =>
+                            _redeemProduct(context, ref, products[index].id),
                   ),
                 ),
               ),

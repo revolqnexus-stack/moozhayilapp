@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/models/cart.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/utils/indian_format.dart';
 import '../../auth/providers/auth_provider.dart';
 
 part 'cart_provider.g.dart';
@@ -64,10 +65,10 @@ CartRepository cartRepository(Ref ref) {
 Future<CartSummary> cartSummary(Ref ref) async {
   final auth = ref.watch(authControllerProvider);
   if (auth.value?.step != AuthFlowStep.signedIn) {
-    return const CartSummary(
-      items: [],
+    return CartSummary(
+      items: const [],
       subtotalPaise: 0,
-      subtotalDisplay: '₹0',
+      subtotalDisplay: IndianFormat.formatInrPaise(0),
       itemCount: 0,
     );
   }

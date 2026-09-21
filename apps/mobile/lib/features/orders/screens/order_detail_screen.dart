@@ -12,6 +12,7 @@ import '../../../core/constants/colors.dart';
 import '../../../core/constants/radii.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
+import '../../../core/utils/indian_format.dart';
 import '../providers/orders_provider.dart';
 
 class OrderDetailScreen extends ConsumerWidget {
@@ -71,14 +72,16 @@ class OrderDetailScreen extends ConsumerWidget {
               if (response.paymentBreakdown.goldAppliedPaise > 0)
                 _SummaryRow(
                   label: 'Gold applied',
-                  value:
-                      '₹${(response.paymentBreakdown.goldAppliedPaise / 100).round()}',
+                  value: IndianFormat.formatInrPaise(
+                    response.paymentBreakdown.goldAppliedPaise,
+                  ),
                 ),
               if (response.paymentBreakdown.cashPaidPaise > 0)
                 _SummaryRow(
                   label: 'Cash paid',
-                  value:
-                      '₹${(response.paymentBreakdown.cashPaidPaise / 100).round()}',
+                  value: IndianFormat.formatInrPaise(
+                    response.paymentBreakdown.cashPaidPaise,
+                  ),
                 ),
               if (canCancel) ...[
                 const SizedBox(height: AppSpacing.xl),

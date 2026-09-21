@@ -281,5 +281,13 @@ abstract final class AppTypography {
     height: 1.2,
     color: AppColors.textMuted,
   );
+
+  /// Tabular figures for aligned rupee amounts in lists and checkout.
+  static final TextStyle priceTabular = _inter(
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+    height: 1.2,
+    color: AppColors.textPrimary,
+  ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
 }
 

@@ -191,11 +191,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         return;
       }
 
-      showPremiumSnackBar(
-        context,
-        CustomerErrorCopy.message(error),
-        haptic: false,
-      );
+      if (mounted) {
+        showPremiumSnackBar(
+          context,
+          CustomerErrorCopy.message(error),
+          haptic: false,
+        );
+      }
     } finally {
       if (mounted) {
         setState(() => _isPlacing = false);

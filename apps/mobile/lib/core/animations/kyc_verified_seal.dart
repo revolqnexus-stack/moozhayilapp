@@ -5,11 +5,7 @@ import '../constants/colors.dart';
 /// Premium KYC verified seal animation: identity card receives gold verified seal.
 /// Seal stamps down with slight bounce, then glows briefly.
 class KycVerifiedSeal extends StatefulWidget {
-  const KycVerifiedSeal({
-    super.key,
-    this.size = 100,
-    this.onComplete,
-  });
+  const KycVerifiedSeal({super.key, this.size = 100, this.onComplete});
 
   final double size;
   final VoidCallback? onComplete;
@@ -42,25 +38,26 @@ class _KycVerifiedSealState extends State<KycVerifiedSeal>
     );
 
     // Subtle bounce (30-50%)
-    _stampBounce = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 0.9),
-        weight: 1,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 0.9, end: 1.05),
-        weight: 1,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.05, end: 1.0),
-        weight: 1,
-      ),
-    ]).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.3, 0.5, curve: Curves.easeOut),
-      ),
-    );
+    _stampBounce =
+        TweenSequence<double>([
+          TweenSequenceItem(
+            tween: Tween<double>(begin: 1.0, end: 0.9),
+            weight: 1,
+          ),
+          TweenSequenceItem(
+            tween: Tween<double>(begin: 0.9, end: 1.05),
+            weight: 1,
+          ),
+          TweenSequenceItem(
+            tween: Tween<double>(begin: 1.05, end: 1.0),
+            weight: 1,
+          ),
+        ]).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.3, 0.5, curve: Curves.easeOut),
+          ),
+        );
 
     // Glow effect (50-100%)
     _glow = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -94,10 +91,7 @@ class _KycVerifiedSealState extends State<KycVerifiedSeal>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.gold.withValues(alpha: 0.15),
-                border: Border.all(
-                  color: AppColors.gold,
-                  width: 3,
-                ),
+                border: Border.all(color: AppColors.gold, width: 3),
                 boxShadow: [
                   BoxShadow(
                     color: AppColors.gold.withValues(alpha: 0.4 * _glow.value),

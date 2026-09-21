@@ -40,15 +40,13 @@ class _GoldProgressRingState extends State<GoldProgressRing>
       duration: AnimationPresets.goalProgressFill,
     );
 
-    _progressAnimation = Tween<double>(
-      begin: 0.0,
-      end: widget.percent.clamp(0.0, 1.0),
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: AnimationPresets.goalProgressCurve,
-      ),
-    );
+    _progressAnimation =
+        Tween<double>(begin: 0.0, end: widget.percent.clamp(0.0, 1.0)).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: AnimationPresets.goalProgressCurve,
+          ),
+        );
 
     if (widget.animateOnMount) {
       _controller.forward();
@@ -61,15 +59,16 @@ class _GoldProgressRingState extends State<GoldProgressRing>
   void didUpdateWidget(GoldProgressRing oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.percent != widget.percent) {
-      _progressAnimation = Tween<double>(
-        begin: oldWidget.percent.clamp(0.0, 1.0),
-        end: widget.percent.clamp(0.0, 1.0),
-      ).animate(
-        CurvedAnimation(
-          parent: _controller,
-          curve: AnimationPresets.goalProgressCurve,
-        ),
-      );
+      _progressAnimation =
+          Tween<double>(
+            begin: oldWidget.percent.clamp(0.0, 1.0),
+            end: widget.percent.clamp(0.0, 1.0),
+          ).animate(
+            CurvedAnimation(
+              parent: _controller,
+              curve: AnimationPresets.goalProgressCurve,
+            ),
+          );
       _controller.forward(from: 0);
     }
   }

@@ -101,12 +101,10 @@ abstract final class CustomerCopy {
   // Gold rate label (daily admin-set rate — not a live feed)
   static const goldRateHeadline = 'Gold rate';
   static const goldRateRefreshing = 'Refreshing…';
-  static const goldRateOffline =
-      "You're offline. Showing last known rate.";
+  static const goldRateOffline = "You're offline. Showing last known rate.";
   static const goldRateClientCacheStale =
       'Showing last known rate. Tap to refresh.';
-  static const goldRateSourceStale =
-      "Today's rate has not been updated yet.";
+  static const goldRateSourceStale = "Today's rate has not been updated yet.";
   static const goldRateSourceUnchanged =
       "Still showing today's published rate.";
   static const goldRateTimeUnavailable = 'Time unavailable';

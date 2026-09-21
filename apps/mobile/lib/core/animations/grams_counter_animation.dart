@@ -39,15 +39,13 @@ class _GramsCounterAnimationState extends State<GramsCounterAnimation>
       duration: AnimationPresets.gramsCredit,
     );
 
-    _counter = Tween<double>(
-      begin: widget.startValue,
-      end: widget.endValue,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: AnimationPresets.gramsCreditCurve,
-      ),
-    );
+    _counter = Tween<double>(begin: widget.startValue, end: widget.endValue)
+        .animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: AnimationPresets.gramsCreditCurve,
+          ),
+        );
 
     _controller.forward();
   }
@@ -56,15 +54,13 @@ class _GramsCounterAnimationState extends State<GramsCounterAnimation>
   void didUpdateWidget(GramsCounterAnimation oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.endValue != widget.endValue) {
-      _counter = Tween<double>(
-        begin: oldWidget.endValue,
-        end: widget.endValue,
-      ).animate(
-        CurvedAnimation(
-          parent: _controller,
-          curve: AnimationPresets.gramsCreditCurve,
-        ),
-      );
+      _counter = Tween<double>(begin: oldWidget.endValue, end: widget.endValue)
+          .animate(
+            CurvedAnimation(
+              parent: _controller,
+              curve: AnimationPresets.gramsCreditCurve,
+            ),
+          );
       _controller.forward(from: 0);
     }
   }
@@ -82,16 +78,13 @@ class _GramsCounterAnimationState extends State<GramsCounterAnimation>
       builder: (context, child) {
         return ShaderMask(
           shaderCallback: (bounds) => LinearGradient(
-            colors: [
-              AppColors.gold,
-              AppColors.goldLight,
-              AppColors.gold,
-            ],
+            colors: [AppColors.gold, AppColors.goldLight, AppColors.gold],
             stops: [0.0, _controller.value, 1.0],
           ).createShader(bounds),
           child: Text(
             '${IndianFormat.formatGramsDouble(_counter.value, includeSuffix: false)}${widget.suffix}',
-            style: widget.style ??
+            style:
+                widget.style ??
                 const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w500,
@@ -140,12 +133,7 @@ class _AmountCounterAnimationState extends State<AmountCounterAnimation>
     _counter = IntTween(
       begin: widget.startAmountPaise,
       end: widget.endAmountPaise,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward();
   }
@@ -157,12 +145,7 @@ class _AmountCounterAnimationState extends State<AmountCounterAnimation>
       _counter = IntTween(
         begin: oldWidget.endAmountPaise,
         end: widget.endAmountPaise,
-      ).animate(
-        CurvedAnimation(
-          parent: _controller,
-          curve: Curves.easeOut,
-        ),
-      );
+      ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
       _controller.forward(from: 0);
     }
   }
@@ -187,7 +170,8 @@ class _AmountCounterAnimationState extends State<AmountCounterAnimation>
       builder: (context, child) {
         return Text(
           _formatAmount(_counter.value),
-          style: widget.style ??
+          style:
+              widget.style ??
               const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w500,

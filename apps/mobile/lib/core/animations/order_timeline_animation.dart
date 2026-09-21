@@ -27,10 +27,7 @@ class _OrderTimelineAnimationState extends State<OrderTimelineAnimation>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: AppAnimations.xl,
-    );
+    _controller = AnimationController(vsync: this, duration: AppAnimations.xl);
 
     if (widget.animate) {
       _controller.forward();
@@ -70,8 +67,9 @@ class _OrderTimelineAnimationState extends State<OrderTimelineAnimation>
               if (i < widget.steps.length - 1)
                 _TimelineConnector(
                   isCompleted: i < widget.currentStep,
-                  progress:
-                      i < widget.currentStep - 1 ? 1.0 : _controller.value,
+                  progress: i < widget.currentStep - 1
+                      ? 1.0
+                      : _controller.value,
                 ),
             ],
           ],
@@ -109,8 +107,9 @@ class _TimelineStepWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isCompleted || isCurrent ? AppColors.gold : AppColors.pearl;
-    final textColor =
-        isCompleted || isCurrent ? AppColors.textPrimary : AppColors.textSecondary;
+    final textColor = isCompleted || isCurrent
+        ? AppColors.textPrimary
+        : AppColors.textSecondary;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,16 +122,9 @@ class _TimelineStepWidget extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: color.withValues(alpha: 0.15),
-            border: Border.all(
-              color: color,
-              width: 2,
-            ),
+            border: Border.all(color: color, width: 2),
           ),
-          child: Icon(
-            step.icon,
-            size: 24,
-            color: color,
-          ),
+          child: Icon(step.icon, size: 24, color: color),
         ),
 
         const SizedBox(width: 16),
@@ -154,10 +146,7 @@ class _TimelineStepWidget extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 step.subtitle,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                ),
+                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
               ),
             ],
           ),
@@ -168,10 +157,7 @@ class _TimelineStepWidget extends StatelessWidget {
 }
 
 class _TimelineConnector extends StatelessWidget {
-  const _TimelineConnector({
-    required this.isCompleted,
-    required this.progress,
-  });
+  const _TimelineConnector({required this.isCompleted, required this.progress});
 
   final bool isCompleted;
   final double progress;

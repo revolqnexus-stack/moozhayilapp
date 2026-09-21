@@ -80,10 +80,7 @@ abstract final class IndianFormat {
   }
 
   /// Floors [grams] to one decimal via string truncation — never `floor(x * 10^n)`.
-  static String formatGramsDouble(
-    double grams, {
-    bool includeSuffix = true,
-  }) {
+  static String formatGramsDouble(double grams, {bool includeSuffix = true}) {
     return formatGrams(
       doubleToGramsRawTruncated(grams),
       includeSuffix: includeSuffix,
@@ -109,7 +106,10 @@ abstract final class IndianFormat {
     return negative ? '-$truncated' : truncated;
   }
 
-  static String _truncateDecimalString(String positiveDecimal, int maxFractionDigits) {
+  static String _truncateDecimalString(
+    String positiveDecimal,
+    int maxFractionDigits,
+  ) {
     final parts = positiveDecimal.split('.');
     final whole = parts.first;
     if (parts.length == 1) {

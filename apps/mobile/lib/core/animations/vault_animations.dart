@@ -167,9 +167,7 @@ class _VaultOpeningAnimationState extends State<VaultOpeningAnimation>
               if (_shine.value > 0)
                 Positioned.fill(
                   child: CustomPaint(
-                    painter: _ShinePainter(
-                      progress: _shine.value,
-                    ),
+                    painter: _ShinePainter(progress: _shine.value),
                   ),
                 ),
             ],

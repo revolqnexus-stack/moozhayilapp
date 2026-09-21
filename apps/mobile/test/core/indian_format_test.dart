@@ -52,10 +52,7 @@ void main() {
 
     test('prefers API display field when provided', () {
       expect(
-        IndianFormat.formatGramsDisplay(
-          display: '37.4g',
-          rawGrams: '99.99',
-        ),
+        IndianFormat.formatGramsDisplay(display: '37.4g', rawGrams: '99.99'),
         '37.4g',
       );
     });
@@ -70,12 +67,7 @@ void main() {
 
     test('handles boundary tenths via string path', () {
       expect(IndianFormat.formatGrams('4.35'), '4.3g');
-      expect(
-        IndianFormat.formatGramsDouble(
-          double.parse('4.35'),
-        ),
-        '4.3g',
-      );
+      expect(IndianFormat.formatGramsDouble(double.parse('4.35')), '4.3g');
     });
 
     test('exact one-decimal values stay stable', () {
@@ -86,14 +78,8 @@ void main() {
 
   group('IndianFormat.formatGramsPercentOf', () {
     test('computes floored partial weight', () {
-      expect(
-        IndianFormat.formatGramsPercentOf('10.0', 50),
-        '5.0g',
-      );
-      expect(
-        IndianFormat.formatGramsPercentOf('10.0', 0),
-        '0.0g',
-      );
+      expect(IndianFormat.formatGramsPercentOf('10.0', 50), '5.0g');
+      expect(IndianFormat.formatGramsPercentOf('10.0', 0), '0.0g');
     });
   });
 }

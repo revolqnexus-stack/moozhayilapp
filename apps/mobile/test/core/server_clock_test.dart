@@ -12,10 +12,7 @@ void main() {
     clock.syncFromHttpDate('Sat, 21 Mar 2026 10:05:00 GMT');
     stopwatch.start();
     await Future<void>.delayed(const Duration(milliseconds: 30));
-    expect(
-      clock.nowUtc().isAfter(DateTime.utc(2026, 3, 21, 10, 5)),
-      isTrue,
-    );
+    expect(clock.nowUtc().isAfter(DateTime.utc(2026, 3, 21, 10, 5)), isTrue);
   });
 
   test('forward device clock jump expires sooner (max wall elapsed)', () {
@@ -56,10 +53,7 @@ void main() {
     final device = DateTime.utc(2026, 3, 21, 10, 0);
     final clock = ServerClock(deviceNow: () => device);
 
-    clock.syncFromHttpDate(
-      'Sat, 21 Mar 2026 10:05:00 GMT',
-      ageHeader: '120',
-    );
+    clock.syncFromHttpDate('Sat, 21 Mar 2026 10:05:00 GMT', ageHeader: '120');
 
     expect(clock.usesDeviceTimeFallback, isTrue);
   });

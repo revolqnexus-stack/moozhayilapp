@@ -88,7 +88,8 @@ class AuraGoldInsightsScreen extends ConsumerWidget {
                         isLoading: goldBalance.isLoading,
                         showingCachedRate: isOffline,
                         variant: GoldRateLabelVariant.dark,
-                        onStaleRefresh: () => ref.invalidate(goldBalanceProvider),
+                        onStaleRefresh: () =>
+                            ref.invalidate(goldBalanceProvider),
                       ),
                     ],
                   ),

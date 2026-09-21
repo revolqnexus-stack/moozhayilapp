@@ -42,21 +42,22 @@ class _WishlistHeartAnimationState extends State<WishlistHeartAnimation>
       ),
     );
 
-    _scale = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 1.2),
-        weight: 1,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.2, end: 1.0),
-        weight: 1,
-      ),
-    ]).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
-      ),
-    );
+    _scale =
+        TweenSequence<double>([
+          TweenSequenceItem(
+            tween: Tween<double>(begin: 1.0, end: 1.2),
+            weight: 1,
+          ),
+          TweenSequenceItem(
+            tween: Tween<double>(begin: 1.2, end: 1.0),
+            weight: 1,
+          ),
+        ]).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
+          ),
+        );
 
     _shimmer = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -154,10 +155,7 @@ class _HeartPainter extends CustomPainter {
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            AppColors.goldLight.withValues(alpha: 0.8),
-            AppColors.gold,
-          ],
+          colors: [AppColors.goldLight.withValues(alpha: 0.8), AppColors.gold],
         ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
 
       canvas.drawPath(path, fillPaint);
@@ -168,7 +166,8 @@ class _HeartPainter extends CustomPainter {
           ..color = AppColors.cream.withValues(alpha: 0.4 * shimmerProgress)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
 
-        final shimmerY = size.height * (1 - fillProgress) +
+        final shimmerY =
+            size.height * (1 - fillProgress) +
             (size.height * fillProgress * shimmerProgress);
 
         canvas.drawRect(

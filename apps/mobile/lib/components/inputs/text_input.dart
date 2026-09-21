@@ -157,8 +157,8 @@ class _AppTextInputState extends State<AppTextInput> {
       hintText: widget.placeholder,
       hintStyle: AppTypography.uiBodyMD.copyWith(color: AppColors.slateMist),
       filled: true,
-      fillColor: _isFocused 
-          ? AppColors.pureWhite 
+      fillColor: _isFocused
+          ? AppColors.pureWhite
           : AppColors.warmIvory.withValues(alpha: 0.5),
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,

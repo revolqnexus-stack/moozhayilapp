@@ -22,7 +22,9 @@ class PriceValidityGuard {
 
   bool get isExpired => remaining == Duration.zero;
 
-  bool get isInFinalMinutes => !isExpired && remaining <= const Duration(minutes: 3);
+  bool get isInFinalMinutes =>
+      !isExpired && remaining <= const Duration(minutes: 3);
 
-  bool get hasValidUntil => validUntilUtc.isAfter(DateTime.fromMillisecondsSinceEpoch(0));
+  bool get hasValidUntil =>
+      validUntilUtc.isAfter(DateTime.fromMillisecondsSinceEpoch(0));
 }

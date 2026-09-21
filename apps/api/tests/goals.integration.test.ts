@@ -58,6 +58,13 @@ async function verifyUser(userId: string) {
   });
 }
 
+function daysAgo(days: number): Date {
+  const date = new Date();
+  date.setUTCHours(0, 0, 0, 0);
+  date.setUTCDate(date.getUTCDate() - days);
+  return date;
+}
+
 async function seedCatalog() {
   const category = await prisma.category.create({
     data: { name: "Bangles", slug: "bangles" },
@@ -182,8 +189,8 @@ describe("Phase 7 goals, contributions, and gold ledger", () => {
         goalType: "investment",
         monthlyAmountPaise: 300000,
         durationMonths: 12,
-        startDate: new Date("2026-06-01"),
-        nextContributionDate: new Date("2026-06-15"),
+        startDate: daysAgo(40),
+        nextContributionDate: daysAgo(10),
         targetAmountPaise: 5000000,
       },
     });
@@ -204,8 +211,8 @@ describe("Phase 7 goals, contributions, and gold ledger", () => {
         goalType: "investment",
         monthlyAmountPaise: 300000,
         durationMonths: 12,
-        startDate: new Date("2026-01-01"),
-        nextContributionDate: new Date("2026-05-20"),
+        startDate: daysAgo(70),
+        nextContributionDate: daysAgo(35),
         targetAmountPaise: 5000000,
       },
     });

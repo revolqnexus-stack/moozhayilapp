@@ -35,15 +35,13 @@ class _AddToCartFlyingImageState extends State<AddToCartFlyingImage>
       duration: AnimationPresets.addToCartFlight,
     );
 
-    _rectTween = RectTween(
-      begin: widget.startRect,
-      end: widget.endRect,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: AnimationPresets.addToCartCurve,
-      ),
-    );
+    _rectTween = RectTween(begin: widget.startRect, end: widget.endRect)
+        .animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: AnimationPresets.addToCartCurve,
+          ),
+        );
 
     _fadeOut = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
@@ -84,9 +82,8 @@ class _AddToCartFlyingImageState extends State<AddToCartFlyingImage>
               child: Image.network(
                 widget.productImageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  color: Colors.grey[200],
-                ),
+                errorBuilder: (_, __, ___) =>
+                    Container(color: Colors.grey[200]),
               ),
             ),
           ),

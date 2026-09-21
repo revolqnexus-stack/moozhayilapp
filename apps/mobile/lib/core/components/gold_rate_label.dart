@@ -67,13 +67,13 @@ class GoldRateLabel extends StatelessWidget {
   }
 
   GoldRateFreshness get _freshness => evaluateGoldRateFreshness(
-        rateUpdatedAtIso: rateUpdatedAtIso,
-        clock: clock,
-        isOffline: isOffline,
-        showingCachedRate: showingCachedRate,
-        serverIsStale: serverIsStale,
-        refetchReturnedSameStaleRate: refetchReturnedSameStaleRate,
-      );
+    rateUpdatedAtIso: rateUpdatedAtIso,
+    clock: clock,
+    isOffline: isOffline,
+    showingCachedRate: showingCachedRate,
+    serverIsStale: serverIsStale,
+    refetchReturnedSameStaleRate: refetchReturnedSameStaleRate,
+  );
 
   String? get _asOfLine {
     if (_freshness == GoldRateFreshness.missingTimestamp) {
@@ -234,11 +234,11 @@ class _RateStatusRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = isOffline || isActionable
         ? (variant == GoldRateLabelVariant.dark
-            ? AppColors.goldLight
-            : AppColors.warningFill)
+              ? AppColors.goldLight
+              : AppColors.warningFill)
         : (variant == GoldRateLabelVariant.dark
-            ? AppColors.paper.withValues(alpha: 0.55)
-            : AppColors.textMuted);
+              ? AppColors.paper.withValues(alpha: 0.55)
+              : AppColors.textMuted);
 
     final row = Row(
       children: [
@@ -246,8 +246,8 @@ class _RateStatusRow extends StatelessWidget {
           isRefreshing
               ? Icons.autorenew
               : isOffline
-                  ? Icons.cloud_off_outlined
-                  : Icons.schedule_outlined,
+              ? Icons.cloud_off_outlined
+              : Icons.schedule_outlined,
           size: 14,
           color: color,
         ),
@@ -274,10 +274,7 @@ class _RateStatusRow extends StatelessWidget {
               label: '$message. Tap to refresh rate.',
               child: Material(
                 color: Colors.transparent,
-                child: InkWell(
-                  onTap: onTap,
-                  child: row,
-                ),
+                child: InkWell(onTap: onTap, child: row),
               ),
             ),
     );

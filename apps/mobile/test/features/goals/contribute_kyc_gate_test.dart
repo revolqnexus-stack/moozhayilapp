@@ -20,9 +20,7 @@ void main() {
             (ref) => throw StateError('contribute must not be called'),
           ),
         ],
-        child: const MaterialApp(
-          home: ContributeScreen(goalId: 'goal-1'),
-        ),
+        child: const MaterialApp(home: ContributeScreen(goalId: 'goal-1')),
       ),
     );
 

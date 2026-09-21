@@ -286,7 +286,7 @@ class RedeemScreen extends ConsumerWidget {
                     onTap: redemptionBlocked
                         ? null
                         : () =>
-                            _redeemProduct(context, ref, products[index].id),
+                              _redeemProduct(context, ref, products[index].id),
                   ),
                 ),
               ),

@@ -67,7 +67,8 @@ class _LiveGoldRateStripState extends State<LiveGoldRateStrip>
     if (widget.rateDisplay != null && widget.rateDisplay!.isNotEmpty) {
       _cachedRateDisplay = widget.rateDisplay;
     }
-    if (widget.rateUpdatedAtIso != null && widget.rateUpdatedAtIso!.isNotEmpty) {
+    if (widget.rateUpdatedAtIso != null &&
+        widget.rateUpdatedAtIso!.isNotEmpty) {
       _cachedUpdatedAt = widget.rateUpdatedAtIso;
     }
 
@@ -143,7 +144,10 @@ class _LiveGoldRateStripState extends State<LiveGoldRateStrip>
                 serverIsStale: widget.serverIsStale,
                 purityLabel: widget.purityLabel,
                 clock: widget.clock,
-                isLoading: widget.isLoading && ratePaise == null && rateDisplay == null,
+                isLoading:
+                    widget.isLoading &&
+                    ratePaise == null &&
+                    rateDisplay == null,
                 isRefreshing: widget.isRefreshing,
                 isOffline: widget.isOffline,
                 showingCachedRate: _showingCachedRate,

@@ -14,10 +14,7 @@ void main() {
         ),
         isTrue,
       );
-      expect(
-        kycGateRequiredForCheckout(1_000_000, 'basic_verified'),
-        isFalse,
-      );
+      expect(kycGateRequiredForCheckout(1_000_000, 'basic_verified'), isFalse);
     });
   });
 

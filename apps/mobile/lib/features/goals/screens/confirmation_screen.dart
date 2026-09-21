@@ -35,7 +35,9 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
     final draft = ref.read(goalCreateDraftStoreProvider);
 
     try {
-      final response = await ref.read(goalsRepositoryProvider).create(
+      final response = await ref
+          .read(goalsRepositoryProvider)
+          .create(
             schemeType: draft.schemeType.apiValue,
             goalType: draft.goalType,
             name: draft.name.trim(),
@@ -119,9 +121,7 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
               const SizedBox(height: AppSpacing.sm),
               Text(
                 CustomerCopy.enrollmentHandoffHint,
-                style: AppTypography.uiBodySM.copyWith(
-                  color: AppColors.gold,
-                ),
+                style: AppTypography.uiBodySM.copyWith(color: AppColors.gold),
               ),
             ],
             if (draft.targetProductName != null)
@@ -131,8 +131,8 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
               label: _submitting
                   ? 'Creating…'
                   : (_requiresFirstPaymentHandoff(scheme)
-                      ? 'Create plan & continue'
-                      : 'Start my plan'),
+                        ? 'Create plan & continue'
+                        : 'Start my plan'),
               onTap: _submitting || !draft.isValid ? null : _submit,
             ),
           ],

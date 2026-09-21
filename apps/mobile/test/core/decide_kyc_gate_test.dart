@@ -82,10 +82,7 @@ void main() {
 
     test('returns null for small cash orders', () {
       expect(
-        checkoutKycReason(
-          orderTotalPaise: 100,
-          usesGoldBalance: false,
-        ),
+        checkoutKycReason(orderTotalPaise: 100, usesGoldBalance: false),
         isNull,
       );
     });

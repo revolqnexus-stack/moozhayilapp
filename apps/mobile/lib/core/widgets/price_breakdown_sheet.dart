@@ -60,9 +60,15 @@ class PriceBreakdownSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          _Row(label: CustomerCopy.priceLockPreviousTotal, value: oldTotalDisplay),
+          _Row(
+            label: CustomerCopy.priceLockPreviousTotal,
+            value: oldTotalDisplay,
+          ),
           const SizedBox(height: AppSpacing.xs),
-          _Row(label: CustomerCopy.priceLockUpdatedTotal, value: newTotalDisplay),
+          _Row(
+            label: CustomerCopy.priceLockUpdatedTotal,
+            value: newTotalDisplay,
+          ),
           const SizedBox(height: AppSpacing.lg),
           PrimaryButton(
             label: CustomerCopy.priceLockConfirmPay,

@@ -4,10 +4,13 @@ import 'server_clock.dart';
 /// How fresh a displayed gold rate is.
 enum GoldRateFreshness {
   fresh,
+
   /// Server says today's rate has not been republished (refresh cannot help).
   sourceStale,
+
   /// Refetch completed but server still reports the same stale rate.
   sourceUnchanged,
+
   /// Offline or local cache is older than expected (refresh may help).
   clientCacheStale,
   missingTimestamp,

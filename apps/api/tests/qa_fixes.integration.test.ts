@@ -431,21 +431,17 @@ describe("POST /v1/payments/capture-checkout", () => {
     await prisma.user.deleteMany({ where: { id: userId } });
   });
 
-  it("returns 400 for invalid signature in non-mock mode", async () => {
-    // In mock mode (NODE_ENV=test) any signature passes; just verify the
-    // endpoint exists and accepts the right shape.
+  it("captures checkout when Cashfree order is paid in mock mode", async () => {
     const res = await request(app)
       .post("/v1/payments/capture-checkout")
       .set("Authorization", `Bearer ${accessToken}`)
       .send({
         payment_session_id: paymentTxId,
-        razorpay_payment_id: "pay_test123",
-        razorpay_order_id: "order_mock_test_123",
-        razorpay_signature: "mock_sig",
+        cashfree_order_id: "order_mock_test_123",
       });
 
-    // In test/mock mode the signature verifier returns true, so we expect 200.
-    expect([200, 400]).toContain(res.status);
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
   });
 
   it("returns 422 for missing required fields", async () => {

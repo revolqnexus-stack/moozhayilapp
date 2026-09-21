@@ -7,7 +7,9 @@ import 'package:moozhayil/core/time/server_clock.dart';
 void main() {
   Widget wrap(Widget child) {
     return MaterialApp(
-      home: Scaffold(body: Padding(padding: const EdgeInsets.all(16), child: child)),
+      home: Scaffold(
+        body: Padding(padding: const EdgeInsets.all(16), child: child),
+      ),
     );
   }
 
@@ -37,7 +39,9 @@ void main() {
     expect(find.text(CustomerCopy.goldRateSourceStale), findsNothing);
   });
 
-  testWidgets('shows source stale copy when server marks stale', (tester) async {
+  testWidgets('shows source stale copy when server marks stale', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       wrap(
         GoldRateLabel(
@@ -72,7 +76,9 @@ void main() {
     expect(find.text(CustomerCopy.goldRateOffline), findsOneWidget);
   });
 
-  testWidgets('shows refreshing copy only while refresh in flight', (tester) async {
+  testWidgets('shows refreshing copy only while refresh in flight', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       wrap(
         GoldRateLabel(

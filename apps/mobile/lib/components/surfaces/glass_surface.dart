@@ -54,10 +54,16 @@ class GlassSurface extends StatelessWidget {
               color: AppColors.ivory.withValues(alpha: 0.92),
               border: Border(
                 top: showTopBorder
-                    ? BorderSide(color: AppColors.gold.withValues(alpha: 0.12), width: 0.5)
+                    ? BorderSide(
+                        color: AppColors.gold.withValues(alpha: 0.12),
+                        width: 0.5,
+                      )
                     : BorderSide.none,
                 bottom: showBottomBorder
-                    ? BorderSide(color: AppColors.gold.withValues(alpha: 0.12), width: 0.5)
+                    ? BorderSide(
+                        color: AppColors.gold.withValues(alpha: 0.12),
+                        width: 0.5,
+                      )
                     : BorderSide.none,
               ),
             ),
@@ -93,7 +99,7 @@ class LuxuryCard extends StatelessWidget {
         color: color ?? AppColors.ivory,
         borderRadius: BorderRadius.circular(2),
         border: Border.all(
-          color: AppColors.gold.withValues(alpha: 0.12), 
+          color: AppColors.gold.withValues(alpha: 0.12),
           width: 0.5,
         ),
         boxShadow: [

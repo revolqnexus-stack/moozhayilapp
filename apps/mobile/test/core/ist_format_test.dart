@@ -5,10 +5,7 @@ void main() {
   test('formats IST with fixed +05:30 regardless of device timezone', () {
     // 2026-03-21 05:12 UTC → 10:42 IST
     final utc = DateTime.utc(2026, 3, 21, 5, 12);
-    expect(
-      IstFormat.formatRateAsOf(utc),
-      'as of 10:42 AM, 21 Mar IST',
-    );
+    expect(IstFormat.formatRateAsOf(utc), 'as of 10:42 AM, 21 Mar IST');
   });
 
   test('toIstWallClock adds five hours thirty minutes', () {

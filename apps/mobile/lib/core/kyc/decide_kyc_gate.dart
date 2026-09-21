@@ -1,11 +1,6 @@
 import '../constants/kyc_thresholds.dart';
 
-enum KycGateReason {
-  goalCreation,
-  contribution,
-  redemption,
-  highValueOrder,
-}
+enum KycGateReason { goalCreation, contribution, redemption, highValueOrder }
 
 enum KycBlockState {
   notStarted,
@@ -44,10 +39,7 @@ KycGateDecision decideKycGate({
   int? contributionAmountPaise,
 }) {
   if (kycStatus == null) {
-    return KycGateBlock(
-      state: KycBlockState.statusUnknown,
-      reason: reason,
-    );
+    return KycGateBlock(state: KycBlockState.statusUnknown, reason: reason);
   }
 
   if (reason == KycGateReason.highValueOrder) {

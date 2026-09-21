@@ -83,10 +83,10 @@ class ProfileActions extends _$ProfileActions {
 
 bool kycGateRequiredForCheckout(int totalPaise, String kycStatus) {
   return checkoutKycReason(
-        orderTotalPaise: totalPaise,
-        usesGoldBalance: false,
-      ) !=
-      null &&
+            orderTotalPaise: totalPaise,
+            usesGoldBalance: false,
+          ) !=
+          null &&
       !isKycVerified(kycStatus);
 }
 

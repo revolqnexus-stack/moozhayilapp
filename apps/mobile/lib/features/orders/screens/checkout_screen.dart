@@ -86,7 +86,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
     }
   }
 
-  Future<void> _applyQuote(PriceQuote quote, {String? previousTotalDisplay}) async {
+  Future<void> _applyQuote(
+    PriceQuote quote, {
+    String? previousTotalDisplay,
+  }) async {
     final clock = ref.read(serverClockProvider);
     final serverTime = DateTime.tryParse(quote.serverTime)?.toUtc();
     if (serverTime != null) {
@@ -116,9 +119,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
     final previous = _quote?.totalDisplay;
     setState(() => _isRefreshingQuote = true);
     try {
-      final quote =
-          await ref.read(cartRepositoryProvider).createQuoteFromCart();
-      await _applyQuote(quote, previousTotalDisplay: forceRefresh ? previous : null);
+      final quote = await ref
+          .read(cartRepositoryProvider)
+          .createQuoteFromCart();
+      await _applyQuote(
+        quote,
+        previousTotalDisplay: forceRefresh ? previous : null,
+      );
     } finally {
       if (mounted) {
         setState(() => _isRefreshingQuote = false);
@@ -169,10 +176,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
 
     final quote = _quote!;
 
-    final usesGold =
-        _useGoldBalance && _paymentMethod != 'cod';
-    final kycGrossTotalPaise =
-        quote.kycGrossTotalPaise ?? quote.totalPaise;
+    final usesGold = _useGoldBalance && _paymentMethod != 'cod';
+    final kycGrossTotalPaise = quote.kycGrossTotalPaise ?? quote.totalPaise;
     final gateReason = checkoutKycReason(
       orderTotalPaise: kycGrossTotalPaise,
       usesGoldBalance: usesGold,
@@ -265,8 +270,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
     } catch (error) {
       if (!mounted) return;
 
-      final kycGrossTotalPaise =
-          cart.kycGrossTotalPaise ?? cart.subtotalPaise;
+      final kycGrossTotalPaise = cart.kycGrossTotalPaise ?? cart.subtotalPaise;
       final gateReason = checkoutKycReason(
         orderTotalPaise: kycGrossTotalPaise,
         usesGoldBalance: _useGoldBalance && _paymentMethod != 'cod',
@@ -428,8 +432,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                                       selected:
                                           _selectedAddressId == address.id,
                                       onTap: () => setState(
-                                        () =>
-                                            _selectedAddressId = address.id,
+                                        () => _selectedAddressId = address.id,
                                       ),
                                     ),
                                   ),
@@ -537,9 +540,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                                       ),
                                       Text(
                                         '-${IndianFormat.formatInrPaise(credit)}',
-                                        style: AppTypography.priceTabular.copyWith(
-                                          color: AppColors.gold,
-                                        ),
+                                        style: AppTypography.priceTabular
+                                            .copyWith(color: AppColors.gold),
                                       ),
                                     ],
                                   ),
@@ -567,11 +569,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                                     ),
                                     Text(
                                       IndianFormat.formatInrPaise(totalDue),
-                                      style: AppTypography.priceTabular.copyWith(
-                                        fontSize: AppTypography.priceMD.fontSize,
-                                        fontWeight: AppTypography.priceMD.fontWeight,
-                                        color: AppTypography.priceMD.color,
-                                      ),
+                                      style: AppTypography.priceTabular
+                                          .copyWith(
+                                            fontSize:
+                                                AppTypography.priceMD.fontSize,
+                                            fontWeight: AppTypography
+                                                .priceMD
+                                                .fontWeight,
+                                            color: AppTypography.priceMD.color,
+                                          ),
                                     ),
                                   ],
                                 );
@@ -614,7 +620,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                               _isRefreshingQuote ||
                               _selectedAddressId == null ||
                               addressList.isEmpty,
-                          onTap: _isPlacing ||
+                          onTap:
+                              _isPlacing ||
                                   payBlocked ||
                                   _isRefreshingQuote ||
                                   _selectedAddressId == null

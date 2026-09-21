@@ -35,8 +35,8 @@ class PaymentSetupScreen extends ConsumerWidget {
             GoalEnrollmentStepHeader(
               step: GoalEnrollmentStep.payment,
               title: 'Review your plan',
-              subtitle: draft.schemeType.isLumpSum ||
-                      draft.schemeType.isRateProtected
+              subtitle:
+                  draft.schemeType.isLumpSum || draft.schemeType.isRateProtected
                   ? 'Step 1 creates your plan. Step 2 collects your advance to secure your booking.'
                   : 'Enrollment creates your plan. Pay installments from Contribute when you are ready.',
             ),

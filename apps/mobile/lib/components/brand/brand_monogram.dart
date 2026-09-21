@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/constants/typography.dart';
+
 /// Moozhayil brand mark with two usage modes.
 ///
 /// • [BrandMonogram] (default) — crisp flat SVG monogram for navigation /

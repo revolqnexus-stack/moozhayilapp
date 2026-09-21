@@ -284,7 +284,9 @@ class _HeroSlide extends StatelessWidget {
                                       gradient: LinearGradient(
                                         colors: [
                                           AppColors.ivory,
-                                          AppColors.ivory.withValues(alpha: 0.95),
+                                          AppColors.ivory.withValues(
+                                            alpha: 0.95,
+                                          ),
                                         ],
                                       ),
                                       border: Border.all(
@@ -296,7 +298,8 @@ class _HeroSlide extends StatelessWidget {
                                       boxShadow: [
                                         BoxShadow(
                                           color: AppColors.ink.withValues(
-                                            alpha: 0.22),
+                                            alpha: 0.22,
+                                          ),
                                           blurRadius: 16,
                                           offset: const Offset(0, 6),
                                         ),

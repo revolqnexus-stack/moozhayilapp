@@ -79,7 +79,10 @@ class _ContributeScreenState extends ConsumerState<ContributeScreen> {
       context: context,
       ref: ref,
       reason: KycGateReason.contribution,
-      returnRoute: AppRoutes.goalContribute.replaceFirst(':goalId', widget.goalId),
+      returnRoute: AppRoutes.goalContribute.replaceFirst(
+        ':goalId',
+        widget.goalId,
+      ),
       contributionAmountPaise: _amountPaise,
     );
     if (!allowed || !mounted) return;
@@ -111,7 +114,9 @@ class _ContributeScreenState extends ConsumerState<ContributeScreen> {
           return;
         }
 
-        final captured = await ref.read(razorpayServiceProvider).pay(
+        final captured = await ref
+            .read(razorpayServiceProvider)
+            .pay(
               context: context,
               checkout: _razorpayCheckout,
               keyId: keyId,
@@ -144,8 +149,10 @@ class _ContributeScreenState extends ConsumerState<ContributeScreen> {
         ref: ref,
         error: error,
         reason: KycGateReason.contribution,
-        returnRoute:
-            AppRoutes.goalContribute.replaceFirst(':goalId', widget.goalId),
+        returnRoute: AppRoutes.goalContribute.replaceFirst(
+          ':goalId',
+          widget.goalId,
+        ),
       )) {
         return;
       }

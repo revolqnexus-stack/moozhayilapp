@@ -59,10 +59,7 @@ class _GoldRateTickerState extends State<GoldRateTicker>
   }
 
   double _parseRate(String rate) {
-    return double.tryParse(
-          rate.replaceAll(RegExp(r'[^0-9.]'), ''),
-        ) ??
-        0.0;
+    return double.tryParse(rate.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
   }
 
   @override
@@ -84,15 +81,16 @@ class _GoldRateTickerState extends State<GoldRateTicker>
                 heightFactor: 1.0,
                 child: Text(
                   widget.rate,
-                  style: widget.style ??
+                  style:
+                      widget.style ??
                       TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
                         color: _change == RateChange.increased
                             ? AppColors.gold
                             : _change == RateChange.decreased
-                                ? AppColors.textSecondary
-                                : AppColors.textPrimary,
+                            ? AppColors.textSecondary
+                            : AppColors.textPrimary,
                         letterSpacing: 0.02,
                       ),
                 ),
@@ -133,12 +131,10 @@ class _RateChangeIndicatorState extends State<_RateChangeIndicator>
       duration: const Duration(milliseconds: 600),
     );
 
-    _glow = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
-    );
+    _glow = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     _controller.forward();
   }
@@ -182,10 +178,7 @@ class _RateChangeIndicatorState extends State<_RateChangeIndicator>
 
 /// Subtle gold bell ring animation for rate alerts.
 class GoldBellAnimation extends StatefulWidget {
-  const GoldBellAnimation({
-    super.key,
-    this.size = 24,
-  });
+  const GoldBellAnimation({super.key, this.size = 24});
 
   final double size;
 
@@ -208,10 +201,7 @@ class _GoldBellAnimationState extends State<GoldBellAnimation>
     );
 
     _rotation = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 0.0, end: 0.15),
-        weight: 1,
-      ),
+      TweenSequenceItem(tween: Tween<double>(begin: 0.0, end: 0.15), weight: 1),
       TweenSequenceItem(
         tween: Tween<double>(begin: 0.15, end: -0.15),
         weight: 2,
@@ -220,28 +210,24 @@ class _GoldBellAnimationState extends State<GoldBellAnimation>
         tween: Tween<double>(begin: -0.15, end: 0.0),
         weight: 1,
       ),
-    ]).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.elasticOut,
-      ),
-    );
+    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
 
-    _scale = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 1.1),
-        weight: 1,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.1, end: 1.0),
-        weight: 1,
-      ),
-    ]).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.3, curve: Curves.easeOut),
-      ),
-    );
+    _scale =
+        TweenSequence<double>([
+          TweenSequenceItem(
+            tween: Tween<double>(begin: 1.0, end: 1.1),
+            weight: 1,
+          ),
+          TweenSequenceItem(
+            tween: Tween<double>(begin: 1.1, end: 1.0),
+            weight: 1,
+          ),
+        ]).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.0, 0.3, curve: Curves.easeOut),
+          ),
+        );
 
     _controller.forward();
   }

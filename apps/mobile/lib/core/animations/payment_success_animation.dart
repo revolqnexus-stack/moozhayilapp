@@ -5,11 +5,7 @@ import '../constants/colors.dart';
 /// Premium payment success animation: gold tick draws itself inside a circular seal.
 /// Used after successful payment (schemes, orders, manual contributions).
 class PaymentSuccessAnimation extends StatefulWidget {
-  const PaymentSuccessAnimation({
-    super.key,
-    this.size = 120,
-    this.onComplete,
-  });
+  const PaymentSuccessAnimation({super.key, this.size = 120, this.onComplete});
 
   final double size;
   final VoidCallback? onComplete;
@@ -86,13 +82,12 @@ class _PaymentSuccessAnimationState extends State<PaymentSuccessAnimation>
                   height: widget.size,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColors.gold,
-                      width: 3,
-                    ),
+                    border: Border.all(color: AppColors.gold, width: 3),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.gold.withValues(alpha: 0.3 * _shimmer.value),
+                        color: AppColors.gold.withValues(
+                          alpha: 0.3 * _shimmer.value,
+                        ),
                         blurRadius: 20,
                         spreadRadius: 4,
                       ),
@@ -142,10 +137,7 @@ class _TickPainter extends CustomPainter {
       // Draw first stroke (p1 → p2)
       final t = progress / 0.4;
       path.moveTo(p1.dx, p1.dy);
-      path.lineTo(
-        p1.dx + (p2.dx - p1.dx) * t,
-        p1.dy + (p2.dy - p1.dy) * t,
-      );
+      path.lineTo(p1.dx + (p2.dx - p1.dx) * t, p1.dy + (p2.dy - p1.dy) * t);
     } else {
       // First stroke complete
       path.moveTo(p1.dx, p1.dy);
@@ -153,10 +145,7 @@ class _TickPainter extends CustomPainter {
 
       // Draw second stroke (p2 → p3)
       final t = (progress - 0.4) / 0.6;
-      path.lineTo(
-        p2.dx + (p3.dx - p2.dx) * t,
-        p2.dy + (p3.dy - p2.dy) * t,
-      );
+      path.lineTo(p2.dx + (p3.dx - p2.dx) * t, p2.dy + (p3.dy - p2.dy) * t);
     }
 
     canvas.drawPath(path, paint);

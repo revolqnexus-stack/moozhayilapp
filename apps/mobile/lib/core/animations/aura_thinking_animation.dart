@@ -6,11 +6,7 @@ import '../constants/colors.dart';
 /// Premium Aura thinking animation: elegant flowing gold line (not bouncing dots).
 /// Shows while Aura is processing the user's request.
 class AuraThinkingAnimation extends StatefulWidget {
-  const AuraThinkingAnimation({
-    super.key,
-    this.width = 120,
-    this.height = 40,
-  });
+  const AuraThinkingAnimation({super.key, this.width = 120, this.height = 40});
 
   final double width;
   final double height;
@@ -48,9 +44,7 @@ class _AuraThinkingAnimationState extends State<AuraThinkingAnimation>
         builder: (context, child) {
           return CustomPaint(
             size: Size(widget.width, widget.height),
-            painter: _FlowingLinePainter(
-              progress: _controller.value,
-            ),
+            painter: _FlowingLinePainter(progress: _controller.value),
           );
         },
       ),
@@ -93,7 +87,8 @@ class _FlowingLinePainter extends CustomPainter {
 
     for (var x = 0.0; x <= size.width; x += 2.0) {
       final normalizedX = x / size.width;
-      final y = size.height / 2 +
+      final y =
+          size.height / 2 +
           amplitude *
               math.sin(
                 (normalizedX * waveCount * 2 * math.pi) +
@@ -112,10 +107,7 @@ class _FlowingLinePainter extends CustomPainter {
 
 /// Alternative: Aura typing indicator with ink-writing effect.
 class AuraTypingAnimation extends StatefulWidget {
-  const AuraTypingAnimation({
-    super.key,
-    this.dotSize = 8,
-  });
+  const AuraTypingAnimation({super.key, this.dotSize = 8});
 
   final double dotSize;
 
@@ -149,11 +141,9 @@ class _AuraTypingAnimationState extends State<AuraTypingAnimation>
       children: [
         _TypingDot(controller: _controller, delay: 0.0, size: widget.dotSize),
         SizedBox(width: widget.dotSize * 0.8),
-        _TypingDot(
-            controller: _controller, delay: 0.15, size: widget.dotSize),
+        _TypingDot(controller: _controller, delay: 0.15, size: widget.dotSize),
         SizedBox(width: widget.dotSize * 0.8),
-        _TypingDot(
-            controller: _controller, delay: 0.3, size: widget.dotSize),
+        _TypingDot(controller: _controller, delay: 0.3, size: widget.dotSize),
       ],
     );
   }
@@ -175,11 +165,7 @@ class _TypingDot extends StatelessWidget {
     final animation = Tween<double>(begin: 0.3, end: 1.0).animate(
       CurvedAnimation(
         parent: controller,
-        curve: Interval(
-          delay,
-          delay + 0.4,
-          curve: Curves.easeInOut,
-        ),
+        curve: Interval(delay, delay + 0.4, curve: Curves.easeInOut),
       ),
     );
 
@@ -196,7 +182,9 @@ class _TypingDot extends StatelessWidget {
               color: AppColors.gold,
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.gold.withValues(alpha: 0.3 * animation.value),
+                  color: AppColors.gold.withValues(
+                    alpha: 0.3 * animation.value,
+                  ),
                   blurRadius: 4 * animation.value,
                 ),
               ],

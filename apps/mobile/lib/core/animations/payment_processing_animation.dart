@@ -6,10 +6,7 @@ import 'dart:math' as math;
 /// Premium payment processing animation: rotating gold ring with subtle shimmer.
 /// Shows while payment is being verified by Razorpay.
 class PaymentProcessingAnimation extends StatefulWidget {
-  const PaymentProcessingAnimation({
-    super.key,
-    this.size = 80,
-  });
+  const PaymentProcessingAnimation({super.key, this.size = 80});
 
   final double size;
 
@@ -18,8 +15,7 @@ class PaymentProcessingAnimation extends StatefulWidget {
       _PaymentProcessingAnimationState();
 }
 
-class _PaymentProcessingAnimationState
-    extends State<PaymentProcessingAnimation>
+class _PaymentProcessingAnimationState extends State<PaymentProcessingAnimation>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
@@ -48,9 +44,7 @@ class _PaymentProcessingAnimationState
         builder: (context, child) {
           return CustomPaint(
             size: Size(widget.size, widget.size),
-            painter: _GoldRingPainter(
-              progress: _controller.value,
-            ),
+            painter: _GoldRingPainter(progress: _controller.value),
           );
         },
       ),
@@ -107,11 +101,7 @@ class _GoldRingPainter extends CustomPainter {
     final shimmerX = center.dx + radius * math.cos(shimmerAngle);
     final shimmerY = center.dy + radius * math.sin(shimmerAngle);
 
-    canvas.drawCircle(
-      Offset(shimmerX, shimmerY),
-      4,
-      shimmerPaint,
-    );
+    canvas.drawCircle(Offset(shimmerX, shimmerY), 4, shimmerPaint);
   }
 
   @override

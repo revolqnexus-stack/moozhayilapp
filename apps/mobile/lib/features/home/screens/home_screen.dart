@@ -275,7 +275,7 @@ class _HomeShowroomCard extends StatelessWidget {
             EditorialImage(
               url: SampleImagery.editorial('showroom-pala', width: 1200),
             ),
-              DecoratedBox(
+            DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.centerLeft,

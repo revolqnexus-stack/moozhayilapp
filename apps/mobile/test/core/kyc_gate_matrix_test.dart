@@ -4,12 +4,7 @@ import 'package:moozhayil/core/kyc/decide_kyc_gate.dart';
 
 void main() {
   group('KYC gate matrix (pure decideKycGate)', () {
-    const statuses = [
-      'not_started',
-      'in_review',
-      'rejected',
-      'basic_verified',
-    ];
+    const statuses = ['not_started', 'in_review', 'rejected', 'basic_verified'];
 
     for (final status in statuses) {
       test('contribution / $status', () {
@@ -30,10 +25,7 @@ void main() {
           kycStatus: status,
           reason: KycGateReason.redemption,
         );
-        expect(
-          d is KycGateAllow,
-          status == 'basic_verified',
-        );
+        expect(d is KycGateAllow, status == 'basic_verified');
       });
 
       test('goalCreation / $status', () {
@@ -41,10 +33,7 @@ void main() {
           kycStatus: status,
           reason: KycGateReason.goalCreation,
         );
-        expect(
-          d is KycGateAllow,
-          status == 'basic_verified',
-        );
+        expect(d is KycGateAllow, status == 'basic_verified');
       });
     }
 
@@ -72,10 +61,7 @@ void main() {
 
     test('unknown status fails closed', () {
       expect(
-        decideKycGate(
-          kycStatus: null,
-          reason: KycGateReason.contribution,
-        ),
+        decideKycGate(kycStatus: null, reason: KycGateReason.contribution),
         isA<KycGateBlock>(),
       );
     });

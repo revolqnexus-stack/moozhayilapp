@@ -29,9 +29,7 @@ class MoozhayilApp extends ConsumerWidget {
       routerConfig: createAppRouter(authState: authState),
       theme: _buildTheme(),
       builder: (context, child) {
-        return ServerClockLifecycle(
-          child: child ?? const SizedBox.shrink(),
-        );
+        return ServerClockLifecycle(child: child ?? const SizedBox.shrink());
       },
     );
   }
@@ -132,4 +130,3 @@ class _FadePageTransitionsBuilder extends PageTransitionsBuilder {
     );
   }
 }
-

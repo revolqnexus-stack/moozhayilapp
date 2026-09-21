@@ -53,8 +53,9 @@ class _CartPriceLockBannerState extends ConsumerState<CartPriceLockBanner> {
 
     setState(() => _isRefreshing = true);
     try {
-      final quote =
-          await ref.read(cartRepositoryProvider).createQuoteFromCart();
+      final quote = await ref
+          .read(cartRepositoryProvider)
+          .createQuoteFromCart();
       if (mounted) {
         _applyQuote(quote);
       }

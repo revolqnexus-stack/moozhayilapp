@@ -36,7 +36,7 @@ class AppAnimations {
   // ── Premium curves ─────────────────────────────────────────────────────────
   /// Standard ease for most transitions — smooth, precise
   static const standard = Curves.easeInOutCubic;
-  
+
   /// Default curve used throughout the app
   static const curveDefault = Curves.easeInOutCubic;
 

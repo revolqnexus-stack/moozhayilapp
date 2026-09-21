@@ -59,9 +59,14 @@ export async function processPaymentWebhookEvent(eventId: string): Promise<void>
       const paymentId = payload.data?.payment?.cf_payment_id?.toString();
 
       if (orderId) {
+        const paymentAmount = payload.data?.payment?.payment_amount;
         await applyPaymentCaptureByProviderOrder({
           providerOrderId: orderId,
           providerPaymentId: paymentId,
+          providerAmountPaise:
+            paymentAmount != null
+              ? Math.round(Number(paymentAmount) * 100)
+              : undefined,
           finalStatus: "captured",
         });
       }

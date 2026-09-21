@@ -139,6 +139,7 @@ async function completePaymentSideEffects(
 export async function applyPaymentCaptureByProviderOrder(input: {
   providerOrderId: string;
   providerPaymentId?: string;
+  providerAmountPaise?: number;
   finalStatus?: "captured" | "reconciled";
 }): Promise<void> {
   const paymentTx = await prisma.paymentTransaction.findFirst({
@@ -146,6 +147,13 @@ export async function applyPaymentCaptureByProviderOrder(input: {
   });
 
   if (!paymentTx) {
+    return;
+  }
+
+  if (
+    input.providerAmountPaise != null &&
+    input.providerAmountPaise !== paymentTx.amountPaise
+  ) {
     return;
   }
 

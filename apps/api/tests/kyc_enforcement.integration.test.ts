@@ -15,7 +15,21 @@ import { createApp } from "../src/app";
 import { prisma } from "../src/db/prisma";
 import { clearRateLimitBucketsForTests } from "../src/middleware/rate_limit.middleware";
 import { paymentProviderClient } from "../src/modules/payments/payment_provider.client";
+async function createQuote(
+  app: ReturnType<typeof createApp>,
+  accessToken: string,
+  productId: string,
+) {
+  const response = await request(app)
+    .post("/v1/quotes")
+    .set("Authorization", `Bearer ${accessToken}`)
+    .send({ items: [{ product_id: productId, quantity: 1 }] });
+  expect(response.status).toBe(201);
+  return response.body.quote_id as string;
+}
+
 async function cleanTables() {
+  await prisma.priceQuote.deleteMany();
   await prisma.webhookEvent.deleteMany();
   await prisma.idempotencyKey.deleteMany();
   await prisma.inventoryReservation.deleteMany();
@@ -195,11 +209,14 @@ describe("KYC enforcement (route-level)", () => {
           },
         });
 
+        const quoteId = await createQuote(app, auth.accessToken, product.id);
+
         const response = await request(app)
           .post("/v1/orders")
           .set("Authorization", `Bearer ${auth.accessToken}`)
           .set("Idempotency-Key", `kyc-block-${status}`)
           .send({
+            quote_id: quoteId,
             items: [{ product_id: product.id, quantity: 1 }],
             delivery_address_id: address.id,
             payment_method: "gold_balance",
@@ -254,11 +271,14 @@ describe("KYC enforcement (route-level)", () => {
         },
       });
 
+      const quoteId = await createQuote(app, auth.accessToken, product.id);
+
       const response = await request(app)
         .post("/v1/orders")
         .set("Authorization", `Bearer ${auth.accessToken}`)
         .set("Idempotency-Key", "kyc-allow-gold")
         .send({
+          quote_id: quoteId,
           items: [{ product_id: product.id, quantity: 1 }],
           delivery_address_id: address.id,
           payment_method: "gold_balance",
@@ -328,11 +348,14 @@ describe("KYC enforcement (route-level)", () => {
         },
       });
 
+      const quoteId = await createQuote(app, auth.accessToken, heavy.id);
+
       const response = await request(app)
         .post("/v1/orders")
         .set("Authorization", `Bearer ${auth.accessToken}`)
         .set("Idempotency-Key", "kyc-high-value")
         .send({
+          quote_id: quoteId,
           items: [{ product_id: heavy.id, quantity: 1 }],
           delivery_address_id: address.id,
           payment_method: "upi",

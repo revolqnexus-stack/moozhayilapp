@@ -6,6 +6,7 @@ export const orderItemSchema = z.object({
 });
 
 export const createOrderSchema = z.object({
+  quote_id: z.string().uuid(),
   items: z.array(orderItemSchema).min(1).max(10),
   delivery_address_id: z.string().uuid(),
   payment_method: z.enum([

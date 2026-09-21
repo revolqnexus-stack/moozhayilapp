@@ -10,28 +10,23 @@ import {
   CANCELLABLE_ORDER_STATUSES,
   INVENTORY_RESERVATION_TTL_MINUTES,
 } from "../../config/orders.constants";
-import { GOAL_ACCUMULATION_PURITY } from "../../config/goals.constants";
 import { withIdempotency } from "../../utils/idempotency";
 import {
   calculateGramsFromPaise,
   calculateValuePaiseFromGrams,
 } from "../../utils/gold";
 import { assertKycGate, checkCheckoutGate } from "../../utils/kyc_gates";
-import { goldRatesService } from "../gold_rates/gold_rates.service";
 import { goldLedgerService } from "../gold_ledger/gold_ledger.service";
 import { goldBalanceService } from "../gold_ledger/gold_balance.service";
-import { calculateProductPrice } from "../products/price";
-import {
-  calculateProductPriceWithAuraMcWaiver,
-  findActiveAuraMcWaiverGoal,
-  type AuraProductPriceDto,
-} from "../goals/aura.mc_waiver.service";
+import { type AuraProductPriceDto } from "../goals/aura.mc_waiver.service";
 import {
   mapProductToDto,
   productInclude,
   type ProductWithRelations,
 } from "../products/product.mapper";
 import { paymentProviderClient } from "../payments/payment_provider.client";
+import { quoteService } from "../quotes/quote.service";
+import type { ResolvedQuote } from "../quotes/quote.types";
 import { generateOrderNumber, mapOrderToDto } from "./order.mapper";
 import { formatPaise } from "../../utils/money";
 import type { CreateOrderInput, ListOrdersQuery } from "./orders.schema";
@@ -41,10 +36,7 @@ import {
   notifyOrderDelivered,
   notifyOrderShipped,
 } from "../notifications/notifications.triggers";
-import {
-  assertAvailableStock,
-  getAvailableStock,
-} from "../inventory/inventory.service";
+import { assertAvailableStock } from "../inventory/inventory.service";
 
 interface PricedLine {
   product: ProductWithRelations;
@@ -143,30 +135,27 @@ export class OrdersService {
       );
     }
 
-    const usesGold =
-      input.payment_method === "gold_balance" ||
-      Boolean(input.use_gold_balance_grams);
-
-    const auraMcWaiverGoal =
-      usesGold ? await findActiveAuraMcWaiverGoal(userId) : null;
-
-    const lines = await this.priceLines(
-      input.items,
-      auraMcWaiverGoal !== null,
-    );
-    const totals = this.aggregateTotals(lines);
-
     const usesGoldIntent =
       input.payment_method === "gold_balance" ||
       Boolean(input.use_gold_balance_grams);
+
+    const resolved = await quoteService.resolveForOrder(
+      userId,
+      input.quote_id,
+      input.items,
+    );
+    const totals = resolved.totals;
+    const lines = await this.linesFromResolvedQuote(resolved);
+    const auraMcWaiverGoal = resolved.auraPlanGoalId
+      ? { id: resolved.auraPlanGoalId }
+      : null;
+
     assertKycGate(
       checkCheckoutGate(kycStatus, totals.totalPaise, usesGoldIntent),
       kycStatus,
     );
 
-    const rate = await goldRatesService.currentRateForPurity(
-      GOAL_ACCUMULATION_PURITY,
-    );
+    const rate = { ratePerGramPaise: resolved.goldRateAtQuotePaise };
 
     if (input.payment_method === "cod") {
       if (totals.totalPaise > COD_MAX_ORDER_PAISE) {
@@ -176,7 +165,7 @@ export class OrdersService {
           "Cash on delivery is only available for orders below ₹25,000",
         );
       }
-      if (usesGold) {
+      if (usesGoldIntent) {
         throw new AppError(
           422,
           "UNPROCESSABLE",
@@ -286,8 +275,11 @@ export class OrdersService {
           paymentMethod: input.payment_method,
           goldBalanceUsedGrams: goldGramsToUse.toFixed(4),
           goldRateAtOrderPaise: rate.ratePerGramPaise,
+          priceQuoteId: resolved.quoteId,
         },
       });
+
+      await quoteService.markConsumed(resolved.quoteId, order.id, tx);
 
       for (const line of lines) {
         await tx.orderItem.create({
@@ -478,16 +470,13 @@ export class OrdersService {
     };
   }
 
-  private async priceLines(
-    items: CreateOrderInput["items"],
-    applyAuraMcWaiver: boolean,
-  ): Promise<PricedLine[]> {
+  private async linesFromResolvedQuote(resolved: ResolvedQuote): Promise<PricedLine[]> {
     const lines: PricedLine[] = [];
 
-    for (const item of items) {
+    for (const snapshot of resolved.lines) {
       const product = await prisma.product.findFirst({
         where: {
-          id: item.product_id,
+          id: snapshot.product_id,
           isPublished: true,
           deletedAt: null,
         },
@@ -498,78 +487,17 @@ export class OrdersService {
         throw new AppError(404, "NOT_FOUND", "Product does not exist");
       }
 
-      const available = await getAvailableStock(
-        product.id,
-        product.stockQuantity,
-      );
-
-      if (available < item.quantity) {
-        throw new AppError(400, "OUT_OF_STOCK", "Product is out of stock");
-      }
-
-      const currentRate = await goldRatesService.currentRateForPurity(
-        product.purity,
-      );
-      const priceInput = {
-        weightGrams: product.weightGrams,
-        ratePerGramPaise: currentRate.ratePerGramPaise,
-        makingChargePct: product.makingChargePct,
-        wastagePct: product.wastagePct,
-        stoneValuePaise: product.stoneValuePaise,
-        gstPct: product.gstPct,
-        rateUpdatedAt: currentRate.effectiveFrom,
-      };
-      const price = applyAuraMcWaiver
-        ? calculateProductPriceWithAuraMcWaiver(priceInput)
-        : {
-            ...calculateProductPrice(priceInput),
-            mc_waiver_paise: 0,
-            mc_waiver_display: formatPaise(0),
-            mc_waiver_applied: false,
-          };
       const productDto = await mapProductToDto(product);
 
       lines.push({
         product,
-        quantity: item.quantity,
-        price,
+        quantity: snapshot.quantity,
+        price: snapshot.price,
         productDto,
       });
     }
 
     return lines;
-  }
-
-  private aggregateTotals(lines: PricedLine[]) {
-    return lines.reduce(
-      (totals, line) => ({
-        totalPaise:
-          totals.totalPaise + line.price.total_paise * line.quantity,
-        goldValuePaise:
-          totals.goldValuePaise + line.price.gold_value_paise * line.quantity,
-        makingChargesPaise:
-          totals.makingChargesPaise +
-          line.price.making_charge_paise * line.quantity,
-        wastagePaise:
-          totals.wastagePaise + line.price.wastage_paise * line.quantity,
-        stoneValuePaise:
-          totals.stoneValuePaise +
-          (line.product.stoneValuePaise ?? 0) * line.quantity,
-        gstPaise: totals.gstPaise + line.price.gst_paise * line.quantity,
-        makingChargeWaiverPaise:
-          totals.makingChargeWaiverPaise +
-          line.price.mc_waiver_paise * line.quantity,
-      }),
-      {
-        totalPaise: 0,
-        goldValuePaise: 0,
-        makingChargesPaise: 0,
-        wastagePaise: 0,
-        stoneValuePaise: 0,
-        gstPaise: 0,
-        makingChargeWaiverPaise: 0,
-      },
-    );
   }
 
   async updateFulfillmentStatus(

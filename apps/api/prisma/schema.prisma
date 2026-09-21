@@ -311,6 +311,7 @@ model User {
   otpSessions     OtpSession[]
   dreamVaultItems     DreamVaultItem[]
   cartItems           CartItem[]
+  priceQuotes         PriceQuote[]
   addresses           Address[]
   kycDocument         KycDocument?
   kycAadhaarSessions  KycAadhaarSession[]
@@ -629,6 +630,40 @@ model CartItem {
   @@index([userId], map: "idx_cart_items_user_id")
   @@index([productId], map: "idx_cart_items_product_id")
   @@map("cart_items")
+}
+
+enum PriceQuoteStatus {
+  active
+  consumed
+  superseded
+  expired
+}
+
+model PriceQuote {
+  id                      String           @id @default(uuid()) @db.Uuid
+  userId                  String           @map("user_id") @db.Uuid
+  status                  PriceQuoteStatus @default(active)
+  validUntil              DateTime         @map("valid_until") @db.Timestamptz(6)
+  serverTimeAtIssue       DateTime         @map("server_time_at_issue") @db.Timestamptz(6)
+  totalPaise              Int              @map("total_paise")
+  goldValuePaise          Int              @map("gold_value_paise")
+  makingChargesPaise      Int              @map("making_charges_paise")
+  wastagePaise            Int              @default(0) @map("wastage_paise")
+  stoneValuePaise         Int              @default(0) @map("stone_value_paise")
+  gstPaise                Int              @map("gst_paise")
+  makingChargeWaiverPaise Int              @default(0) @map("making_charge_waiver_paise")
+  auraPlanGoalId          String?          @map("aura_plan_goal_id") @db.Uuid
+  goldRateAtQuotePaise    Int              @map("gold_rate_at_quote_paise")
+  linesJson               Json             @map("lines_json")
+  consumedOrderId         String?          @map("consumed_order_id") @db.Uuid
+  createdAt               DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt               DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status], map: "idx_price_quotes_user_id_status")
+  @@index([validUntil], map: "idx_price_quotes_valid_until")
+  @@map("price_quotes")
 }
 
 model Address {
@@ -979,6 +1014,7 @@ model Order {
   goldBalanceUsedGrams    Decimal            @default(0) @map("gold_balance_used_grams") @db.Decimal(10, 4)
   goldRateAtOrderPaise    Int                @map("gold_rate_at_order_paise")
   paymentTransactionId    String?            @map("payment_transaction_id") @db.Uuid
+  priceQuoteId            String?            @map("price_quote_id") @db.Uuid
   notes                   String?
   shippedAt               DateTime?          @map("shipped_at") @db.Timestamptz(6)
   deliveredAt             DateTime?          @map("delivered_at") @db.Timestamptz(6)

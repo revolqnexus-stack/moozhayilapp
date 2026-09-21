@@ -1,4 +1,5 @@
 import Decimal from "decimal.js";
+import { PRICE_VALIDITY_MS } from "../../config/price.constants";
 import { formatPaise } from "../../utils/money";
 
 export interface ProductPriceInput {
@@ -46,7 +47,7 @@ export function calculateProductPrice(input: ProductPriceInput): ProductPriceDto
     goldValuePaise + makingChargePaise + wastagePaise + input.stoneValuePaise;
   const gstPaise = toPaise(new Decimal(basePricePaise).mul(input.gstPct).div(100));
   const totalPaise = basePricePaise + gstPaise;
-  const priceValidUntil = new Date(generatedAt.getTime() + 15 * 60 * 1000);
+  const priceValidUntil = new Date(generatedAt.getTime() + PRICE_VALIDITY_MS);
 
   return {
     total_paise: totalPaise,

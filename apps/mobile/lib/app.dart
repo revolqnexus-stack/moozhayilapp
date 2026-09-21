@@ -29,10 +29,6 @@ class MoozhayilApp extends ConsumerWidget {
       routerConfig: createAppRouter(authState: authState),
       theme: _buildTheme(),
       builder: (context, child) {
-        // Global error boundary — catches widget-level errors in release builds.
-        ErrorWidget.builder = (FlutterErrorDetails details) {
-          return _AppErrorWidget(details: details);
-        };
         return ServerClockLifecycle(
           child: child ?? const SizedBox.shrink(),
         );
@@ -137,52 +133,3 @@ class _FadePageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
-/// Graceful fallback shown when a widget subtree throws an unhandled error
-/// in release builds (replaces Flutter's red crash screen).
-class _AppErrorWidget extends StatelessWidget {
-  const _AppErrorWidget({required this.details});
-
-  final FlutterErrorDetails details;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.paper,
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline_rounded,
-                size: 48,
-                color: AppColors.gold,
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Something went wrong',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'We\'ve noted the issue. Please restart the app and try again.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                  height: 1.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

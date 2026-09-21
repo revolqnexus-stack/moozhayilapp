@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:moozhayil/app.dart';
+import 'package:moozhayil/core/widgets/app_error_widget.dart';
 
 /// Top-level FCM background message handler.
 /// Must be a top-level function (not a class method).
@@ -29,6 +30,10 @@ Future<void> main() async {
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   await Hive.initFlutter();
+
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return AppErrorWidget(details: details);
+  };
 
   runApp(const ProviderScope(child: MoozhayilApp()));
 }

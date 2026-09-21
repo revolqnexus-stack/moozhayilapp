@@ -33,6 +33,18 @@ abstract final class AppRoutes {
   static const goals = '/goals';
   static const goalDetail = '/goals/:goalId';
   static const goalContribute = '/goals/:goalId/contribute';
+
+  static String goalContributeFirstPayment({
+    required String goalId,
+    required int amountPaise,
+  }) =>
+      Uri(
+        path: '/goals/$goalId/contribute',
+        queryParameters: {
+          'firstPayment': '1',
+          'amountPaise': '$amountPaise',
+        },
+      ).toString();
   static const goalsCreate = '/goals/create';
   static const goalsCreateMoment = '/goals/create/moment';
   static const goalsCreatePiece = '/goals/create/piece';

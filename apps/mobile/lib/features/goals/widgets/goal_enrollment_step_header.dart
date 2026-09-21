@@ -6,7 +6,7 @@ import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 import '../providers/goal_create_provider.dart';
 
-enum GoalEnrollmentStep { moment, piece, amount, payment }
+enum GoalEnrollmentStep { moment, piece, amount, payment, firstPayment }
 
 class GoalEnrollmentStepHeader extends StatelessWidget {
   const GoalEnrollmentStepHeader({
@@ -20,14 +20,18 @@ class GoalEnrollmentStepHeader extends StatelessWidget {
   final String title;
   final String? subtitle;
 
-  static const _totalSteps = 4;
+  static int _totalStepsFor(GoalEnrollmentStep step) =>
+      step == GoalEnrollmentStep.firstPayment ? 2 : 4;
 
   int get _stepIndex => switch (step) {
     GoalEnrollmentStep.moment => 1,
     GoalEnrollmentStep.piece => 2,
     GoalEnrollmentStep.amount => 3,
     GoalEnrollmentStep.payment => 4,
+    GoalEnrollmentStep.firstPayment => 2,
   };
+
+  int get _totalSteps => _totalStepsFor(step);
 
   @override
   Widget build(BuildContext context) {
@@ -87,9 +91,9 @@ String goalPaymentSummary({
     GoldenWishSchemeType.aura =>
       '$amount/month · $durationMonths installments · pay from Contribute after enroll',
     GoldenWishSchemeType.crest =>
-      '$amount advance · pay from Contribute after enroll to lock weight',
+      '$amount advance · next step secures your locked gold weight',
     GoldenWishSchemeType.dhanam =>
-      '$amount booking · pay from Contribute after enroll',
+      '$amount booking · next step secures your protected rate',
     GoldenWishSchemeType.goldNidhi =>
       'From $amount per deposit · pay anytime from Contribute',
   };

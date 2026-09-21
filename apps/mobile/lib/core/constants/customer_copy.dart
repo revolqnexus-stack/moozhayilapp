@@ -129,6 +129,17 @@ abstract final class CustomerCopy {
   static const priceLockUpdatedTotal = 'Updated total';
   static const priceLockConfirmPay = 'Confirm and pay';
 
+  static const enrollmentHandoffHint =
+      'Next: pay your advance to secure your booking (Step 2 of 2).';
+  static const firstPaymentSecureBooking = 'Secure your booking';
+  static const firstPaymentSecureRate = 'Secure your rate protection';
+  static const firstPaymentBody =
+      'Your plan is created. Pay your advance now to lock today\u2019s published rate.';
+  static const firstPaymentLockedAmount =
+      'This amount was set during enrollment and cannot be changed here.';
+  static const firstPaymentSuccessSubtitle =
+      'Your advance is received. Your booking is now secured.';
+
   static const planCompletePrefix = 'Plan complete';
 
   /// Summary line suffix, e.g. "3 active plans".

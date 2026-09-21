@@ -67,7 +67,7 @@ const goldenWishPlans = <GoldenWishPlan>[
         'today and your gold weight is locked at today\u2019s published rate.',
     highlights: [
       'Single advance from ₹500',
-      'Gold weight locked at enrollment',
+      'Gold weight locked on payment',
       'Ideal for planned weddings and occasions',
     ],
     enrollmentAvailable: true,

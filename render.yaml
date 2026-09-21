@@ -11,35 +11,35 @@ services:
     healthCheckPath: /health
     
     envVars:
+      # Staging preview — mock providers + fixed OTP (123456). Do NOT use
+      # NODE_ENV=production here; production requires live SMS and refuses mock.
       - key: NODE_ENV
-        value: production
+        value: staging
       - key: PORT
         value: 3080
       - key: PAYMENT_PROVIDER
         value: razorpay
       - key: PAYMENT_PROVIDER_MODE
-        value: live
+        value: mock
       - key: STORAGE_BACKEND
         value: s3
       - key: TRUST_PROXY
         value: true
+      # Mock providers until MSG91 / KYC / Firebase live keys are ready.
       - key: SMS_PROVIDER_MODE
-        value: live
+        value: mock
       - key: KYC_PROVIDER_MODE
-        value: live
+        value: mock
       - key: FIREBASE_MODE
-        value: live
+        value: mock
       
-      # Connect to managed services (add in Render dashboard)
+      # External managed services — set in Render dashboard (not Render Postgres/Redis):
+      # DATABASE_URL = Neon PostgreSQL pooler (?sslmode=require)
+      # REDIS_URL    = Upstash Redis
       - key: DATABASE_URL
-        fromDatabase:
-          name: moozhayil-db
-          property: connectionString
+        sync: false
       - key: REDIS_URL
-        fromService:
-          name: moozhayil-redis
-          type: redis
-          property: connectionString
+        sync: false
       
       # Secrets (add manually in Render dashboard)
       - key: JWT_SECRET
@@ -105,14 +105,5 @@ services:
       # Share same env vars as API
       - fromGroup: moozhayil-api
 
-# Managed PostgreSQL Database
-databases:
-  - name: moozhayil-db
-    databaseName: moozhayil
-    plan: starter  # $7/month
-    region: singapore
-    ipAllowList: []  # Allow all (or restrict to your IPs)
-
-# Managed Redis (for sessions/cache/jobs)
-# Note: Render doesn't have managed Redis, use Upstash instead (free)
-# Add REDIS_URL manually from Upstash
+# Database: Neon PostgreSQL (external) — set DATABASE_URL in dashboard
+# Cache/queue: Upstash Redis (external) — set REDIS_URL in dashboard

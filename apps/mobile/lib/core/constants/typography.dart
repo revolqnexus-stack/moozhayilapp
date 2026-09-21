@@ -37,6 +37,7 @@ abstract final class AppTypography {
       height: height,
       letterSpacing: letterSpacing ?? (fontSize * 0.04),
       color: color,
+      decoration: TextDecoration.none,
     );
   }
 
@@ -53,6 +54,7 @@ abstract final class AppTypography {
       height: height,
       letterSpacing: letterSpacing,
       color: color,
+      decoration: TextDecoration.none,
     );
   }
 
@@ -290,4 +292,3 @@ abstract final class AppTypography {
     color: AppColors.textPrimary,
   ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
 }
-

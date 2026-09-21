@@ -146,9 +146,7 @@ class _ButtonBodyState extends State<_ButtonBody>
 
   @override
   Widget build(BuildContext context) {
-    final bg = _pressed
-        ? AppColors.brandBurgundy
-        : widget.backgroundColor;
+    final bg = _pressed ? AppColors.brandBurgundy : widget.backgroundColor;
 
     return Semantics(
       button: true,
@@ -162,8 +160,10 @@ class _ButtonBodyState extends State<_ButtonBody>
             color: bg,
             borderRadius: BorderRadius.circular(AppRadius.button),
             border: Border.all(
-              color: AppColors.gold.withValues(alpha: 0.35),
-              width: 0.5,
+              color: widget.onTap != null
+                  ? AppColors.gold.withValues(alpha: 0.35)
+                  : AppColors.borderStrong,
+              width: widget.onTap != null ? 0.5 : 1,
             ),
             boxShadow: widget.onTap != null
                 ? [

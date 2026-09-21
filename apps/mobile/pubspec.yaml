@@ -44,12 +44,9 @@ flutter:
   assets:
     - assets/images/moozhayil_logo.png
     - assets/images/moozhayil_monogram_flat.svg
+    - assets/google_fonts/
     # Brand photography — drop files here as they become available:
     # assets/images/products/
     # assets/images/brands/
     # assets/images/hero/
     # assets/images/showroom/
-  fonts:
-    - family: Cormorant Garamond
-      fonts:
-        - asset: assets/fonts/CormorantGaramond.ttf

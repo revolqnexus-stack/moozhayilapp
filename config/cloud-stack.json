@@ -1,0 +1,17 @@
+{
+  "renderApiBase": "https://moozhayilapp-fyz6.onrender.com",
+  "renderApiV1": "https://moozhayilapp-fyz6.onrender.com/v1",
+  "healthUrl": "https://moozhayilapp-fyz6.onrender.com/health",
+  "adminDevPort": 5180,
+  "localApiPort": 3080,
+  "services": {
+    "database": "Neon PostgreSQL (us-east-2)",
+    "cache": "Upstash Redis",
+    "hosting": "Render.com (Singapore)"
+  },
+  "notes": {
+    "emulator": "Android emulator uses Render API in debug mode (see apps/mobile/lib/core/config/api_config.dart).",
+    "localApi": "Run scripts/sync-cloud-env.ps1 then npm run dev:cloud in apps/api to use Neon + Upstash locally.",
+    "secrets": "DATABASE_URL and REDIS_URL live in PRODUCTION_ENV.txt (never commit real values elsewhere)."
+  }
+}

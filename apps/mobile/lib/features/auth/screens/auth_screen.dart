@@ -27,63 +27,82 @@ class AuthScreen extends ConsumerWidget {
     final state = auth.value ?? const AuthState();
     final phoneReady = isValidIndianPhone(normalizeIndianPhone(state.phone));
 
-    return ColoredBox(
-      color: AppColors.paper,
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.screenPaddingLG),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Spacer(),
-              Text('Log in', style: AppTypography.displayItalic(36)),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'Elegance meets mastery.\nWelcome to Moozhayil.',
-                style: AppTypography.uiBodyMD.copyWith(
-                  color: AppColors.textMuted,
-                  height: 1.5,
+    return Scaffold(
+      backgroundColor: AppColors.paper,
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.screenPaddingLG),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Spacer(),
+                    Text(
+                      'Log in',
+                      style: AppTypography.displayItalic(
+                        36,
+                      ).copyWith(decoration: TextDecoration.none),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      'Elegance meets mastery.\nWelcome to Moozhayil.',
+                      style: AppTypography.uiBodyMD.copyWith(
+                        color: AppColors.textMuted,
+                        height: 1.5,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    AppTextInput(
+                      label: 'Mobile number',
+                      placeholder: '9876543210',
+                      value: state.phone,
+                      autofocus: true,
+                      keyboardType: TextInputType.phone,
+                      textInputAction: TextInputAction.done,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ],
+                      onChanged: ref
+                          .read(authControllerProvider.notifier)
+                          .setPhone,
+                      onSubmit: (_) => _sendOtp(context, ref),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      'We\u2019ll send a 6-digit code to +91 ${state.phone.isEmpty ? 'XXXXXXXXXX' : state.phone}.',
+                      style: AppTypography.uiCaption.copyWith(
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                    if (auth.hasError) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      ErrorState(
+                        headline: _sendErrorHeadline(auth.error),
+                        body: CustomerErrorCopy.message(auth.error),
+                        onRetry: () => _sendOtp(context, ref),
+                      ),
+                    ],
+                    const SizedBox(height: AppSpacing.xl),
+                    PrimaryButton(
+                      label: 'Send OTP',
+                      isFullWidth: true,
+                      isLoading: auth.isLoading,
+                      isDisabled: !phoneReady,
+                      onTap: () => _sendOtp(context, ref),
+                    ),
+                    const Spacer(),
+                  ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xl),
-              AppTextInput(
-                label: 'Mobile number',
-                placeholder: '9876543210',
-                value: state.phone,
-                autofocus: true,
-                keyboardType: TextInputType.phone,
-                textInputAction: TextInputAction.done,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(10),
-                ],
-                onChanged: ref.read(authControllerProvider.notifier).setPhone,
-                onSubmit: (_) => _sendOtp(context, ref),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                'We\u2019ll send a 6-digit code to +91 ${state.phone.isEmpty ? 'XXXXXXXXXX' : state.phone}.',
-                style: AppTypography.uiCaption,
-              ),
-              if (auth.hasError) ...[
-                const SizedBox(height: AppSpacing.md),
-                ErrorState(
-                  headline: _sendErrorHeadline(auth.error),
-                  body: CustomerErrorCopy.message(auth.error),
-                  onRetry: () => _sendOtp(context, ref),
-                ),
-              ],
-              const SizedBox(height: AppSpacing.xl),
-              PrimaryButton(
-                label: 'Send OTP',
-                isFullWidth: true,
-                isLoading: auth.isLoading,
-                isDisabled: !phoneReady,
-                onTap: () => _sendOtp(context, ref),
-              ),
-              const Spacer(),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

@@ -45,10 +45,25 @@ function signAccessToken(input: {
   );
 }
 
+const MOCK_SMS_OTP = "123456";
+
 function generateOtp(): string {
-  // Test environments need deterministic OTPs without leaking them through the API.
+  const env = loadEnv();
+
+  // Jest/integration tests may override the code without touching live providers.
   if (process.env.NODE_ENV === "test") {
-    return process.env.TEST_OTP_CODE ?? "123456";
+    return process.env.TEST_OTP_CODE ?? MOCK_SMS_OTP;
+  }
+
+  // Staging / dev: fixed OTP only when SMS is explicitly in mock mode.
+  if (env.SMS_PROVIDER_MODE === "mock") {
+    // Defense in depth — loadEnv blocks production+mock, but never emit 123456
+    // if this server is labelled production.
+    if (env.NODE_ENV === "production") {
+      logger.error("Refusing fixed mock OTP in production", { provider: "mock" });
+      return randomOtp();
+    }
+    return MOCK_SMS_OTP;
   }
 
   return randomOtp();

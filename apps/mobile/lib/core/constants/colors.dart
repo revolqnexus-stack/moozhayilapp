@@ -92,8 +92,8 @@ abstract final class AppColors {
   static const Color warningFill = Color(0xFF8C6A20);
   static const Color errorFill = Color(0xFF8C2020);
 
-  static const Color disabledBg = Color(0xFFF0EDE8);
-  static const Color disabledText = Color(0xFFB8B0A6);
+  static const Color disabledBg = Color(0xFFE8E2DA);
+  static const Color disabledText = Color(0xFF6B645C);
 
   static const Color shimmerBase = Color(0xFFF4F0EB);
   static const Color shimmerHighlight = Color(0xFFE8E2D8);
@@ -121,4 +121,3 @@ abstract final class AppColors {
   static const Color moonveil = pearl;
   static const Color nebulaEdge = border;
 }
-

@@ -21,6 +21,12 @@ export async function sendOtpSms(input: {
       logger.info("OTP mock SMS", {
         phone: maskPhone(input.phone),
         otp: input.otp,
+        provider: "mock",
+      });
+    } else {
+      logger.info("OTP mock SMS dispatched (fixed staging code)", {
+        phone: maskPhone(input.phone),
+        provider: "mock",
       });
     }
 

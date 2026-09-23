@@ -428,6 +428,9 @@ export class OrdersService {
       payment_amount_paise: finalPaymentAmount,
       payment_session_id: paymentSessionId,
       payment_url: paymentUrl,
+      razorpay_order_id: razorpayOrderId,
+      razorpay_key_id:
+        finalPaymentAmount > 0 ? (env.RAZORPAY_KEY_ID ?? null) : null,
       cashfree_order_id: razorpayOrderId,
       cashfree_app_id: finalPaymentAmount > 0 ? (env.CASHFREE_APP_ID ?? null) : null,
       aura_mc_waiver_applied: totals.makingChargeWaiverPaise > 0,

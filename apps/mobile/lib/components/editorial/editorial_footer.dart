@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/constants/colors.dart';
+import '../../core/constants/legal_urls.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/constants/typography.dart';
 import 'monogram_pattern.dart';
@@ -76,16 +78,62 @@ class EditorialFooter extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
-              Text(
-                'Terms · Privacy · Accessibility',
-                style: AppTypography.uiCaption.copyWith(
-                  color: AppColors.cream.withValues(alpha: 0.6),
-                ),
+              Wrap(
+                spacing: AppSpacing.sm,
+                children: [
+                  _LegalLink(label: 'Terms', url: LegalUrls.terms),
+                  Text(
+                    '·',
+                    style: AppTypography.uiCaption.copyWith(
+                      color: AppColors.cream.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  _LegalLink(label: 'Privacy', url: LegalUrls.privacy),
+                  Text(
+                    '·',
+                    style: AppTypography.uiCaption.copyWith(
+                      color: AppColors.cream.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  _LegalLink(
+                    label: 'Accessibility',
+                    url: LegalUrls.accessibility,
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+class _LegalLink extends StatelessWidget {
+  const _LegalLink({required this.label, required this.url});
+
+  final String label;
+  final String url;
+
+  Future<void> _open() async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _open,
+      child: Text(
+        label,
+        style: AppTypography.uiCaption.copyWith(
+          color: AppColors.cream.withValues(alpha: 0.82),
+          decoration: TextDecoration.underline,
+          decorationColor: AppColors.cream.withValues(alpha: 0.5),
+        ),
+      ),
     );
   }
 }

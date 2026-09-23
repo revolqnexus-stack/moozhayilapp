@@ -6,6 +6,8 @@
 .env
 .env.*
 !.env.example
+!.env.cloud.example
+!**/.env.cloud.example
 !.env.production.example
 !**/.env.production.example
 *.pem
@@ -13,6 +15,10 @@
 secrets.txt
 *-secrets.txt
 .secrets-generated.txt
+.render-api-key
+PRODUCTION_ENV.txt
+RAILWAY_ENV_VARIABLES.txt
+railway-secrets.txt
 
 # --- OS ---
 .DS_Store

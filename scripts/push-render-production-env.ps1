@@ -74,7 +74,7 @@ if ($SkipDeploy) { $params["SkipDeploy"] = $true }
 
 Write-Host ""
 if ($Prelaunch) {
-  Write-Host "Prelaunch mode pushed — prod infra with mock providers so legal pages boot for Razorpay verification."
+  Write-Host "Prelaunch mode pushed - prod infra with mock providers so legal pages boot for Razorpay verification."
 } else {
   Write-Host "Production env pushed. Service will refuse to start until live provider credentials pass production guards."
 }

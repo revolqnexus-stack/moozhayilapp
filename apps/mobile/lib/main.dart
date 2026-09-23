@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -7,12 +8,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:moozhayil/app.dart';
 import 'package:moozhayil/core/widgets/app_error_widget.dart';
+import 'package:moozhayil/firebase_options.dart';
 
 /// Top-level FCM background message handler.
 /// Must be a top-level function (not a class method).
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Firebase is already initialized by the time this is called.
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // The notification is handled by the system tray automatically.
   // We only need this handler if we want to process data-only messages
   // while the app is terminated.

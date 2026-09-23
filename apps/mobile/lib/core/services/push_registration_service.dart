@@ -6,8 +6,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../firebase_options.dart';
 import '../config/api_config.dart';
-import '../config/firebase_config.dart';
 import 'api_service.dart';
 
 /// Registers the device push token with the API.
@@ -44,22 +44,10 @@ class PushRegistrationService {
       return;
     }
 
-    if (!FirebaseConfig.isConfigured) {
-      debugPrint(
-        '[push] PUSH_ENABLED=true but Firebase dart-defines are missing.',
-      );
-      return;
-    }
-
     try {
       if (!_firebaseInitialized) {
         await Firebase.initializeApp(
-          options: FirebaseOptions(
-            apiKey: FirebaseConfig.apiKey,
-            appId: FirebaseConfig.appId,
-            messagingSenderId: FirebaseConfig.messagingSenderId,
-            projectId: FirebaseConfig.projectId,
-          ),
+          options: DefaultFirebaseOptions.currentPlatform,
         );
         _firebaseInitialized = true;
       }

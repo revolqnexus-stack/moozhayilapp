@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "000000000000",
-    "project_id": "moozhayil-placeholder",
-    "storage_bucket": "moozhayil-placeholder.appspot.com"
+    "project_number": "1005538186479",
+    "project_id": "moozhayil-prod",
+    "storage_bucket": "moozhayil-prod.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+        "mobilesdk_app_id": "1:1005538186479:android:37d22ee44bc97f46d6771a",
         "android_client_info": {
           "package_name": "com.moozhayil.moozhayil"
         }
@@ -15,26 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIza-placeholder-key-replace-with-real"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:1111111111111111111111",
-        "android_client_info": {
-          "package_name": "com.moozhayil.moozhayil.debug"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIza-placeholder-key-replace-with-real"
+          "current_key": "AIzaSyCBfsG4ARhNPgllWVBmG4Up0jGronfMaSU"
         }
       ],
       "services": {

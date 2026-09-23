@@ -19,6 +19,8 @@ secrets.txt
 PRODUCTION_ENV.txt
 RAILWAY_ENV_VARIABLES.txt
 railway-secrets.txt
+**/firebase-service-account.json
+**/firebase-adminsdk*.json
 
 # --- OS ---
 .DS_Store

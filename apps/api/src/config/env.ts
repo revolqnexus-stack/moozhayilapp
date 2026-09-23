@@ -151,6 +151,38 @@ function assertProductionLiveCredentials(data: z.infer<typeof envSchema>) {
   }
 }
 
+function assertProductionNoTestCredentials(data: z.infer<typeof envSchema>) {
+  const invalid: string[] = [];
+
+  if (
+    data.PAYMENT_PROVIDER === "razorpay" &&
+    data.RAZORPAY_KEY_ID?.startsWith("rzp_test_")
+  ) {
+    invalid.push("RAZORPAY_KEY_ID must be a live key (rzp_live_*) in production");
+  }
+
+  const placeholderPattern = /^(YOUR_|REPLACE_ME|<|mock$|mock@)/i;
+  const credentialFields: Array<[string, string | undefined]> = [
+    ["RAZORPAY_KEY_SECRET", data.RAZORPAY_KEY_SECRET],
+    ["MSG91_AUTH_KEY", data.MSG91_AUTH_KEY],
+    ["KYC_PROVIDER_API_KEY", data.KYC_PROVIDER_API_KEY],
+    ["S3_ACCESS_KEY_ID", data.S3_ACCESS_KEY_ID],
+    ["S3_SECRET_ACCESS_KEY", data.S3_SECRET_ACCESS_KEY],
+  ];
+
+  for (const [name, value] of credentialFields) {
+    if (value && placeholderPattern.test(value)) {
+      invalid.push(`${name} must not use placeholder values in production`);
+    }
+  }
+
+  if (invalid.length > 0) {
+    throw new Error(
+      `Invalid environment configuration: ${invalid.join("; ")}`,
+    );
+  }
+}
+
 function assertProductionInfrastructure(data: z.infer<typeof envSchema>) {
   const missing = [
     data.STORAGE_BACKEND === "s3" && !data.S3_BUCKET ? "S3_BUCKET" : null,
@@ -220,6 +252,7 @@ export function loadEnv(input: NodeJS.ProcessEnv = process.env): Env {
 
     assertProductionProviderModes(data);
     assertProductionLiveCredentials(data);
+    assertProductionNoTestCredentials(data);
     assertProductionInfrastructure(data);
   }
 

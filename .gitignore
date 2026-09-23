@@ -15,10 +15,16 @@
 secrets.txt
 *-secrets.txt
 .secrets-generated.txt
+**/.secrets-generated.txt
 .render-api-key
 PRODUCTION_ENV.txt
+!PRODUCTION_ENV.example.txt
 RAILWAY_ENV_VARIABLES.txt
+!RAILWAY_ENV_VARIABLES.example.txt
 railway-secrets.txt
+apps/api/.env.cloud
+**/moozhayil-release.jks
+**/upload-keystore.jks
 **/firebase-service-account.json
 **/firebase-adminsdk*.json
 

@@ -25,7 +25,7 @@ const productionBase = {
   CORS_ALLOWED_ORIGINS: "https://app.example.com",
   MSG91_AUTH_KEY: "test_msg91_key",
   MSG91_OTP_TEMPLATE_ID: "test_template",
-  RAZORPAY_KEY_ID: "rzp_test",
+  RAZORPAY_KEY_ID: "rzp_live_test_key_id",
   RAZORPAY_KEY_SECRET: "rzp_secret",
   RAZORPAY_WEBHOOK_SECRET: "webhook_secret",
   KYC_PROVIDER_BASE_URL: "https://kyc.example.com",
@@ -59,6 +59,15 @@ describe("Production environment guards", () => {
         STORAGE_BACKEND: "local",
       }),
     ).not.toThrow();
+  });
+
+  it("rejects Razorpay test keys when NODE_ENV=production", () => {
+    expect(() =>
+      loadEnv({
+        ...productionBase,
+        RAZORPAY_KEY_ID: "rzp_test_abc123",
+      }),
+    ).toThrow("RAZORPAY_KEY_ID must be a live key");
   });
 
   it("requires MSG91 credentials when NODE_ENV=production and SMS is live", () => {

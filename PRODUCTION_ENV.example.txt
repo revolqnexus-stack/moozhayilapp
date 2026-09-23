@@ -1,0 +1,65 @@
+# MOOZHAYIL PRODUCTION ENVIRONMENT — TEMPLATE ONLY
+# Copy to PRODUCTION_ENV.txt (gitignored) and fill in real values.
+# NEVER commit PRODUCTION_ENV.txt or paste secrets into docs/source control.
+
+# --- Basic ---
+NODE_ENV=production
+PORT=3080
+TRUST_PROXY=true
+LOG_LEVEL=info
+
+# --- Database (Neon PostgreSQL) ---
+DATABASE_URL=postgresql://USER:PASSWORD@HOST/neondb?sslmode=require
+
+# --- Redis (Upstash) ---
+REDIS_URL=rediss://default:TOKEN@HOST.upstash.io:6379
+
+# --- Security secrets (generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))") ---
+JWT_SECRET=
+JWT_REFRESH_SECRET=
+OTP_HASH_SECRET=
+PII_ENCRYPTION_SECRET=
+ADMIN_JWT_SECRET=
+KYC_WEBHOOK_SECRET=
+GOLD_RATE_WEBHOOK_SECRET=
+
+# --- Razorpay (live keys only in production) ---
+PAYMENT_PROVIDER=razorpay
+PAYMENT_PROVIDER_MODE=live
+RAZORPAY_KEY_ID=rzp_live_YOUR_KEY_ID
+RAZORPAY_KEY_SECRET=
+RAZORPAY_WEBHOOK_SECRET=
+
+# --- Cloudflare R2 ---
+STORAGE_BACKEND=s3
+S3_ENDPOINT=https://YOUR_ACCOUNT_ID.r2.cloudflarestorage.com
+S3_REGION=auto
+S3_BUCKET=moozhayil-media
+S3_ACCESS_KEY_ID=
+S3_SECRET_ACCESS_KEY=
+S3_PUBLIC_BASE_URL=https://media.yourdomain.com
+S3_FORCE_PATH_STYLE=false
+
+# --- URLs / CORS ---
+PUBLIC_BASE_URL=https://api.yourdomain.com
+CORS_ALLOWED_ORIGINS=https://admin.yourdomain.com,https://yourdomain.com
+
+# --- SMS (MSG91) ---
+SMS_PROVIDER_MODE=live
+MSG91_AUTH_KEY=
+MSG91_OTP_TEMPLATE_ID=
+
+# --- KYC provider ---
+KYC_PROVIDER_MODE=live
+KYC_PROVIDER_BASE_URL=
+KYC_PROVIDER_API_KEY=
+
+# --- Firebase (FCM push) ---
+FIREBASE_MODE=live
+FIREBASE_PROJECT_ID=
+FIREBASE_CLIENT_EMAIL=
+FIREBASE_PRIVATE_KEY=
+
+# --- Misc ---
+ENABLE_DEMO_SEEDS=false
+WORKER_HEALTH_PORT=3001

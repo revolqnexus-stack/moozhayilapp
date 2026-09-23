@@ -7,7 +7,7 @@ Quick reference for every external service the app needs.
 ## 🎯 WHAT YOU HAVE vs WHAT YOU NEED
 
 ### ✅ Already Have:
-- **Razorpay Test Keys**: `rzp_test_TGWGDXCj0VWG6f` / `1vOWeQGb7BScgGHK8WYuy7h2`
+- **Razorpay Test Keys**: obtain from Razorpay dashboard (never commit secrets)
 - **Complete Codebase**: 95% feature-complete
 - **Deployment Configs**: Railway + Vercel ready
 

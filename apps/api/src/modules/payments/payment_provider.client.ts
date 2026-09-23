@@ -65,6 +65,9 @@ export class PaymentProviderClient {
     const env = loadEnv();
 
     if (env.PAYMENT_PROVIDER_MODE === "mock") {
+      if (env.NODE_ENV === "production") {
+        return false;
+      }
       return input.signature === "mock_valid_signature";
     }
 

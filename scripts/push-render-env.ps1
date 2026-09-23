@@ -87,7 +87,11 @@ $vars["NODE_ENV"] = "staging"
 $vars["TRUST_PROXY"] = "true"
 $vars["SMS_PROVIDER_MODE"] = "mock"
 $vars["KYC_PROVIDER_MODE"] = "mock"
-$vars["FIREBASE_MODE"] = "mock"
+if ($vars["FIREBASE_PROJECT_ID"] -and $vars["FIREBASE_CLIENT_EMAIL"] -and $vars["FIREBASE_PRIVATE_KEY"]) {
+  $vars["FIREBASE_MODE"] = "live"
+} else {
+  $vars["FIREBASE_MODE"] = "mock"
+}
 $vars["STORAGE_BACKEND"] = "local"
 $vars["CORS_ALLOWED_ORIGINS"] = "http://localhost:5180,http://localhost:5173,https://$ServiceHost"
 
@@ -100,6 +104,7 @@ $keysToPush = @(
   "PAYMENT_PROVIDER", "PAYMENT_PROVIDER_MODE",
   "RAZORPAY_KEY_ID", "RAZORPAY_KEY_SECRET", "RAZORPAY_WEBHOOK_SECRET",
   "SMS_PROVIDER_MODE", "KYC_PROVIDER_MODE", "FIREBASE_MODE",
+  "FIREBASE_PROJECT_ID", "FIREBASE_CLIENT_EMAIL", "FIREBASE_PRIVATE_KEY",
   "STORAGE_BACKEND", "PUBLIC_BASE_URL", "CORS_ALLOWED_ORIGINS",
   "ENABLE_DEMO_SEEDS", "WORKER_HEALTH_PORT"
 )

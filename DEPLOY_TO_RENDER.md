@@ -81,31 +81,30 @@ TRUST_PROXY=true
 LOG_LEVEL=info
 ```
 
-#### Database & Redis (Copy from your setup):
+#### Database & Redis (from Neon + Upstash dashboards — never paste into Git):
 ```
-DATABASE_URL=postgresql://neondb_owner:npg_7SxQXUGVi0sq@ep-damp-bonus-axn314ol-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require
-
-REDIS_URL=redis://default:gQAAAAAAAkxUAAIgcDFiNTBkMGM5MDhlYTM0N2M3OWIxMTBiZGY2MTU1NWVhYg@crack-duck-150612.upstash.io:6379
-```
-
-#### Security Secrets (From PRODUCTION_ENV.txt):
-```
-JWT_SECRET=11d8ca10940c8e5129bfee6a6916fc4dae4300f6aae3c332214db13d576cf508
-JWT_REFRESH_SECRET=23d42299dbf0282d278255319949ad9bfc6de609309b76c91e9922493d1c7aa8
-OTP_HASH_SECRET=e7fc45e520eb6a8eb33a7c75d944b251db935bdc197d82d9f806930691e0ea1e
-PII_ENCRYPTION_SECRET=0a48d4af223124ce38c7f955baa236c571408a59458516546cf47d78ac2e625b
-ADMIN_JWT_SECRET=f9201d2e0d1c703f3f8754c711d5820fce909719cd952a343047e681563dab07
-KYC_WEBHOOK_SECRET=d0aa61a2e142700fb7e593a00807bee96b957752c12d51439bdb6cac2f20fc80
-GOLD_RATE_WEBHOOK_SECRET=57bc4ab2a4ab7cde1cee935fdf057c956fedb79a227c7a241630d1f59c9b4b18
+DATABASE_URL=postgresql://USER:PASSWORD@HOST/neondb?sslmode=require
+REDIS_URL=rediss://default:TOKEN@HOST.upstash.io:6379
 ```
 
-#### Razorpay (Use your test keys for now):
+#### Security Secrets (generate locally — see GENERATE_SECRETS.md):
+```
+JWT_SECRET=<generate-32-byte-hex>
+JWT_REFRESH_SECRET=<generate-32-byte-hex>
+OTP_HASH_SECRET=<generate-32-byte-hex>
+PII_ENCRYPTION_SECRET=<generate-32-byte-hex>
+ADMIN_JWT_SECRET=<generate-32-byte-hex>
+KYC_WEBHOOK_SECRET=<generate-32-byte-hex>
+GOLD_RATE_WEBHOOK_SECRET=<generate-32-byte-hex>
+```
+
+#### Razorpay (staging: test keys; production: live keys only):
 ```
 PAYMENT_PROVIDER=razorpay
-PAYMENT_PROVIDER_MODE=live
-RAZORPAY_KEY_ID=rzp_test_YOUR_KEY_HERE
-RAZORPAY_KEY_SECRET=YOUR_SECRET_HERE
-RAZORPAY_WEBHOOK_SECRET=3d3af9998e4f87ae5f7692b3a468cf53
+PAYMENT_PROVIDER_MODE=mock
+RAZORPAY_KEY_ID=rzp_test_YOUR_KEY_ID
+RAZORPAY_KEY_SECRET=<from-razorpay-dashboard>
+RAZORPAY_WEBHOOK_SECRET=<from-razorpay-dashboard>
 ```
 
 #### Cloudflare R2 Storage (Use values from Step 1):

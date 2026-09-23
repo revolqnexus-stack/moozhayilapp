@@ -1,13 +1,7 @@
-/// True for staging APK builds pointed at Render / non-production hosts.
+/// True only when the build explicitly opts into staging QA behaviour.
+/// Pass `--dart-define=STAGING_BUILD=true` for staging APKs.
 bool get isStagingApiBuild {
-  const apiBase = String.fromEnvironment('API_BASE_URL');
-  if (apiBase.isEmpty) {
-    return false;
-  }
-
-  return apiBase.contains('onrender.com') ||
-      apiBase.contains('staging') ||
-      apiBase.contains('localhost');
+  return const bool.fromEnvironment('STAGING_BUILD', defaultValue: false);
 }
 
 /// Fixed OTP used when the backend runs with SMS_PROVIDER_MODE=mock.

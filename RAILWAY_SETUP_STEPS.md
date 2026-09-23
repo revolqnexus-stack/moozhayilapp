@@ -229,7 +229,7 @@ npm run migrate:deploy
 ```
 ✅ GitHub Repo: moozhayil-gold-diamonds (pushed)
 ✅ Railway Project: Created
-✅ PostgreSQL: postgresql://postgres:DBDZDffKbyxXXYPwPBwceeYiqAXlYwmS@postgres.railway.internal:5432/railway
+✅ PostgreSQL: postgresql://USER:PASSWORD@HOST:5432/railway
 ✅ Redis: redis://default:hxnlfMRDMdQPfzrvvGnbjOAcPtHTebeU@redis.railway.internal:6379
 ✅ Security Secrets: Generated (in RAILWAY_ENV_VARIABLES.txt)
 ⏳ API Service: Need to configure & deploy

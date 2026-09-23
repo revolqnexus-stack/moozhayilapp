@@ -37,6 +37,7 @@ import { storesRouter } from "./modules/stores/stores.routes";
 import { usersRouter } from "./modules/users/users.routes";
 import { vaultRouter } from "./modules/vault/vault.routes";
 import { initMonitoring } from "./utils/monitoring";
+import { legalRouter } from "./legal/legal.routes";
 
 export interface CreateAppOptions {
   beforeNotFound?: (app: Express) => void;
@@ -71,6 +72,9 @@ export function createApp(options: CreateAppOptions = {}) {
   );
 
   app.use(express.json({ limit: "1mb" }));
+
+  // Public legal pages (Razorpay / Play Store) — no auth required.
+  app.use(legalRouter);
 
   if (env.STORAGE_BACKEND === "local") {
     app.use(

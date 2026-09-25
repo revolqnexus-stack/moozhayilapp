@@ -33,16 +33,57 @@ function layout(title: string, body: string): string {
 </html>`;
 }
 
+function productCatalogueSection(): string {
+  return `<h2>Product catalogue &amp; pricing</h2>
+<p class="meta">22k gold rate: ₹6,240/gram (indicative). Prices include gold value plus making charges.</p>
+<table>
+  <thead>
+    <tr><th>Product</th><th>Description</th><th>Weight</th><th>Making charge</th><th>Price (INR)</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Temple Bloom Necklace</strong><br/><small>SKU: MZ-NK-001</small></td>
+      <td>22k gold necklace with temple-inspired detailing. In stock.</td>
+      <td>8.5 g</td>
+      <td>12%</td>
+      <td class="price">₹59,405</td>
+    </tr>
+    <tr>
+      <td><strong>Heritage Band Ring</strong><br/><small>SKU: MZ-RG-002</small></td>
+      <td>Classic 22k band ring for everyday elegance. In stock.</td>
+      <td>4.2 g</td>
+      <td>10%</td>
+      <td class="price">₹28,829</td>
+    </tr>
+    <tr>
+      <td><strong>Kerala Kasu Bangle</strong><br/><small>SKU: MZ-BG-003</small></td>
+      <td>Traditional kasu bangle pair in 22k gold. In stock.</td>
+      <td>12.0 g</td>
+      <td>11%</td>
+      <td class="price">₹83,117</td>
+    </tr>
+    <tr>
+      <td><strong>Aura Gold Savings Plan</strong></td>
+      <td>Monthly gold accumulation plan. Redeemable for jewellery or vault balance.</td>
+      <td>—</td>
+      <td>—</td>
+      <td class="price">From ₹500/month</td>
+    </tr>
+  </tbody>
+</table>
+<p><a href="/products">Full catalogue page →</a></p>`;
+}
+
 export function landingPageHtml(): string {
   return layout(
     "Moozhayil",
     `<h1>${BRAND}</h1>
 <p class="meta">Gold savings schemes, jewellery, and digital gold services in India.</p>
-<p>Moozhayil helps customers save toward gold, browse jewellery, and manage gold savings plans. Customers view products and complete purchases through our mobile application; this website provides business information, product catalogue, and legal policies.</p>
-<p><a href="/products"><strong>View product catalogue &amp; pricing →</strong></a></p>
+<p>Moozhayil helps customers save toward gold, browse jewellery, and manage gold savings plans. Product prices are listed below; checkout is completed in our mobile app after OTP login.</p>
+${productCatalogueSection()}
 <h2>Our services</h2>
 <ul>
-  <li><strong>22k gold jewellery</strong> — necklaces, rings, bangles (see <a href="/products">catalogue</a>)</li>
+  <li><strong>22k gold jewellery</strong> — necklaces, rings, bangles</li>
   <li><strong>Gold savings schemes</strong> — monthly contributions from ₹500 toward gold accumulation</li>
   <li><strong>Digital gold vault</strong> — track accumulated gold balance and redeem for jewellery</li>
 </ul>

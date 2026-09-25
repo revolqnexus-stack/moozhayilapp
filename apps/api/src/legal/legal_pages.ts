@@ -16,12 +16,17 @@ function layout(title: string, body: string): string {
     .meta { color: #666; font-size: 0.9rem; margin-bottom: 1.5rem; }
     a { color: #8b6914; }
     footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee; font-size: 0.85rem; color: #666; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.95rem; }
+    th, td { border: 1px solid #e5e5e5; padding: 0.65rem 0.75rem; text-align: left; vertical-align: top; }
+    th { background: #faf7f0; }
+    .price { font-weight: 600; white-space: nowrap; }
+    .note { background: #faf7f0; border: 1px solid #eee; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.9rem; }
   </style>
 </head>
 <body>
   ${body}
   <footer>
-    <p><a href="/">Home</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/accessibility">Accessibility</a></p>
+    <p><a href="/">Home</a> · <a href="/products">Products</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/accessibility">Accessibility</a></p>
     <p>Contact: <a href="mailto:${CONTACT}">${CONTACT}</a></p>
   </footer>
 </body>
@@ -33,8 +38,73 @@ export function landingPageHtml(): string {
     "Moozhayil",
     `<h1>${BRAND}</h1>
 <p class="meta">Gold savings schemes, jewellery, and digital gold services in India.</p>
-<p>Moozhayil helps customers save toward gold, browse jewellery, and manage plans through our mobile app. Payments are processed securely via authorised payment partners.</p>
+<p>Moozhayil helps customers save toward gold, browse jewellery, and manage gold savings plans. Customers view products and complete purchases through our mobile application; this website provides business information, product catalogue, and legal policies.</p>
+<p><a href="/products"><strong>View product catalogue &amp; pricing →</strong></a></p>
+<h2>Our services</h2>
+<ul>
+  <li><strong>22k gold jewellery</strong> — necklaces, rings, bangles (see <a href="/products">catalogue</a>)</li>
+  <li><strong>Gold savings schemes</strong> — monthly contributions from ₹500 toward gold accumulation</li>
+  <li><strong>Digital gold vault</strong> — track accumulated gold balance and redeem for jewellery</li>
+</ul>
 <p><strong>Support:</strong> <a href="mailto:${CONTACT}">${CONTACT}</a></p>`,
+  );
+}
+
+/** Static catalogue for Razorpay / merchant verification (matches app product SKUs). */
+export function productsPageHtml(): string {
+  const goldRate22k = "₹6,240";
+  const rateNote = `22k gold rate: ${goldRate22k}/gram (indicative; final price confirmed in app at checkout)`;
+
+  return layout(
+    "Products &amp; Services",
+    `<h1>Products &amp; Services</h1>
+<p class="meta">${rateNote}</p>
+<p class="note">Prices include gold value at the current 22k rate plus making charges. GST and delivery, if applicable, are shown before payment in the Moozhayil app.</p>
+<h2>Jewellery catalogue</h2>
+<table>
+  <thead>
+    <tr><th>Product</th><th>Description</th><th>Weight</th><th>Making charge</th><th>Price (INR)</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Temple Bloom Necklace</strong><br/><small>SKU: MZ-NK-001</small></td>
+      <td>22k gold necklace with temple-inspired detailing. In stock.</td>
+      <td>8.5 g</td>
+      <td>12%</td>
+      <td class="price">₹59,405</td>
+    </tr>
+    <tr>
+      <td><strong>Heritage Band Ring</strong><br/><small>SKU: MZ-RG-002</small></td>
+      <td>Classic 22k band ring for everyday elegance. In stock.</td>
+      <td>4.2 g</td>
+      <td>10%</td>
+      <td class="price">₹28,829</td>
+    </tr>
+    <tr>
+      <td><strong>Kerala Kasu Bangle</strong><br/><small>SKU: MZ-BG-003</small></td>
+      <td>Traditional kasu bangle pair in 22k gold. In stock.</td>
+      <td>12.0 g</td>
+      <td>11%</td>
+      <td class="price">₹83,117</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Gold savings scheme</h2>
+<table>
+  <thead>
+    <tr><th>Plan</th><th>Description</th><th>Minimum contribution</th><th>Price (INR)</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Aura Gold Savings Plan</strong></td>
+      <td>Monthly gold accumulation plan. Contributions are converted to gold at the live rate on payment date. Redeemable for jewellery or vault balance.</td>
+      <td>₹500 / month</td>
+      <td class="price">From ₹500</td>
+    </tr>
+  </tbody>
+</table>
+<p>Orders and payments are completed in the Moozhayil Android app after phone OTP login and KYC verification where required.</p>
+<p><strong>Contact:</strong> <a href="mailto:${CONTACT}">${CONTACT}</a></p>`,
   );
 }
 

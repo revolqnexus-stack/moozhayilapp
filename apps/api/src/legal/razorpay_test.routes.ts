@@ -51,17 +51,28 @@ function testCheckoutHtml(keyId: string, orderId: string): string {
 </html>`;
 }
 
+function razorpayTestKeysReady(keyId: string | undefined, keySecret: string | undefined): boolean {
+  if (!keyId?.startsWith("rzp_test_") || !keySecret?.trim()) {
+    return false;
+  }
+  const placeholder = /YOUR_|REPLACE_ME|^mock$/i;
+  return !placeholder.test(keyId) && !placeholder.test(keySecret);
+}
+
 razorpayTestRouter.get("/pay/test", async (_req, res, next) => {
   try {
     const env = loadEnv();
     const keyId = env.RAZORPAY_KEY_ID;
-    if (!keyId?.startsWith("rzp_test_")) {
-      res
-        .status(503)
-        .type("html")
-        .send(
-          "<p>Test checkout is only available when Razorpay test keys (rzp_test_*) are configured.</p>",
-        );
+    const keySecret = env.RAZORPAY_KEY_SECRET;
+
+    if (!razorpayTestKeysReady(keyId, keySecret)) {
+      res.status(503).type("html").send(`<!DOCTYPE html>
+<html lang="en-IN"><body style="font-family:system-ui;max-width:520px;margin:2rem auto;padding:0 1rem">
+<h1>Razorpay test checkout not configured</h1>
+<p>Add your <strong>Test API keys</strong> from Razorpay Dashboard → Account &amp; Settings → API Keys to production env, redeploy, then reload this page.</p>
+<p>Or complete the wizard using <strong>Payment Links</strong> in the Razorpay dashboard with test card 4100 2800 0000 1007.</p>
+<p><a href="/">Back to website</a></p>
+</body></html>`);
       return;
     }
 
@@ -70,8 +81,13 @@ razorpayTestRouter.get("/pay/test", async (_req, res, next) => {
       receipt: `web_test_${Date.now()}`,
     });
 
-    res.type("html").send(testCheckoutHtml(keyId, order.providerOrderId));
-  } catch (error) {
-    next(error);
+    res.type("html").send(testCheckoutHtml(keyId!, order.providerOrderId));
+  } catch {
+    res.status(503).type("html").send(`<!DOCTYPE html>
+<html lang="en-IN"><body style="font-family:system-ui;max-width:520px;margin:2rem auto;padding:0 1rem">
+<h1>Could not start test payment</h1>
+<p>Verify Razorpay test Key ID and Secret on the server match your dashboard.</p>
+<p><a href="/pay/test">Retry</a> · <a href="/">Home</a></p>
+</body></html>`);
   }
 });

@@ -59,7 +59,7 @@ function razorpayTestKeysReady(keyId: string | undefined, keySecret: string | un
   return !placeholder.test(keyId) && !placeholder.test(keySecret);
 }
 
-razorpayTestRouter.get("/pay/test", async (_req, res, next) => {
+razorpayTestRouter.get("/pay/test", async (_req, res) => {
   try {
     const env = loadEnv();
     const keyId = env.RAZORPAY_KEY_ID;

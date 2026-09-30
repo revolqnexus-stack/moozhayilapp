@@ -5,7 +5,11 @@
 param(
   [switch]$SkipDeploy,
   [switch]$SkipHealthCheck,
-  [switch]$Prelaunch
+  [switch]$Prelaunch,
+  # Prelaunch keeps payments/KYC mock but allows real MSG91 OTP when keys are set.
+  [switch]$LiveSms,
+  # Prelaunch + real Razorpay orders (test or live keys in PRODUCTION_ENV).
+  [switch]$LivePayments
 )
 
 $ErrorActionPreference = "Stop"
@@ -41,12 +45,37 @@ if ($stagingRedis -and $prodVars["REDIS_URL"] -match "@$([regex]::Escape($stagin
   Write-Error "PRODUCTION_ENV REDIS_URL still points at staging Redis host ($stagingRedis)"
 }
 
+$smsMode = "live"
+if ($Prelaunch -and -not $LiveSms) {
+  $smsMode = "mock"
+}
+
+$paymentMode = "live"
+if ($Prelaunch -and -not $LivePayments) {
+  $paymentMode = "mock"
+}
+
+if ($LivePayments) {
+  if (-not $prodVars["RAZORPAY_KEY_ID"] -or -not $prodVars["RAZORPAY_KEY_SECRET"]) {
+    Write-Error "LivePayments requires RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in PRODUCTION_ENV.txt"
+  }
+}
+
+if ($LiveSms) {
+  if (-not $prodVars["MSG91_AUTH_KEY"] -or $prodVars["MSG91_AUTH_KEY"].Length -lt 8) {
+    Write-Error "LiveSms requires MSG91_AUTH_KEY in PRODUCTION_ENV.txt (MSG91 dashboard -> API -> Authkey)."
+  }
+  if (-not $prodVars["MSG91_OTP_TEMPLATE_ID"]) {
+    Write-Error "LiveSms requires MSG91_OTP_TEMPLATE_ID in PRODUCTION_ENV.txt (MSG91 SendOTP template id)."
+  }
+}
+
 $overrides = @{
   NODE_ENV                         = if ($Prelaunch) { "staging" } else { "production" }
   TRUST_PROXY                      = "true"
-  SMS_PROVIDER_MODE                = if ($Prelaunch) { "mock" } else { "live" }
+  SMS_PROVIDER_MODE                = $smsMode
   KYC_PROVIDER_MODE                = if ($Prelaunch) { "mock" } else { "live" }
-  PAYMENT_PROVIDER_MODE            = if ($Prelaunch) { "mock" } else { "live" }
+  PAYMENT_PROVIDER_MODE            = $paymentMode
   FIREBASE_MODE                    = "live"
   STORAGE_BACKEND                  = "s3"
   ENABLE_DEMO_SEEDS                = if ($Prelaunch) { "true" } else { "false" }
@@ -73,7 +102,13 @@ if ($SkipDeploy) { $params["SkipDeploy"] = $true }
 & (Join-Path $Root "scripts/push-render-env-core.ps1") @params
 
 Write-Host ""
-if ($Prelaunch) {
+if ($Prelaunch -and $LiveSms -and $LivePayments) {
+  Write-Host "Prelaunch + LiveSms + LivePayments pushed - real OTP and Razorpay; KYC still mock."
+} elseif ($Prelaunch -and $LiveSms) {
+  Write-Host "Prelaunch + LiveSms pushed - real OTP via MSG91; payments/KYC still mock."
+} elseif ($Prelaunch -and $LivePayments) {
+  Write-Host "Prelaunch + LivePayments pushed - Razorpay live; SMS/KYC still mock unless -LiveSms."
+} elseif ($Prelaunch) {
   Write-Host "Prelaunch mode pushed - prod infra with mock providers so legal pages boot for Razorpay verification."
 } else {
   Write-Host "Production env pushed. Service will refuse to start until live provider credentials pass production guards."

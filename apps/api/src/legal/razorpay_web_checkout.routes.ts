@@ -8,6 +8,24 @@ import {
 
 export const razorpayWebCheckoutRouter = Router();
 
+/** Razorpay checkout needs scripts + iframes from checkout.razorpay.com (Brave can block popups). */
+razorpayWebCheckoutRouter.use((req, res, next) => {
+  if (req.path.startsWith("/pay")) {
+    res.setHeader(
+      "Content-Security-Policy",
+      [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com",
+        "frame-src https://api.razorpay.com https://checkout.razorpay.com",
+        "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com",
+        "img-src 'self' data: https:",
+        "style-src 'self' 'unsafe-inline'",
+      ].join("; "),
+    );
+  }
+  next();
+});
+
 function razorpayKeysReady(
   keyId: string | undefined,
   keySecret: string | undefined,
@@ -132,15 +150,15 @@ function checkoutPageHtml(keyId: string, defaultAmountPaise: number): string {
 <body>
   <h1>Moozhayil — Razorpay Standard Checkout</h1>
   <p>Pay ₹${amountDisplay} (test mode). Card <strong>4100 2800 0000 1007</strong>, CVV <strong>123</strong>, any future expiry.</p>
-  <div class="note">Standard Web Checkout: create order → modal → verify signature on server.</div>
-  <button id="pay" type="button">Pay now</button>
+  <div class="note">Standard Web Checkout: create order → modal → verify signature on server.<br/><strong>Brave users:</strong> turn off Shields for this site and allow pop-ups, or use Chrome/Edge.</div>
+  <button id="pay" type="button" disabled>Loading checkout…</button>
   <div id="error" role="alert"></div>
   <div id="result"></div>
   <p><a href="/">← Back to website</a></p>
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js" crossorigin="anonymous"></script>
   <script>
     (function () {
-      var keyId = "${safeKey}";
+      var fallbackKeyId = "${safeKey}";
       var amountPaise = ${defaultAmountPaise};
       var payBtn = document.getElementById("pay");
       var errEl = document.getElementById("error");
@@ -152,7 +170,28 @@ function checkoutPageHtml(keyId: string, defaultAmountPaise: number): string {
         okEl.style.display = "none";
       }
 
+      function checkoutReady() {
+        if (typeof Razorpay === "undefined") {
+          showError("Razorpay checkout.js did not load. Disable ad blockers / Brave Shields and refresh.");
+          payBtn.disabled = true;
+          payBtn.textContent = "Checkout unavailable";
+          return false;
+        }
+        payBtn.disabled = false;
+        payBtn.textContent = "Pay now";
+        return true;
+      }
+
+      if (document.readyState === "complete") {
+        checkoutReady();
+      } else {
+        window.addEventListener("load", checkoutReady);
+      }
+
       payBtn.onclick = function () {
+        if (!checkoutReady()) {
+          return;
+        }
         errEl.style.display = "none";
         okEl.style.display = "none";
         payBtn.disabled = true;
@@ -168,14 +207,16 @@ function checkoutPageHtml(keyId: string, defaultAmountPaise: number): string {
               throw new Error(res.data.error || ("Order failed (" + res.status + ")"));
             }
             var orderId = res.data.order_id;
+            var checkoutKey = res.data.key_id || fallbackKeyId;
             var options = {
-              key: keyId,
+              key: checkoutKey,
               amount: res.data.amount,
               currency: res.data.currency || "INR",
               name: "Moozhayil Gold & Diamonds",
               description: "Standard checkout payment",
               order_id: orderId,
               theme: { color: "#8b6914" },
+              retry: { enabled: false },
               handler: function (response) {
                 fetch("/api/verify-payment", {
                   method: "POST",
@@ -205,12 +246,17 @@ function checkoutPageHtml(keyId: string, defaultAmountPaise: number): string {
                 }
               }
             };
-            var rzp = new Razorpay(options);
-            rzp.on("payment.failed", function (resp) {
+            try {
+              var rzp = new Razorpay(options);
+              rzp.on("payment.failed", function (resp) {
+                payBtn.disabled = false;
+                showError(resp.error.description || "Payment failed");
+              });
+              rzp.open();
+            } catch (openErr) {
               payBtn.disabled = false;
-              showError(resp.error.description || "Payment failed");
-            });
-            rzp.open();
+              showError(openErr && openErr.message ? openErr.message : "Could not open Razorpay modal");
+            }
           })
           .catch(function (e) {
             showError(e.message || "Could not start checkout");

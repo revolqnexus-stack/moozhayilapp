@@ -131,6 +131,10 @@ razorpayWebCheckoutRouter.post("/api/verify-payment", (req, res) => {
 
 function checkoutPageHtml(keyId: string, defaultAmountPaise: number): string {
   const safeKey = keyId.replace(/"/g, "");
+  const isLive = keyId.startsWith("rzp_live_");
+  const modeNote = isLive
+    ? "<strong>LIVE mode:</strong> real money will be charged."
+    : "Test mode — no real money is charged.";
   const amountDisplay = (defaultAmountPaise / 100).toFixed(2);
   return `<!DOCTYPE html>
 <html lang="en-IN">
@@ -149,7 +153,7 @@ function checkoutPageHtml(keyId: string, defaultAmountPaise: number): string {
 </head>
 <body>
   <h1>Moozhayil — Razorpay Standard Checkout</h1>
-  <p>Pay ₹${amountDisplay} (test mode). Card <strong>4100 2800 0000 1007</strong>, CVV <strong>123</strong>, any future expiry.</p>
+  <p>Pay ₹${amountDisplay}. ${modeNote}</p>
   <div class="note">Standard Web Checkout: create order → modal → verify signature on server.<br/><strong>Brave users:</strong> turn off Shields for this site and allow pop-ups, or use Chrome/Edge.</div>
   <button id="pay" type="button" disabled>Loading checkout…</button>
   <div id="error" role="alert"></div>

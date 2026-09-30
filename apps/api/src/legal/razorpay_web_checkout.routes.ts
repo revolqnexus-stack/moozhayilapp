@@ -244,10 +244,10 @@ async function serveCheckoutPage(
   res.type("html").send(checkoutPageHtml(keyId!, amountPaise));
 }
 
-razorpayWebCheckoutRouter.get("/pay/checkout", (req, res) => {
+razorpayWebCheckoutRouter.get("/pay/checkout", (_req, res) => {
   void serveCheckoutPage(res, 100);
 });
 
-razorpayWebCheckoutRouter.get("/pay/test", (req, res) => {
+razorpayWebCheckoutRouter.get("/pay/test", (_req, res) => {
   void serveCheckoutPage(res, 100);
 });

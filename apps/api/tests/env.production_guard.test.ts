@@ -70,6 +70,39 @@ describe("Production environment guards", () => {
     ).toThrow("RAZORPAY_KEY_ID must be a live key");
   });
 
+  it("rejects staging Neon endpoint when MOOZHAYIL_STAGING_DATABASE_HOST is set", () => {
+    expect(() =>
+      loadEnv({
+        ...productionBase,
+        DATABASE_URL:
+          "postgresql://user:pass@staging-neon.example.com/neondb?sslmode=require",
+        MOOZHAYIL_STAGING_DATABASE_HOST: "staging-neon.example.com",
+      }),
+    ).toThrow("Production DATABASE_URL must not use staging Neon endpoint");
+  });
+
+  it("rejects staging Redis host when MOOZHAYIL_STAGING_REDIS_HOST is set", () => {
+    expect(() =>
+      loadEnv({
+        ...productionBase,
+        REDIS_URL: "redis://default:token@staging-redis.example.com:6379",
+        MOOZHAYIL_STAGING_REDIS_HOST: "staging-redis.example.com",
+      }),
+    ).toThrow("Production REDIS_URL must not use staging Redis host");
+  });
+
+  it("allows mock KYC in production when MOOZHAYIL_ALLOW_MOCK_KYC is true", () => {
+    expect(() =>
+      loadEnv({
+        ...productionBase,
+        KYC_PROVIDER_MODE: "mock",
+        MOOZHAYIL_ALLOW_MOCK_KYC: "true",
+        KYC_PROVIDER_BASE_URL: undefined,
+        KYC_PROVIDER_API_KEY: undefined,
+      }),
+    ).not.toThrow();
+  });
+
   it("requires MSG91 credentials when NODE_ENV=production and SMS is live", () => {
     expect(() =>
       loadEnv({

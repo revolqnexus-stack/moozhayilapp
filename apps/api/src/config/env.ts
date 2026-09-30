@@ -69,6 +69,17 @@ const envSchema = z.object({
   LOG_LEVEL: z
     .enum(["error", "warn", "info", "http", "verbose", "debug", "silly"])
     .default("info"),
+  MOOZHAYIL_STAGING_DATABASE_HOST: z.string().min(1).optional(),
+  MOOZHAYIL_STAGING_REDIS_HOST: z.string().min(1).optional(),
+  MOOZHAYIL_PRELAUNCH: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((value) => value === "true"),
+  /** When true, production may use KYC_PROVIDER_MODE=mock (launch without KYC vendor). */
+  MOOZHAYIL_ALLOW_MOCK_KYC: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((value) => value === "true"),
 });
 
 export type Env = Omit<
@@ -95,10 +106,13 @@ const developmentSecrets = {
 };
 
 function assertProductionProviderModes(data: z.infer<typeof envSchema>) {
+  const mockKycOk =
+    data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC;
+
   const mockProviders = [
     data.SMS_PROVIDER_MODE === "mock" ? "SMS_PROVIDER_MODE" : null,
     data.PAYMENT_PROVIDER_MODE === "mock" ? "PAYMENT_PROVIDER_MODE" : null,
-    data.KYC_PROVIDER_MODE === "mock" ? "KYC_PROVIDER_MODE" : null,
+    data.KYC_PROVIDER_MODE === "mock" && !mockKycOk ? "KYC_PROVIDER_MODE" : null,
     data.FIREBASE_MODE === "mock" ? "FIREBASE_MODE" : null,
   ].filter(Boolean);
 
@@ -135,8 +149,16 @@ function assertProductionLiveCredentials(data: z.infer<typeof envSchema>) {
     data.PAYMENT_PROVIDER === "razorpay" && !data.RAZORPAY_WEBHOOK_SECRET
       ? "RAZORPAY_WEBHOOK_SECRET"
       : null,
-    data.KYC_PROVIDER_BASE_URL ? null : "KYC_PROVIDER_BASE_URL",
-    data.KYC_PROVIDER_API_KEY ? null : "KYC_PROVIDER_API_KEY",
+    data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC
+      ? null
+      : data.KYC_PROVIDER_BASE_URL
+        ? null
+        : "KYC_PROVIDER_BASE_URL",
+    data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC
+      ? null
+      : data.KYC_PROVIDER_API_KEY
+        ? null
+        : "KYC_PROVIDER_API_KEY",
     data.FIREBASE_PROJECT_ID ? null : "FIREBASE_PROJECT_ID",
     data.FIREBASE_CLIENT_EMAIL ? null : "FIREBASE_CLIENT_EMAIL",
     data.FIREBASE_PRIVATE_KEY ? null : "FIREBASE_PRIVATE_KEY",
@@ -180,6 +202,26 @@ function assertProductionNoTestCredentials(data: z.infer<typeof envSchema>) {
     throw new Error(
       `Invalid environment configuration: ${invalid.join("; ")}`,
     );
+  }
+}
+
+function assertProductionResourceIsolation(data: z.infer<typeof envSchema>) {
+  if (data.MOOZHAYIL_STAGING_DATABASE_HOST) {
+    const dbHost = new URL(data.DATABASE_URL).hostname;
+    if (dbHost === data.MOOZHAYIL_STAGING_DATABASE_HOST) {
+      throw new Error(
+        `Production DATABASE_URL must not use staging Neon endpoint (${data.MOOZHAYIL_STAGING_DATABASE_HOST})`,
+      );
+    }
+  }
+
+  if (data.MOOZHAYIL_STAGING_REDIS_HOST) {
+    const redisHost = new URL(data.REDIS_URL).hostname;
+    if (redisHost === data.MOOZHAYIL_STAGING_REDIS_HOST) {
+      throw new Error(
+        `Production REDIS_URL must not use staging Redis host (${data.MOOZHAYIL_STAGING_REDIS_HOST})`,
+      );
+    }
   }
 }
 
@@ -251,6 +293,7 @@ export function loadEnv(input: NodeJS.ProcessEnv = process.env): Env {
     }
 
     assertProductionProviderModes(data);
+    assertProductionResourceIsolation(data);
     assertProductionLiveCredentials(data);
     assertProductionNoTestCredentials(data);
     assertProductionInfrastructure(data);

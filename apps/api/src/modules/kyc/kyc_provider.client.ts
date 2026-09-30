@@ -63,7 +63,7 @@ export class KycProviderClient {
   async sendAadhaarOtp(aadhaarNumber: string): Promise<AadhaarOtpSendResult> {
     const env = loadEnv();
     if (env.KYC_PROVIDER_MODE === "mock") {
-      if (env.NODE_ENV === "production") {
+      if (env.NODE_ENV === "production" && !env.MOOZHAYIL_ALLOW_MOCK_KYC) {
         throw new AppError(503, "PROVIDER_UNAVAILABLE", "Mock KYC disabled in production");
       }
 
@@ -88,7 +88,7 @@ export class KycProviderClient {
   ): Promise<AadhaarVerifyResult> {
     const env = loadEnv();
     if (env.KYC_PROVIDER_MODE === "mock") {
-      if (env.NODE_ENV === "production") {
+      if (env.NODE_ENV === "production" && !env.MOOZHAYIL_ALLOW_MOCK_KYC) {
         throw new AppError(503, "PROVIDER_UNAVAILABLE", "Mock KYC disabled in production");
       }
 
@@ -124,7 +124,7 @@ export class KycProviderClient {
   async verifyPan(panNumber: string): Promise<PanVerifyResult> {
     const env = loadEnv();
     if (env.KYC_PROVIDER_MODE === "mock") {
-      if (env.NODE_ENV === "production") {
+      if (env.NODE_ENV === "production" && !env.MOOZHAYIL_ALLOW_MOCK_KYC) {
         throw new AppError(503, "PROVIDER_UNAVAILABLE", "Mock KYC disabled in production");
       }
 
@@ -159,7 +159,7 @@ export class KycProviderClient {
   async verifySelfie(buffer: Buffer, mimeType: string): Promise<SelfieVerifyResult> {
     const env = loadEnv();
     if (env.KYC_PROVIDER_MODE === "mock") {
-      if (env.NODE_ENV === "production") {
+      if (env.NODE_ENV === "production" && !env.MOOZHAYIL_ALLOW_MOCK_KYC) {
         throw new AppError(503, "PROVIDER_UNAVAILABLE", "Mock KYC disabled in production");
       }
 

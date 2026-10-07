@@ -1,0 +1,40 @@
+{
+  "staging": {
+    "label": "Staging / QA",
+    "renderServiceName": "moozhayilapp",
+    "renderServiceId": "srv-dammuh61egvs73csp3ng",
+    "apiBase": "https://moozhayilapp-fyz6.onrender.com",
+    "apiV1": "https://moozhayilapp-fyz6.onrender.com/v1",
+    "healthUrl": "https://moozhayilapp-fyz6.onrender.com/health",
+    "nodeEnv": "staging",
+    "neonProjectId": "gentle-block-84894749",
+    "neonBranchId": "br-odd-haze-axka0m9f",
+    "neonBranchName": "production",
+    "envFile": "STAGING_ENV.txt",
+    "pushScript": "scripts/push-render-staging-env.ps1",
+    "allowsMockProviders": true,
+    "neonDatabaseHost": "ep-damp-bonus-axn314ol-pooler.c-4.us-east-2.aws.neon.tech",
+    "redisHost": "crack-duck-150612.upstash.io"
+  },
+  "production": {
+    "label": "Production",
+    "renderServiceName": "moozhayilapp-prod",
+    "renderServiceId": "srv-dapva7k9v7es73a27ukg",
+    "apiBase": "https://moozhayilapp-prod.onrender.com",
+    "apiV1": "https://moozhayilapp-prod.onrender.com/v1",
+    "healthUrl": "https://moozhayilapp-prod.onrender.com/health",
+    "nodeEnv": "production",
+    "neonProjectId": "gentle-block-84894749",
+    "neonBranchId": "br-damp-math-axi5dk1v",
+    "neonBranchName": "moozhayil-prod",
+    "envFile": "PRODUCTION_ENV.txt",
+    "pushScript": "scripts/push-render-production-env.ps1",
+    "allowsMockProviders": false,
+    "neonDatabaseHost": "ep-still-dawn-axfpf8h5-pooler.c-4.us-east-2.aws.neon.tech",
+    "redisHost": "frank-kodiak-285964.upstash.io",
+    "r2Bucket": "moozhayil-media",
+    "r2PublicBaseUrl": "https://pub-d3fdc2de167c41ebbcd014931a507493.r2.dev",
+    "r2EndpointHost": "28247e5c8e5aca83c94a869bdfbd0b6d.r2.cloudflarestorage.com",
+    "adminCrmOrigin": "https://moozhayil-gold-diamonds.vercel.app"
+  }
+}

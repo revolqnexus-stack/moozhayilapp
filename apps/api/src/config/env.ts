@@ -45,6 +45,12 @@ const envSchema = z.object({
   SMS_PROVIDER_MODE: z.enum(["mock", "live"]).default("mock"),
   MSG91_AUTH_KEY: z.string().min(8).optional(),
   MSG91_OTP_TEMPLATE_ID: z.string().min(1).optional(),
+  /** DLT-approved 6-char header (e.g. MZHYIL). Sent to MSG91 when set. */
+  MSG91_SENDER_ID: z.string().min(6).max(6).optional(),
+  /** Airtel/Jio DLT Principal Entity ID (PE). Required for India SMS scrubbing. */
+  MSG91_DLT_PE_ID: z.string().min(10).optional(),
+  /** DLT Template Entity ID (numeric, from operator portal — not MSG91 template id). */
+  MSG91_DLT_TE_ID: z.string().min(10).optional(),
   PAYMENT_PROVIDER: z.enum(["razorpay", "cashfree"]).default("razorpay"),
   PAYMENT_PROVIDER_MODE: z.enum(["mock", "live"]).default("mock"),
   RAZORPAY_KEY_ID: z.string().min(1).optional(),
@@ -123,6 +129,20 @@ function assertProductionProviderModes(data: z.infer<typeof envSchema>) {
   }
 }
 
+/** Brand DLT registration ID — must not be used as MSG91 PE_ID (see config/dlt-production.json). */
+const MSG91_BRAND_DLT_ID_NOT_PE = "1016720216615695729";
+
+function assertMsg91DltPeId(data: z.infer<typeof envSchema>) {
+  if (
+    data.SMS_PROVIDER_MODE === "live" &&
+    data.MSG91_DLT_PE_ID === MSG91_BRAND_DLT_ID_NOT_PE
+  ) {
+    throw new Error(
+      "MSG91_DLT_PE_ID is the Brand DLT ID; use Principal Entity peId from config/dlt-production.json",
+    );
+  }
+}
+
 function assertProductionLiveCredentials(data: z.infer<typeof envSchema>) {
   const missing = [
     data.SMS_PROVIDER_MODE === "live" && !data.MSG91_AUTH_KEY
@@ -130,6 +150,12 @@ function assertProductionLiveCredentials(data: z.infer<typeof envSchema>) {
       : null,
     data.SMS_PROVIDER_MODE === "live" && !data.MSG91_OTP_TEMPLATE_ID
       ? "MSG91_OTP_TEMPLATE_ID"
+      : null,
+    data.SMS_PROVIDER_MODE === "live" && !data.MSG91_DLT_PE_ID
+      ? "MSG91_DLT_PE_ID"
+      : null,
+    data.SMS_PROVIDER_MODE === "live" && !data.MSG91_DLT_TE_ID
+      ? "MSG91_DLT_TE_ID"
       : null,
     data.PAYMENT_PROVIDER === "cashfree" && !data.CASHFREE_APP_ID
       ? "CASHFREE_APP_ID"
@@ -294,6 +320,7 @@ export function loadEnv(input: NodeJS.ProcessEnv = process.env): Env {
 
     assertProductionProviderModes(data);
     assertProductionResourceIsolation(data);
+    assertMsg91DltPeId(data);
     assertProductionLiveCredentials(data);
     assertProductionNoTestCredentials(data);
     assertProductionInfrastructure(data);

@@ -2,6 +2,9 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
+  "env": {
+    "VITE_API_BASE": "https://moozhayilapp-prod.onrender.com"
+  },
   "rewrites": [
     {
       "source": "/(.*)",

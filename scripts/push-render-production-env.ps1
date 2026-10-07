@@ -71,12 +71,22 @@ if ($ProductionExceptKyc) {
   if (-not $LivePayments) { $paymentMode = "mock" }
 }
 
+$dltPath = Join-Path $Root "config/dlt-production.json"
+$dltCfg = $null
+if (Test-Path $dltPath) {
+  $dltCfg = Get-Content $dltPath -Raw | ConvertFrom-Json
+}
+
 if ($ProductionExceptKyc -or $LiveSms) {
   if (-not $prodVars["MSG91_AUTH_KEY"] -or $prodVars["MSG91_AUTH_KEY"].Length -lt 8) {
     Write-Error "Live SMS requires MSG91_AUTH_KEY in PRODUCTION_ENV.txt."
   }
-  if (-not $prodVars["MSG91_OTP_TEMPLATE_ID"]) {
-    Write-Error "Live SMS requires MSG91_OTP_TEMPLATE_ID in PRODUCTION_ENV.txt."
+  if (-not $prodVars["MSG91_OTP_TEMPLATE_ID"] -and -not $dltCfg.msg91OtpTemplateId) {
+    Write-Error "Live SMS requires MSG91_OTP_TEMPLATE_ID in PRODUCTION_ENV.txt or config/dlt-production.json."
+  }
+  $peCheck = if ($prodVars["MSG91_DLT_PE_ID"]) { $prodVars["MSG91_DLT_PE_ID"] } elseif ($dltCfg) { $dltCfg.peId } else { "" }
+  if ($peCheck -eq "1016720216615695729") {
+    Write-Error "MSG91_DLT_PE_ID is Brand DLT ID; use Principal Entity peId $($dltCfg.peId) from config/dlt-production.json (and MSG91 sender PE field)."
   }
 }
 
@@ -103,7 +113,23 @@ $overrides = @{
 
 if ($ServiceHost) {
   $overrides["PUBLIC_BASE_URL"] = "https://$ServiceHost"
-  $overrides["CORS_ALLOWED_ORIGINS"] = "https://$ServiceHost"
+  $corsOrigins = @("https://$ServiceHost")
+  if ($cfg.production.adminCrmOrigin) {
+    $corsOrigins += $cfg.production.adminCrmOrigin.TrimEnd("/")
+  }
+  $overrides["CORS_ALLOWED_ORIGINS"] = ($corsOrigins -join ",")
+}
+
+if ($dltCfg) {
+  $overrides["MSG91_DLT_PE_ID"] = [string]$dltCfg.peId
+  $overrides["MSG91_DLT_TE_ID"] = [string]$dltCfg.airtelDltTemplateId
+  if ($dltCfg.msg91OtpTemplateId) {
+    $overrides["MSG91_OTP_TEMPLATE_ID"] = [string]$dltCfg.msg91OtpTemplateId
+  }
+  if ($dltCfg.header) {
+    $overrides["MSG91_SENDER_ID"] = [string]$dltCfg.header
+  }
+  Write-Host "DLT overrides from config/dlt-production.json: PE=$($dltCfg.peId) TE=$($dltCfg.airtelDltTemplateId)"
 }
 
 $params = @{

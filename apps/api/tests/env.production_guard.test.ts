@@ -25,6 +25,8 @@ const productionBase = {
   CORS_ALLOWED_ORIGINS: "https://app.example.com",
   MSG91_AUTH_KEY: "test_msg91_key",
   MSG91_OTP_TEMPLATE_ID: "test_template",
+  MSG91_DLT_PE_ID: "1001435730734881903",
+  MSG91_DLT_TE_ID: "1077188560121746406",
   RAZORPAY_KEY_ID: "rzp_live_test_key_id",
   RAZORPAY_KEY_SECRET: "rzp_secret",
   RAZORPAY_WEBHOOK_SECRET: "webhook_secret",
@@ -110,7 +112,20 @@ describe("Production environment guards", () => {
         SMS_PROVIDER_MODE: "live",
         MSG91_AUTH_KEY: undefined,
         MSG91_OTP_TEMPLATE_ID: undefined,
+        MSG91_DLT_PE_ID: undefined,
+        MSG91_DLT_TE_ID: undefined,
       }),
-    ).toThrow("missing production live provider credentials MSG91_AUTH_KEY, MSG91_OTP_TEMPLATE_ID");
+    ).toThrow(
+      "missing production live provider credentials MSG91_AUTH_KEY, MSG91_OTP_TEMPLATE_ID, MSG91_DLT_PE_ID, MSG91_DLT_TE_ID",
+    );
+  });
+
+  it("rejects Brand DLT ID used as MSG91_DLT_PE_ID", () => {
+    expect(() =>
+      loadEnv({
+        ...productionBase,
+        MSG91_DLT_PE_ID: "1016720216615695729",
+      }),
+    ).toThrow("MSG91_DLT_PE_ID is the Brand DLT ID");
   });
 });

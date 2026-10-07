@@ -1,5 +1,6 @@
 import { loadEnv } from "../../config/env";
 import { AppError } from "../../middleware/error.middleware";
+import { logger } from "../../utils/logger";
 import { withRetry } from "../../utils/retry";
 
 const MSG91_OTP_URL = "https://control.msg91.com/api/v5/otp";
@@ -42,51 +43,78 @@ export async function sendMsg91Otp(input: {
   phone: string;
   otp: string;
 }): Promise<void> {
+  const env = loadEnv();
   const { authKey, templateId } = requireMsg91Credentials();
   const mobile = formatPhoneForMsg91(input.phone);
 
-  await withRetry(async () => {
-    const url = new URL(MSG91_OTP_URL);
-    url.searchParams.set("otp", input.otp);
-    url.searchParams.set("mobile", mobile);
+  const payload: Record<string, string | number> = {
+    template_id: templateId,
+    mobile,
+    otp: input.otp,
+    otp_length: 6,
+    otp_expiry: 10,
+  };
+  if (env.MSG91_SENDER_ID) {
+    payload.sender = env.MSG91_SENDER_ID;
+  }
+  if (env.MSG91_DLT_PE_ID) {
+    payload.PE_ID = env.MSG91_DLT_PE_ID;
+  }
+  if (env.MSG91_DLT_TE_ID) {
+    payload.DLT_TE_ID = env.MSG91_DLT_TE_ID;
+  }
 
-    const response = await fetch(url, {
+  await withRetry(async () => {
+    const response = await fetch(MSG91_OTP_URL, {
       method: "POST",
       headers: {
         authkey: authKey,
         "content-type": "application/json",
         accept: "application/json",
       },
-      body: JSON.stringify({
-        template_id: templateId,
-      }),
+      body: JSON.stringify(payload),
     });
 
+    const rawBody = await response.text().catch(() => "");
+
     if (!response.ok) {
-      const body = await response.text().catch(() => "");
       throw new Error(
-        `MSG91 OTP request failed (${response.status}): ${body.slice(0, 200)}`,
+        `MSG91 OTP request failed (${response.status}): ${rawBody.slice(0, 200)}`,
       );
     }
 
     let payload: unknown;
     try {
-      payload = await response.json();
+      payload = rawBody ? JSON.parse(rawBody) : null;
     } catch {
-      return;
+      throw new Error(`MSG91 OTP invalid JSON: ${rawBody.slice(0, 200)}`);
     }
 
-    if (
+    if (payload && typeof payload === "object" && "type" in payload) {
+      const type = String(payload.type);
+      if (type === "error") {
+        const message =
+          "message" in payload && typeof payload.message === "string"
+            ? payload.message
+            : "MSG91 rejected OTP dispatch";
+        throw new Error(message);
+      }
+      if (type !== "success") {
+        throw new Error(`MSG91 unexpected response type: ${type}`);
+      }
+    }
+
+    const requestId =
       payload &&
       typeof payload === "object" &&
-      "type" in payload &&
-      payload.type === "error"
-    ) {
-      const message =
-        "message" in payload && typeof payload.message === "string"
-          ? payload.message
-          : "MSG91 rejected OTP dispatch";
-      throw new Error(message);
-    }
+      "message" in payload &&
+      typeof payload.message === "string"
+        ? payload.message
+        : undefined;
+
+    logger.info("MSG91 OTP accepted", {
+      mobile: `${mobile.slice(0, 4)}****${mobile.slice(-2)}`,
+      requestId,
+    });
   });
 }

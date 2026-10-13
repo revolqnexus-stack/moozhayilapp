@@ -75,13 +75,22 @@ class _OtpDotFieldState extends State<OtpDotField> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Opacity(
-            opacity: 0,
+          SizedBox(
+            width: 1,
+            height: 1,
             child: TextField(
               controller: _controller,
               focusNode: _focusNode,
               autofocus: true,
               keyboardType: TextInputType.number,
+              autofillHints: const [AutofillHints.oneTimeCode],
+              enableSuggestions: false,
+              autocorrect: false,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+              ),
+              style: const TextStyle(fontSize: 1, color: Colors.transparent),
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               onChanged: _handleChanged,
             ),

@@ -46,18 +46,17 @@ describe("Auth OTP SMS dispatch", () => {
     });
   });
 
-  it("deletes the session and returns PROVIDER_UNAVAILABLE when SMS dispatch fails", async () => {
+  it("deletes the session when background SMS dispatch fails", async () => {
     mockedSendOtpSms.mockRejectedValueOnce(new Error("MSG91 unavailable"));
 
     const response = await request(app)
       .post("/v1/auth/send-otp")
       .send({ phone: "+919876543211" });
 
-    expect(response.status).toBe(503);
-    expect(response.body.error).toMatchObject({
-      code: "PROVIDER_UNAVAILABLE",
-      message: "Could not send verification code. Please try again.",
-    });
+    expect(response.status).toBe(200);
+    expect(response.body.otp_session_id).toEqual(expect.any(String));
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
     const sessions = await prisma.otpSession.count({
       where: { phone: "+919876543211" },

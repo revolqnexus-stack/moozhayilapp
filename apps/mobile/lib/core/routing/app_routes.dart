@@ -2,6 +2,10 @@
 ///
 /// Source of truth: docs/14-final-architecture.md §4.2
 abstract final class AppRoutes {
+  /// Initial boot route shown while the auth session is being restored, so the
+  /// Home tab shell never flashes before the user's signed-in state is known.
+  static const splash = '/splash';
+
   static const onboarding = '/onboarding';
   static const onboardingCarousel = '/onboarding/carousel';
   static const onboardingIntent = '/onboarding/intent';

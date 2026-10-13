@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/utils/customer_error_copy.dart';
@@ -14,19 +16,35 @@ import '../../../core/constants/colors.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 import '../../../core/routing/app_routes.dart';
+import '../../../core/services/api_warmup.dart';
 import '../../../core/utils/phone_utils.dart';
 import '../providers/auth_provider.dart';
 
-class AuthScreen extends ConsumerWidget {
+class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key, this.from});
 
   final String? from;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AuthScreen> createState() => _AuthScreenState();
+}
+
+class _AuthScreenState extends ConsumerState<AuthScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(warmProductionApi());
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final auth = ref.watch(authControllerProvider);
     final state = auth.value ?? const AuthState();
     final phoneReady = isValidIndianPhone(normalizeIndianPhone(state.phone));
+    final sendingOtp = state.otpSendInProgress;
+    final sendOtpError = state.sendOtpError;
 
     return Scaffold(
       backgroundColor: AppColors.paper,
@@ -73,15 +91,17 @@ class AuthScreen extends ConsumerWidget {
                       onChanged: ref
                           .read(authControllerProvider.notifier)
                           .setPhone,
-                      onSubmit: (_) => _sendOtp(context, ref),
+                      onSubmit: (_) => _sendOtp(context),
                     ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      'We\u2019ll send a 6-digit code to +91 ${state.phone.isEmpty ? 'XXXXXXXXXX' : state.phone}.',
-                      style: AppTypography.uiCaption.copyWith(
-                        decoration: TextDecoration.none,
+                    if (phoneReady) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        'We\u2019ll send a 6-digit code to +91 ${formatIndianPhoneLabel(state.phone)}.',
+                        style: AppTypography.uiCaption.copyWith(
+                          decoration: TextDecoration.none,
+                        ),
                       ),
-                    ),
+                    ],
                     if (stagingOtpHint.isNotEmpty) ...[
                       const SizedBox(height: AppSpacing.xs),
                       Text(
@@ -92,21 +112,31 @@ class AuthScreen extends ConsumerWidget {
                         ),
                       ),
                     ],
-                    if (auth.hasError) ...[
+                    if (sendOtpError != null) ...[
                       const SizedBox(height: AppSpacing.md),
                       ErrorState(
-                        headline: _sendErrorHeadline(auth.error),
-                        body: CustomerErrorCopy.message(auth.error),
-                        onRetry: () => _sendOtp(context, ref),
+                        headline: _sendErrorHeadline(sendOtpError),
+                        body: CustomerErrorCopy.message(sendOtpError),
+                        onRetry: () => _sendOtp(context),
+                      ),
+                    ],
+                    if (sendingOtp) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        'Sending your code\u2026',
+                        style: AppTypography.uiCaption.copyWith(
+                          color: AppColors.textMuted,
+                          decoration: TextDecoration.none,
+                        ),
                       ),
                     ],
                     const SizedBox(height: AppSpacing.xl),
                     PrimaryButton(
-                      label: 'Send OTP',
+                      label: sendingOtp ? 'Sending\u2026' : 'Send OTP',
                       isFullWidth: true,
-                      isLoading: auth.isLoading,
-                      isDisabled: !phoneReady,
-                      onTap: () => _sendOtp(context, ref),
+                      isLoading: sendingOtp,
+                      isDisabled: !phoneReady || sendingOtp,
+                      onTap: () => _sendOtp(context),
                     ),
                     const Spacer(),
                   ],
@@ -119,20 +149,28 @@ class AuthScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _sendOtp(BuildContext context, WidgetRef ref) async {
-    if (ref.read(authControllerProvider).isLoading) {
+  void _sendOtp(BuildContext context) {
+    final before = ref.read(authControllerProvider).value ?? const AuthState();
+    if (before.otpSendInProgress) {
       return;
     }
 
-    await ref.read(authControllerProvider.notifier).sendOtp();
-    if (context.mounted && !ref.read(authControllerProvider).hasError) {
-      context.go(
-        Uri(
-          path: AppRoutes.authOtp,
-          queryParameters: from == null ? null : {'from': from},
-        ).toString(),
-      );
+    final phone = normalizeIndianPhone(before.phone);
+    if (!isValidIndianPhone(phone)) {
+      return;
     }
+
+    // Fire the request but don't block the UI on the SMS round-trip. The OTP
+    // screen renders a "sending" state and surfaces any send error with retry.
+    unawaited(ref.read(authControllerProvider.notifier).sendOtp());
+
+    // Optimistically open the OTP screen immediately.
+    context.go(
+      Uri(
+        path: AppRoutes.authOtp,
+        queryParameters: widget.from == null ? null : {'from': widget.from},
+      ).toString(),
+    );
   }
 
   String _sendErrorHeadline(Object? error) {

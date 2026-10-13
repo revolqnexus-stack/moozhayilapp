@@ -1,4 +1,8 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+
+dotenv.config({
+  path: process.env.MOOZHAYIL_ENV_FILE ?? ".env",
+});
 import http from "http";
 import { validateEnvironment } from "../app";
 import { logger } from "../utils/logger";

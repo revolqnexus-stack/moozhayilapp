@@ -7,7 +7,7 @@ import { logger } from "../../utils/logger";
 import type { SendOtpInput, VerifyOtpInput, RefreshInput } from "./auth.schema";
 import { sendOtpSms } from "./sms.client";
 
-const accessTokenTtlSeconds = 60 * 60;
+const accessTokenTtlSeconds = 60 * 60 * 24;
 const refreshTokenTtlDays = 30;
 const otpTtlSeconds = 5 * 60;
 const resendAfterSeconds = 30;
@@ -107,22 +107,13 @@ export class AuthService {
       },
     });
 
-    try {
-      await sendOtpSms({ phone: input.phone, otp });
-    } catch (err) {
+    void sendOtpSms({ phone: input.phone, otp }).catch(async (err: unknown) => {
       logger.error("OTP SMS dispatch failed", {
         phone: input.phone.slice(0, 4) + "****",
         error: err instanceof Error ? err.message : String(err),
       });
-
-      await prisma.otpSession.delete({ where: { id: otpSession.id } });
-
-      throw new AppError(
-        503,
-        "PROVIDER_UNAVAILABLE",
-        "Could not send verification code. Please try again.",
-      );
-    }
+      await prisma.otpSession.delete({ where: { id: otpSession.id } }).catch(() => undefined);
+    });
 
     return {
       otp_session_id: otpSession.id,

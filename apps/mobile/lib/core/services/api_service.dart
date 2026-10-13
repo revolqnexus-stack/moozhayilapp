@@ -33,6 +33,13 @@ class ApiException implements Exception {
     if (error.type == DioExceptionType.connectionError) {
       return const ApiException('Please check your internet connection');
     }
+    if (error.type == DioExceptionType.connectionTimeout ||
+        error.type == DioExceptionType.receiveTimeout ||
+        error.type == DioExceptionType.sendTimeout) {
+      return const ApiException(
+        'The server is waking up. Please wait a moment and try again.',
+      );
+    }
 
     return const ApiException('Something went wrong');
   }
@@ -118,9 +125,9 @@ Dio dio(Ref ref) {
   final client = Dio(
     BaseOptions(
       baseUrl: resolveApiBaseUrl(),
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 15),
-      sendTimeout: const Duration(seconds: 15),
+      connectTimeout: const Duration(seconds: 25),
+      receiveTimeout: const Duration(seconds: 25),
+      sendTimeout: const Duration(seconds: 25),
       responseType: ResponseType.json,
     ),
   );

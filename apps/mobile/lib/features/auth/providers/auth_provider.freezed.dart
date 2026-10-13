@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AuthState {
 
- AuthFlowStep get step; User? get user; OtpChallenge? get otpChallenge; String get phone; String get otp;
+ AuthFlowStep get step; User? get user; OtpChallenge? get otpChallenge; String get phone; String get otp; bool get otpSendInProgress; Object? get sendOtpError; bool get otpVerifyInProgress; Object? get verifyOtpError;
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $AuthStateCopyWith<AuthState> get copyWith => _$AuthStateCopyWithImpl<AuthState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthState&&(identical(other.step, step) || other.step == step)&&(identical(other.user, user) || other.user == user)&&(identical(other.otpChallenge, otpChallenge) || other.otpChallenge == otpChallenge)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.otp, otp) || other.otp == otp));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthState&&(identical(other.step, step) || other.step == step)&&(identical(other.user, user) || other.user == user)&&(identical(other.otpChallenge, otpChallenge) || other.otpChallenge == otpChallenge)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.otp, otp) || other.otp == otp)&&(identical(other.otpSendInProgress, otpSendInProgress) || other.otpSendInProgress == otpSendInProgress)&&const DeepCollectionEquality().equals(other.sendOtpError, sendOtpError)&&(identical(other.otpVerifyInProgress, otpVerifyInProgress) || other.otpVerifyInProgress == otpVerifyInProgress)&&const DeepCollectionEquality().equals(other.verifyOtpError, verifyOtpError));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,step,user,otpChallenge,phone,otp);
+int get hashCode => Object.hash(runtimeType,step,user,otpChallenge,phone,otp,otpSendInProgress,const DeepCollectionEquality().hash(sendOtpError),otpVerifyInProgress,const DeepCollectionEquality().hash(verifyOtpError));
 
 @override
 String toString() {
-  return 'AuthState(step: $step, user: $user, otpChallenge: $otpChallenge, phone: $phone, otp: $otp)';
+  return 'AuthState(step: $step, user: $user, otpChallenge: $otpChallenge, phone: $phone, otp: $otp, otpSendInProgress: $otpSendInProgress, sendOtpError: $sendOtpError, otpVerifyInProgress: $otpVerifyInProgress, verifyOtpError: $verifyOtpError)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $AuthStateCopyWith<$Res>  {
   factory $AuthStateCopyWith(AuthState value, $Res Function(AuthState) _then) = _$AuthStateCopyWithImpl;
 @useResult
 $Res call({
- AuthFlowStep step, User? user, OtpChallenge? otpChallenge, String phone, String otp
+ AuthFlowStep step, User? user, OtpChallenge? otpChallenge, String phone, String otp, bool otpSendInProgress, Object? sendOtpError, bool otpVerifyInProgress, Object? verifyOtpError
 });
 
 
@@ -62,14 +62,16 @@ class _$AuthStateCopyWithImpl<$Res>
 
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? step = null,Object? user = freezed,Object? otpChallenge = freezed,Object? phone = null,Object? otp = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? step = null,Object? user = freezed,Object? otpChallenge = freezed,Object? phone = null,Object? otp = null,Object? otpSendInProgress = null,Object? sendOtpError = freezed,Object? otpVerifyInProgress = null,Object? verifyOtpError = freezed,}) {
   return _then(_self.copyWith(
 step: null == step ? _self.step : step // ignore: cast_nullable_to_non_nullable
 as AuthFlowStep,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
 as User?,otpChallenge: freezed == otpChallenge ? _self.otpChallenge : otpChallenge // ignore: cast_nullable_to_non_nullable
 as OtpChallenge?,phone: null == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
 as String,otp: null == otp ? _self.otp : otp // ignore: cast_nullable_to_non_nullable
-as String,
+as String,otpSendInProgress: null == otpSendInProgress ? _self.otpSendInProgress : otpSendInProgress // ignore: cast_nullable_to_non_nullable
+as bool,sendOtpError: freezed == sendOtpError ? _self.sendOtpError : sendOtpError ,otpVerifyInProgress: null == otpVerifyInProgress ? _self.otpVerifyInProgress : otpVerifyInProgress // ignore: cast_nullable_to_non_nullable
+as bool,verifyOtpError: freezed == verifyOtpError ? _self.verifyOtpError : verifyOtpError ,
   ));
 }
 /// Create a copy of AuthState
@@ -178,10 +180,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AuthFlowStep step,  User? user,  OtpChallenge? otpChallenge,  String phone,  String otp)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AuthFlowStep step,  User? user,  OtpChallenge? otpChallenge,  String phone,  String otp,  bool otpSendInProgress,  Object? sendOtpError,  bool otpVerifyInProgress,  Object? verifyOtpError)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AuthState() when $default != null:
-return $default(_that.step,_that.user,_that.otpChallenge,_that.phone,_that.otp);case _:
+return $default(_that.step,_that.user,_that.otpChallenge,_that.phone,_that.otp,_that.otpSendInProgress,_that.sendOtpError,_that.otpVerifyInProgress,_that.verifyOtpError);case _:
   return orElse();
 
 }
@@ -199,10 +201,10 @@ return $default(_that.step,_that.user,_that.otpChallenge,_that.phone,_that.otp);
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AuthFlowStep step,  User? user,  OtpChallenge? otpChallenge,  String phone,  String otp)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AuthFlowStep step,  User? user,  OtpChallenge? otpChallenge,  String phone,  String otp,  bool otpSendInProgress,  Object? sendOtpError,  bool otpVerifyInProgress,  Object? verifyOtpError)  $default,) {final _that = this;
 switch (_that) {
 case _AuthState():
-return $default(_that.step,_that.user,_that.otpChallenge,_that.phone,_that.otp);case _:
+return $default(_that.step,_that.user,_that.otpChallenge,_that.phone,_that.otp,_that.otpSendInProgress,_that.sendOtpError,_that.otpVerifyInProgress,_that.verifyOtpError);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -219,10 +221,10 @@ return $default(_that.step,_that.user,_that.otpChallenge,_that.phone,_that.otp);
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AuthFlowStep step,  User? user,  OtpChallenge? otpChallenge,  String phone,  String otp)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AuthFlowStep step,  User? user,  OtpChallenge? otpChallenge,  String phone,  String otp,  bool otpSendInProgress,  Object? sendOtpError,  bool otpVerifyInProgress,  Object? verifyOtpError)?  $default,) {final _that = this;
 switch (_that) {
 case _AuthState() when $default != null:
-return $default(_that.step,_that.user,_that.otpChallenge,_that.phone,_that.otp);case _:
+return $default(_that.step,_that.user,_that.otpChallenge,_that.phone,_that.otp,_that.otpSendInProgress,_that.sendOtpError,_that.otpVerifyInProgress,_that.verifyOtpError);case _:
   return null;
 
 }
@@ -234,7 +236,7 @@ return $default(_that.step,_that.user,_that.otpChallenge,_that.phone,_that.otp);
 
 
 class _AuthState implements AuthState {
-  const _AuthState({this.step = AuthFlowStep.signedOut, this.user, this.otpChallenge, this.phone = '', this.otp = ''});
+  const _AuthState({this.step = AuthFlowStep.signedOut, this.user, this.otpChallenge, this.phone = '', this.otp = '', this.otpSendInProgress = false, this.sendOtpError, this.otpVerifyInProgress = false, this.verifyOtpError});
   
 
 @override@JsonKey() final  AuthFlowStep step;
@@ -242,6 +244,10 @@ class _AuthState implements AuthState {
 @override final  OtpChallenge? otpChallenge;
 @override@JsonKey() final  String phone;
 @override@JsonKey() final  String otp;
+@override@JsonKey() final  bool otpSendInProgress;
+@override final  Object? sendOtpError;
+@override@JsonKey() final  bool otpVerifyInProgress;
+@override final  Object? verifyOtpError;
 
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
@@ -253,16 +259,16 @@ _$AuthStateCopyWith<_AuthState> get copyWith => __$AuthStateCopyWithImpl<_AuthSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthState&&(identical(other.step, step) || other.step == step)&&(identical(other.user, user) || other.user == user)&&(identical(other.otpChallenge, otpChallenge) || other.otpChallenge == otpChallenge)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.otp, otp) || other.otp == otp));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthState&&(identical(other.step, step) || other.step == step)&&(identical(other.user, user) || other.user == user)&&(identical(other.otpChallenge, otpChallenge) || other.otpChallenge == otpChallenge)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.otp, otp) || other.otp == otp)&&(identical(other.otpSendInProgress, otpSendInProgress) || other.otpSendInProgress == otpSendInProgress)&&const DeepCollectionEquality().equals(other.sendOtpError, sendOtpError)&&(identical(other.otpVerifyInProgress, otpVerifyInProgress) || other.otpVerifyInProgress == otpVerifyInProgress)&&const DeepCollectionEquality().equals(other.verifyOtpError, verifyOtpError));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,step,user,otpChallenge,phone,otp);
+int get hashCode => Object.hash(runtimeType,step,user,otpChallenge,phone,otp,otpSendInProgress,const DeepCollectionEquality().hash(sendOtpError),otpVerifyInProgress,const DeepCollectionEquality().hash(verifyOtpError));
 
 @override
 String toString() {
-  return 'AuthState(step: $step, user: $user, otpChallenge: $otpChallenge, phone: $phone, otp: $otp)';
+  return 'AuthState(step: $step, user: $user, otpChallenge: $otpChallenge, phone: $phone, otp: $otp, otpSendInProgress: $otpSendInProgress, sendOtpError: $sendOtpError, otpVerifyInProgress: $otpVerifyInProgress, verifyOtpError: $verifyOtpError)';
 }
 
 
@@ -273,7 +279,7 @@ abstract mixin class _$AuthStateCopyWith<$Res> implements $AuthStateCopyWith<$Re
   factory _$AuthStateCopyWith(_AuthState value, $Res Function(_AuthState) _then) = __$AuthStateCopyWithImpl;
 @override @useResult
 $Res call({
- AuthFlowStep step, User? user, OtpChallenge? otpChallenge, String phone, String otp
+ AuthFlowStep step, User? user, OtpChallenge? otpChallenge, String phone, String otp, bool otpSendInProgress, Object? sendOtpError, bool otpVerifyInProgress, Object? verifyOtpError
 });
 
 
@@ -290,14 +296,16 @@ class __$AuthStateCopyWithImpl<$Res>
 
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? step = null,Object? user = freezed,Object? otpChallenge = freezed,Object? phone = null,Object? otp = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? step = null,Object? user = freezed,Object? otpChallenge = freezed,Object? phone = null,Object? otp = null,Object? otpSendInProgress = null,Object? sendOtpError = freezed,Object? otpVerifyInProgress = null,Object? verifyOtpError = freezed,}) {
   return _then(_AuthState(
 step: null == step ? _self.step : step // ignore: cast_nullable_to_non_nullable
 as AuthFlowStep,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
 as User?,otpChallenge: freezed == otpChallenge ? _self.otpChallenge : otpChallenge // ignore: cast_nullable_to_non_nullable
 as OtpChallenge?,phone: null == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
 as String,otp: null == otp ? _self.otp : otp // ignore: cast_nullable_to_non_nullable
-as String,
+as String,otpSendInProgress: null == otpSendInProgress ? _self.otpSendInProgress : otpSendInProgress // ignore: cast_nullable_to_non_nullable
+as bool,sendOtpError: freezed == sendOtpError ? _self.sendOtpError : sendOtpError ,otpVerifyInProgress: null == otpVerifyInProgress ? _self.otpVerifyInProgress : otpVerifyInProgress // ignore: cast_nullable_to_non_nullable
+as bool,verifyOtpError: freezed == verifyOtpError ? _self.verifyOtpError : verifyOtpError ,
   ));
 }
 

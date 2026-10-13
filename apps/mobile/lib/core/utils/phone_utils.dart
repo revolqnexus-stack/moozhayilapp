@@ -26,3 +26,17 @@ bool isValidIndianPhone(String phone) {
   final normalized = normalizeIndianPhone(phone);
   return RegExp(r'^\+91[6-9]\d{9}$').hasMatch(normalized);
 }
+
+/// Last 10 digits for UI (handles pasted +91… numbers).
+String indianMobileDigitsOnly(String raw) {
+  final digits = raw.replaceAll(RegExp(r'\D'), '');
+  if (digits.length <= 10) {
+    return digits;
+  }
+  return digits.substring(digits.length - 10);
+}
+
+String formatIndianPhoneLabel(String raw) {
+  final digits = indianMobileDigitsOnly(raw);
+  return digits.isEmpty ? 'XXXXXXXXXX' : digits;
+}

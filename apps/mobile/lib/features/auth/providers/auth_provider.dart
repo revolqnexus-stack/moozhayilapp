@@ -23,10 +23,14 @@ abstract class AuthState with _$AuthState {
     OtpChallenge? otpChallenge,
     @Default('') String phone,
     @Default('') String otp,
+    @Default(false) bool otpSendInProgress,
+    Object? sendOtpError,
+    @Default(false) bool otpVerifyInProgress,
+    Object? verifyOtpError,
   }) = _AuthState;
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class AuthController extends _$AuthController {
   @override
   Future<AuthState> build() async {
@@ -44,6 +48,15 @@ class AuthController extends _$AuthController {
     }
 
     final user = await ref.read(authServiceProvider).restoreSession();
+
+    final inFlight = state.value;
+    if (inFlight != null &&
+        (inFlight.otpSendInProgress ||
+            inFlight.otpChallenge != null ||
+            inFlight.step == AuthFlowStep.otpSent)) {
+      return inFlight;
+    }
+
     if (user != null) {
       unawaited(
         ref.read(pushRegistrationServiceProvider).registerDeviceIfNeeded(),
@@ -60,57 +73,105 @@ class AuthController extends _$AuthController {
 
   void setPhone(String phone) {
     final current = state.value ?? const AuthState();
-    state = AsyncData(current.copyWith(phone: phone));
+    state = AsyncData(
+      current.copyWith(
+        phone: indianMobileDigitsOnly(phone),
+        sendOtpError: null,
+      ),
+    );
   }
 
   void setOtp(String otp) {
     final current = state.value ?? const AuthState();
-    state = AsyncData(current.copyWith(otp: otp));
+    state = AsyncData(current.copyWith(otp: otp, verifyOtpError: null));
   }
 
   Future<void> sendOtp() async {
-    if (state.isLoading) {
+    final previous = state.value ?? const AuthState();
+    if (previous.otpSendInProgress) {
       return;
     }
 
-    final previous = state.value ?? const AuthState();
     final phone = normalizeIndianPhone(previous.phone);
     if (!isValidIndianPhone(phone)) {
       return;
     }
 
-    state = await AsyncValue.guard(() async {
+    state = AsyncData(
+      previous.copyWith(
+        otpSendInProgress: true,
+        sendOtpError: null,
+        verifyOtpError: null,
+      ),
+    );
+
+    try {
       final challenge = await ref.read(authServiceProvider).sendOtp(phone);
-      return previous.copyWith(
-        step: AuthFlowStep.otpSent,
-        phone: phone,
-        otpChallenge: challenge,
-        otp: '',
+      state = AsyncData(
+        previous.copyWith(
+          otpSendInProgress: false,
+          sendOtpError: null,
+          verifyOtpError: null,
+          step: AuthFlowStep.otpSent,
+          phone: indianMobileDigitsOnly(phone),
+          otpChallenge: challenge,
+          otp: '',
+        ),
       );
-    });
+    } catch (error) {
+      state = AsyncData(
+        previous.copyWith(otpSendInProgress: false, sendOtpError: error),
+      );
+    }
   }
 
-  Future<User> verifyOtp() async {
+  /// Verifies the entered OTP.
+  ///
+  /// Returns the signed-in [User] on success, or `null` on failure. Unlike a
+  /// raw [AsyncValue.guard], this preserves the existing [AuthState] (phone,
+  /// entered code) while verifying so the OTP screen never blanks mid-request.
+  Future<User?> verifyOtp() async {
     final previous = state.value ?? const AuthState();
-    final challenge = previous.otpChallenge;
-    if (challenge == null) {
-      throw StateError('OTP session is missing');
+    if (previous.otpVerifyInProgress) {
+      return null;
     }
 
-    final result = await AsyncValue.guard(() async {
-      final verifyResult = await ref
+    final challenge = previous.otpChallenge;
+    if (challenge == null) {
+      state = AsyncData(
+        previous.copyWith(
+          verifyOtpError: StateError('OTP session is missing'),
+        ),
+      );
+      return null;
+    }
+
+    state = AsyncData(
+      previous.copyWith(otpVerifyInProgress: true, verifyOtpError: null),
+    );
+
+    try {
+      final result = await ref
           .read(authServiceProvider)
           .verifyOtp(otpSessionId: challenge.otpSessionId, otp: previous.otp);
-      return previous.copyWith(
-        step: AuthFlowStep.signedIn,
-        user: verifyResult.user,
+      state = AsyncData(
+        previous.copyWith(
+          step: AuthFlowStep.signedIn,
+          user: result.user,
+          otpVerifyInProgress: false,
+          verifyOtpError: null,
+        ),
       );
-    });
-    state = result;
-    unawaited(
-      ref.read(pushRegistrationServiceProvider).registerDeviceIfNeeded(),
-    );
-    return result.requireValue.user!;
+      unawaited(
+        ref.read(pushRegistrationServiceProvider).registerDeviceIfNeeded(),
+      );
+      return result.user;
+    } catch (error) {
+      state = AsyncData(
+        previous.copyWith(otpVerifyInProgress: false, verifyOtpError: error),
+      );
+      return null;
+    }
   }
 
   Future<void> refreshMe() async {

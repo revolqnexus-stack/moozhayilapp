@@ -4,6 +4,7 @@ import { logger } from "../../utils/logger";
 import { withRetry } from "../../utils/retry";
 
 const MSG91_OTP_URL = "https://control.msg91.com/api/v5/otp";
+const MSG91_REQUEST_TIMEOUT_MS = 8000;
 
 function requireMsg91Credentials() {
   const env = loadEnv();
@@ -52,7 +53,8 @@ export async function sendMsg91Otp(input: {
     mobile,
     otp: input.otp,
     otp_length: 6,
-    otp_expiry: 10,
+    // Keep in sync with the server-side OTP TTL (otpTtlSeconds in auth.service).
+    otp_expiry: 5,
   };
   if (env.MSG91_SENDER_ID) {
     payload.sender = env.MSG91_SENDER_ID;
@@ -64,18 +66,32 @@ export async function sendMsg91Otp(input: {
     payload.DLT_TE_ID = env.MSG91_DLT_TE_ID;
   }
 
-  await withRetry(async () => {
-    const response = await fetch(MSG91_OTP_URL, {
-      method: "POST",
-      headers: {
-        authkey: authKey,
-        "content-type": "application/json",
-        accept: "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+  await withRetry(
+    async () => {
+      let response: Response;
+      try {
+        response = await fetch(MSG91_OTP_URL, {
+          method: "POST",
+          headers: {
+            authkey: authKey,
+            "content-type": "application/json",
+            accept: "application/json",
+          },
+          body: JSON.stringify(payload),
+          // Hard per-attempt deadline so a slow provider can't hold the OTP
+          // request open indefinitely.
+          signal: AbortSignal.timeout(MSG91_REQUEST_TIMEOUT_MS),
+        });
+      } catch (err) {
+        if (err instanceof Error && err.name === "TimeoutError") {
+          throw new Error(
+            `MSG91 OTP request timed out after ${MSG91_REQUEST_TIMEOUT_MS}ms`,
+          );
+        }
+        throw err;
+      }
 
-    const rawBody = await response.text().catch(() => "");
+      const rawBody = await response.text().catch(() => "");
 
     if (!response.ok) {
       throw new Error(
@@ -83,19 +99,19 @@ export async function sendMsg91Otp(input: {
       );
     }
 
-    let payload: unknown;
+    let parsed: unknown;
     try {
-      payload = rawBody ? JSON.parse(rawBody) : null;
+      parsed = rawBody ? JSON.parse(rawBody) : null;
     } catch {
       throw new Error(`MSG91 OTP invalid JSON: ${rawBody.slice(0, 200)}`);
     }
 
-    if (payload && typeof payload === "object" && "type" in payload) {
-      const type = String(payload.type);
+    if (parsed && typeof parsed === "object" && "type" in parsed) {
+      const type = String(parsed.type);
       if (type === "error") {
         const message =
-          "message" in payload && typeof payload.message === "string"
-            ? payload.message
+          "message" in parsed && typeof parsed.message === "string"
+            ? parsed.message
             : "MSG91 rejected OTP dispatch";
         throw new Error(message);
       }
@@ -105,16 +121,18 @@ export async function sendMsg91Otp(input: {
     }
 
     const requestId =
-      payload &&
-      typeof payload === "object" &&
-      "message" in payload &&
-      typeof payload.message === "string"
-        ? payload.message
+      parsed &&
+      typeof parsed === "object" &&
+      "message" in parsed &&
+      typeof parsed.message === "string"
+        ? parsed.message
         : undefined;
 
-    logger.info("MSG91 OTP accepted", {
-      mobile: `${mobile.slice(0, 4)}****${mobile.slice(-2)}`,
-      requestId,
-    });
-  });
+      logger.info("MSG91 OTP accepted", {
+        mobile: `${mobile.slice(0, 4)}****${mobile.slice(-2)}`,
+        requestId,
+      });
+    },
+    { maxAttempts: 2, initialDelayMs: 150, maxDelayMs: 600 },
+  );
 }

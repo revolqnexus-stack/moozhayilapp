@@ -5,10 +5,14 @@ import 'package:go_router/go_router.dart';
 import '../../../core/animations/section_reveal.dart';
 import '../../../components/editorial/editorial_footer.dart';
 import '../../../components/editorial/editorial_image.dart';
+import '../../../components/feedback/error_state.dart';
+import '../../../components/feedback/loading_shimmer.dart';
+import '../../../core/config/dev_preview.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 import '../../../core/routing/app_routes.dart';
+import '../../../core/utils/cms_navigation.dart';
 import '../../../core/utils/sample_catalog.dart';
 import '../../../core/utils/sample_banners.dart';
 import '../../../core/utils/sample_imagery.dart';
@@ -32,14 +36,8 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final heroBanners = editorialList(
-      ref.watch(cmsBannersProvider('home_hero')),
-      SampleBanners.forPlacement('home_hero'),
-    );
-    final products = editorialList(
-      ref.watch(featuredProductsProvider),
-      SampleCatalog.products,
-    );
+    final featuredAsync = ref.watch(featuredProductsProvider);
+    final products = editorialList(featuredAsync, SampleCatalog.products);
     final goldRate = ref.watch(goldBalanceProvider);
     final clock = ref.watch(serverClockProvider);
     final isOffline = ref.watch(isOfflineProvider);
@@ -97,10 +95,7 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
 
-            SectionReveal(
-              index: 1,
-              child: HeroBannerCarousel(banners: heroBanners),
-            ),
+            const SectionReveal(index: 1, child: _HomeHeroSection()),
 
             const SectionReveal(index: 2, child: CategoryPopCarousel()),
 
@@ -108,7 +103,11 @@ class HomeScreen extends ConsumerWidget {
 
             SectionReveal(
               index: 4,
-              child: FeaturedJewellerySection(products: products),
+              child: !DevPreview.enabled && featuredAsync.hasError
+                  ? _HomeSectionError(
+                      onRetry: () => ref.invalidate(featuredProductsProvider),
+                    )
+                  : FeaturedJewellerySection(products: products),
             ),
 
             SectionReveal(
@@ -323,6 +322,167 @@ class _HomeShowroomCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Home hero that handles loading, error, and empty states explicitly instead
+/// of collapsing to nothing when live banner data is unavailable.
+class _HomeHeroSection extends ConsumerWidget {
+  const _HomeHeroSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(cmsBannersProvider('home_hero'));
+    final height = MediaQuery.sizeOf(context).height * 0.48;
+
+    // Debug/preview: always show believable sample slides.
+    if (DevPreview.enabled) {
+      final banners = (async.value?.isNotEmpty ?? false)
+          ? async.value!
+          : SampleBanners.forPlacement('home_hero');
+      return HeroBannerCarousel(banners: banners);
+    }
+
+    return async.when(
+      data: (banners) => banners.isEmpty
+          ? _HeroFallback(height: height)
+          : HeroBannerCarousel(banners: banners),
+      loading: () => _HeroSkeleton(height: height),
+      error: (_, _) => _HeroError(
+        height: height,
+        onRetry: () => ref.invalidate(cmsBannersProvider('home_hero')),
+      ),
+    );
+  }
+}
+
+class _HeroSkeleton extends StatelessWidget {
+  const _HeroSkeleton({required this.height});
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.homeScreenPadding,
+      ),
+      child: LoadingShimmer.full(height: height, borderRadius: 0),
+    );
+  }
+}
+
+class _HeroError extends StatelessWidget {
+  const _HeroError({required this.height, required this.onRetry});
+
+  final double height;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      child: Center(
+        child: ErrorState(
+          headline: 'We couldn\u2019t load the latest highlights',
+          body: 'Please check your connection and try again.',
+          onRetry: onRetry,
+        ),
+      ),
+    );
+  }
+}
+
+/// Branded, network-free hero shown when the CMS returns no active slides, so
+/// Home always has a hero rather than a blank gap.
+class _HeroFallback extends StatelessWidget {
+  const _HeroFallback({required this.height});
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.homeScreenPadding,
+      ),
+      child: GestureDetector(
+        onTap: () => navigateCmsRoute(context, AppRoutes.shop),
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          height: height,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.brandBurgundy,
+                AppColors.brandBurgundy.withValues(alpha: 0.86),
+              ],
+            ),
+            border: Border.all(
+              color: AppColors.gold.withValues(alpha: 0.35),
+              width: 0.5,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'MOOZHAYIL',
+                  style: AppTypography.uiMicro.copyWith(
+                    color: AppColors.gold,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 2.4,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Elegance meets mastery',
+                  style: AppTypography.headingLG.copyWith(
+                    color: AppColors.ivory,
+                    height: 1.05,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'EXPLORE THE COLLECTION →',
+                  style: AppTypography.buttonLabelSM.copyWith(
+                    color: AppColors.goldLight,
+                    fontSize: 11,
+                    letterSpacing: 1.8,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Compact retry strip for a data-driven Home section that failed to load.
+class _HomeSectionError extends StatelessWidget {
+  const _HomeSectionError({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+      child: ErrorState(
+        headline: 'We couldn\u2019t load this section',
+        body: 'Please check your connection and try again.',
+        onRetry: onRetry,
       ),
     );
   }

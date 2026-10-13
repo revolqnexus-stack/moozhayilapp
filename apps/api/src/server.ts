@@ -1,4 +1,8 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+
+dotenv.config({
+  path: process.env.MOOZHAYIL_ENV_FILE ?? ".env",
+});
 import { createApp, validateEnvironment } from "./app";
 import { initMonitoring } from "./utils/monitoring";
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,11 +9,23 @@ import 'core/widgets/server_clock_lifecycle.dart';
 import 'features/auth/providers/auth_provider.dart';
 
 /// Root widget of the Moozhayil application.
-class MoozhayilApp extends ConsumerWidget {
+class MoozhayilApp extends ConsumerStatefulWidget {
   const MoozhayilApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MoozhayilApp> createState() => _MoozhayilAppState();
+}
+
+class _MoozhayilAppState extends ConsumerState<MoozhayilApp> {
+  late final GoRouter _router = createAppRouter(
+    readAuthState: () => ref.read(authControllerProvider).value,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(authControllerProvider, (_, _) {
+      _router.refresh();
+    });
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -21,12 +34,10 @@ class MoozhayilApp extends ConsumerWidget {
       ),
     );
 
-    final authState = ref.watch(authControllerProvider).value;
-
     return MaterialApp.router(
       title: 'Moozhayil',
       debugShowCheckedModeBanner: false,
-      routerConfig: createAppRouter(authState: authState),
+      routerConfig: _router,
       theme: _buildTheme(),
       builder: (context, child) {
         return ServerClockLifecycle(child: child ?? const SizedBox.shrink());

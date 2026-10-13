@@ -20,6 +20,12 @@ class AuthService {
   final ApiService _apiService;
   final StorageService _storageService;
 
+  /// Requests an OTP for [phone].
+  ///
+  /// Deliberately a single attempt: a timed-out retry could trigger a second
+  /// SMS (and burn the per-phone send limit) because the first request may have
+  /// already dispatched the code server-side. The server responds before the
+  /// SMS round-trip, so a successful send returns quickly.
   Future<OtpChallenge> sendOtp(String phone) async {
     try {
       final response = await _apiService.client.post<Map<String, dynamic>>(
@@ -116,15 +122,55 @@ class AuthService {
 
   Future<User?> restoreSession() async {
     final accessToken = await _storageService.readAccessToken();
-    if (accessToken == null || accessToken.isEmpty) {
+    final refreshToken = await _storageService.readRefreshToken();
+    if ((accessToken == null || accessToken.isEmpty) &&
+        (refreshToken == null || refreshToken.isEmpty)) {
       return null;
     }
 
     try {
       return await me();
-    } on ApiException {
+    } on ApiException catch (error) {
+      if (_isTransientError(error)) {
+        return null;
+      }
+      if (await _tryRefreshSession()) {
+        try {
+          return await me();
+        } on ApiException catch (retryError) {
+          if (_isTransientError(retryError)) {
+            return null;
+          }
+        }
+      }
       await _storageService.clearTokens();
       return null;
+    }
+  }
+
+  bool _isTransientError(ApiException error) {
+    final message = error.message.toLowerCase();
+    return message.contains('internet') ||
+        message.contains('waking up') ||
+        message.contains('timeout') ||
+        message.contains('connection');
+  }
+
+  Future<bool> _tryRefreshSession() async {
+    final refreshToken = await _storageService.readRefreshToken();
+    if (refreshToken == null || refreshToken.isEmpty) {
+      return false;
+    }
+    try {
+      final response = await _apiService.client.post<Map<String, dynamic>>(
+        '/auth/refresh',
+        data: {'refresh_token': refreshToken},
+      );
+      final result = RefreshTokenResult.fromJson(response.data!);
+      await _storageService.saveAccessToken(result.accessToken);
+      return true;
+    } on DioException {
+      return false;
     }
   }
 }

@@ -21,6 +21,7 @@ import '../../features/goals/screens/piece_screen.dart';
 import '../../features/goals/screens/payment_setup_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/my_gold/screens/my_gold_screen.dart';
+import '../../features/onboarding/screens/boot_screen.dart';
 import '../../features/onboarding/screens/intent_screen.dart';
 import '../../features/onboarding/screens/kyc_intro_screen.dart';
 import '../../features/onboarding/screens/name_screen.dart';
@@ -71,22 +72,40 @@ import 'app_routes.dart';
 ///
 /// Rule 8 (09-cursor-rules.md): Navigation MUST go through [context.push] /
 /// [context.go] using constants from [AppRoutes]. Never use Navigator.push.
-final GoRouter appRouter = createAppRouter();
-
-GoRouter createAppRouter({AuthState? authState}) => GoRouter(
-  initialLocation: AppRoutes.home,
+/// Stable router — do not recreate when auth changes (that reset navigation and
+/// dropped OTP sessions). Call [GoRouter.refresh] when auth updates instead.
+GoRouter createAppRouter({required AuthState? Function() readAuthState}) =>
+    GoRouter(
+  initialLocation: AppRoutes.splash,
   debugLogDiagnostics: false,
   redirect: (context, state) {
+    final authState = readAuthState();
+    final location = state.uri.path;
+    final atBoot = location == AppRoutes.splash;
+
+    // Session is still being restored — hold on the boot screen so the Home
+    // tab shell never flashes before the signed-in state is known.
     if (authState == null) {
-      return null;
+      return atBoot ? null : AppRoutes.splash;
     }
 
-    final location = state.uri.path;
     final isPublicRoute =
         location.startsWith(AppRoutes.auth) ||
         location.startsWith(AppRoutes.onboarding) ||
         (DevPreview.enabled && location.startsWith('/dev'));
     final isSignedIn = authState.step == AuthFlowStep.signedIn;
+
+    // Session resolved — leave the boot screen for the correct destination.
+    if (atBoot) {
+      if (isSignedIn) {
+        final name = authState.user?.name;
+        if (name == null || name.isEmpty) {
+          return AppRoutes.onboardingIntent;
+        }
+        return AppRoutes.home;
+      }
+      return AppRoutes.auth;
+    }
 
     if (!isSignedIn && !isPublicRoute) {
       return Uri(
@@ -107,6 +126,12 @@ GoRouter createAppRouter({AuthState? authState}) => GoRouter(
     return null;
   },
   routes: [
+    // ── Boot / session-restore screen (initial route) ──────────────────────
+    GoRoute(
+      path: AppRoutes.splash,
+      builder: (context, state) => const BootScreen(),
+    ),
+
     // ── Persistent tab shell ───────────────────────────────────────────────
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>

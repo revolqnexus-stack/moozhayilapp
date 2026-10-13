@@ -6,7 +6,6 @@ plugins {
 }
 
 import java.util.Properties
-import java.io.FileInputStream
 
 // Load release signing config from android/key.properties.
 // Create key.properties from key.properties.example and fill in real values
@@ -14,8 +13,14 @@ import java.io.FileInputStream
 val keyPropertiesFile = rootProject.file("key.properties")
 val keyProperties = Properties()
 if (keyPropertiesFile.exists()) {
-    keyProperties.load(FileInputStream(keyPropertiesFile))
+    val raw = keyPropertiesFile.readText(Charsets.UTF_8).removePrefix("\uFEFF")
+    keyProperties.load(raw.reader())
 }
+
+fun signingString(props: Properties, key: String): String =
+    props.getProperty(key)?.trim().orEmpty().ifEmpty {
+        error("Missing or empty '$key' in ${keyPropertiesFile.path}")
+    }
 
 android {
     namespace = "com.moozhayil.moozhayil"
@@ -39,10 +44,10 @@ android {
     signingConfigs {
         if (keyPropertiesFile.exists()) {
             create("release") {
-                keyAlias = keyProperties["keyAlias"] as String
-                keyPassword = keyProperties["keyPassword"] as String
-                storeFile = file(keyProperties["storeFile"] as String)
-                storePassword = keyProperties["storePassword"] as String
+                keyAlias = signingString(keyProperties, "keyAlias")
+                keyPassword = signingString(keyProperties, "keyPassword")
+                storeFile = rootProject.file(signingString(keyProperties, "storeFile"))
+                storePassword = signingString(keyProperties, "storePassword")
             }
         }
     }

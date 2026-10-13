@@ -1,8 +1,16 @@
 {
-  "buildCommand": "VITE_API_BASE=https://moozhayilapp-prod.onrender.com npm run build",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
+    {
+      "source": "/v1/:path*",
+      "destination": "https://moozhayilapp-prod.onrender.com/v1/:path*"
+    },
+    {
+      "source": "/health",
+      "destination": "https://moozhayilapp-prod.onrender.com/health"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"

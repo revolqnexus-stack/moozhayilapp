@@ -72,22 +72,9 @@ class HomeScreen extends ConsumerWidget {
 
     return ColoredBox(
       color: AppColors.warmIvory,
-      child: RefreshIndicator(
-        color: AppColors.gold,
-        onRefresh: () async {
-          ref.invalidate(goldBalanceProvider);
-          ref.invalidate(featuredProductsProvider);
-          ref.invalidate(homeBannersProvider);
-          ref.invalidate(categoriesProvider);
-          await Future.wait([
-            ref.read(featuredProductsProvider.future),
-            ref.read(homeBannersProvider.future),
-          ]);
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.only(bottom: bottomInset),
-          child: Column(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.only(bottom: bottomInset),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SectionReveal(
@@ -154,7 +141,6 @@ class HomeScreen extends ConsumerWidget {
 
             const SectionReveal(index: 8, child: EditorialFooter()),
           ],
-        ),
         ),
       ),
     );

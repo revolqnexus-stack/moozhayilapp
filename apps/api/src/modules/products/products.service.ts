@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/error.middleware";
+import { logger } from "../../utils/logger";
 import { dbPurity } from "../gold_rates/gold_rates.service";
 import type {
   ProductListInput,
@@ -13,6 +14,25 @@ import {
   productInclude,
   type ProductWithRelations,
 } from "./product.mapper";
+
+async function mapListedProducts(products: ProductWithRelations[]) {
+  const priced = await Promise.all(
+    products.map(async (product) => {
+      try {
+        return await mapProductToDto(product);
+      } catch (error) {
+        logger.warn("Skipping catalog product; live pricing unavailable", {
+          product_id: product.id,
+          sku: product.sku,
+          purity: product.purity,
+          error: error instanceof Error ? error.message : String(error),
+        });
+        return null;
+      }
+    }),
+  );
+  return priced.filter((product) => product !== null);
+}
 
 function sortImages(product: ProductWithRelations) {
   return [...product.images]
@@ -36,9 +56,7 @@ export class ProductsService {
       take: input.limit + 1,
     });
 
-    const priced = await Promise.all(
-      products.map((product) => mapProductToDto(product)),
-    );
+    const priced = await mapListedProducts(products);
     const filtered = priced.filter((product) => {
       if (
         input.min_price_paise !== undefined &&
@@ -126,7 +144,7 @@ export class ProductsService {
       take: input.limit,
     });
 
-    return Promise.all(products.map((item) => mapProductToDto(item)));
+    return mapListedProducts(products);
   }
 
   async search(input: ProductSearchInput) {
@@ -186,7 +204,7 @@ export class ProductsService {
           name: collection.name,
           cover_image: collection.coverImageUrl,
         })),
-        products: await Promise.all(products.map((product) => mapProductToDto(product))),
+        products: await mapListedProducts(products),
       },
     };
   }

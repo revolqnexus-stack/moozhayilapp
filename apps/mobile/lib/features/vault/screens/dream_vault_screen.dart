@@ -16,6 +16,8 @@ import '../../../core/constants/typography.dart';
 import '../../../core/models/vault_item.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../providers/vault_list_display.dart';
+import '../providers/vault_product_ids_display.dart';
 import '../providers/vault_provider.dart';
 import '../widgets/dream_vault_card.dart';
 import '../widgets/goal_start_bottom_sheet.dart';
@@ -26,7 +28,7 @@ class DreamVaultScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authControllerProvider);
-    final vault = ref.watch(vaultItemsProvider);
+    final vault = ref.watch(vaultDisplayItemsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.paper,
@@ -118,8 +120,17 @@ class DreamVaultScreen extends ConsumerWidget {
       confirmLabel: 'Remove',
       cancelLabel: 'Keep it',
       isDestructive: true,
-      onConfirm: () =>
-          ref.read(vaultActionsProvider.notifier).removeItem(item.id),
+      onConfirm: () async {
+        await ref
+            .read(vaultActionsProvider.notifier)
+            .removeProduct(item.product.id);
+        forgetVaultProductInCache(ref, item.product.id);
+        applyOptimisticVaultToggle(
+          ref,
+          productId: item.product.id,
+          saving: false,
+        );
+      },
     );
   }
 }

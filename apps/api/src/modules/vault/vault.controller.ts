@@ -26,6 +26,13 @@ export class VaultController {
     const itemId = z.string().uuid().parse(req.params.itemId);
     res.status(200).json(await vaultService.remove(requireUserId(req), itemId));
   }
+
+  async removeByProduct(req: Request, res: Response): Promise<void> {
+    const productId = z.string().uuid().parse(req.params.productId);
+    res
+      .status(200)
+      .json(await vaultService.removeByProductId(requireUserId(req), productId));
+  }
 }
 
 export const vaultController = new VaultController();

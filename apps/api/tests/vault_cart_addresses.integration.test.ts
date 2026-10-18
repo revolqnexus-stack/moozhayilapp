@@ -126,6 +126,33 @@ describe("Phase 5 vault cart and addresses", () => {
     expect(removeResponse.body.success).toBe(true);
   });
 
+  it("removes Dream Vault items by product id and treats stale item ids as success", async () => {
+    const product = await seedProduct();
+    const auth = await signIn("+919876543213");
+
+    const addResponse = await request(app)
+      .post("/v1/vault")
+      .set("Authorization", `Bearer ${auth.accessToken}`)
+      .send({ product_id: product.id });
+
+    expect(addResponse.status).toBe(201);
+
+    const removeByProduct = await request(app)
+      .delete(`/v1/vault/products/${product.id}`)
+      .set("Authorization", `Bearer ${auth.accessToken}`);
+
+    expect(removeByProduct.status).toBe(200);
+    expect(removeByProduct.body.success).toBe(true);
+
+    const staleItemId = addResponse.body.vault_item.id as string;
+    const removeStale = await request(app)
+      .delete(`/v1/vault/${staleItemId}`)
+      .set("Authorization", `Bearer ${auth.accessToken}`);
+
+    expect(removeStale.status).toBe(200);
+    expect(removeStale.body.success).toBe(true);
+  });
+
   it("supports guest handoff by restoring a previously removed vault item", async () => {
     const product = await seedProduct();
     const auth = await signIn("+919876543211");

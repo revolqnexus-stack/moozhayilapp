@@ -98,11 +98,29 @@ export class VaultService {
     });
 
     if (!item) {
-      throw new AppError(404, "NOT_FOUND", "Dream Vault item does not exist");
+      return { success: true };
     }
 
     await prisma.dreamVaultItem.update({
-      where: { id: itemId },
+      where: { id: item.id },
+      data: { removedAt: new Date() },
+    });
+
+    return { success: true };
+  }
+
+  async removeByProductId(userId: string, productId: string) {
+    const item = await prisma.dreamVaultItem.findFirst({
+      where: { userId, productId, removedAt: null },
+      orderBy: { addedAt: "desc" },
+    });
+
+    if (!item) {
+      return { success: true };
+    }
+
+    await prisma.dreamVaultItem.update({
+      where: { id: item.id },
       data: { removedAt: new Date() },
     });
 

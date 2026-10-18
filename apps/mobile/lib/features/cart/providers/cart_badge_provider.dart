@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'cart_provider.dart';
+import 'cart_summary_display.dart';
 
 class CartCountOverride extends Notifier<int?> {
   @override
@@ -18,6 +18,6 @@ final cartBadgeCountProvider = Provider<int>((ref) {
   if (override != null) return override;
 
   return ref
-      .watch(cartSummaryProvider)
+      .watch(cartDisplaySummaryProvider)
       .maybeWhen(data: (summary) => summary.itemCount, orElse: () => 0);
 });

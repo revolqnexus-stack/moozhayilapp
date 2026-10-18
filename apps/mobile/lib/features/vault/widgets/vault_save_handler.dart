@@ -9,6 +9,8 @@ import '../../../core/routing/app_routes.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/utils/customer_error_copy.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../providers/vault_list_display.dart';
+import '../providers/vault_product_ids_display.dart';
 import '../providers/vault_provider.dart';
 import 'goal_start_bottom_sheet.dart';
 
@@ -21,12 +23,18 @@ Future<void> handleVaultSave(
   WidgetRef ref,
   String productId,
 ) async {
-  final ids = await ref.read(effectiveVaultProductIdsProvider.future);
-  if (ids.contains(productId)) {
+  final ids = ref.read(displayVaultProductIdsProvider);
+  final wasSaved = ids.contains(productId);
+
+  if (wasSaved) {
+    applyOptimisticVaultToggle(ref, productId: productId, saving: false);
     try {
       await ref.read(vaultActionsProvider.notifier).removeProduct(productId);
+      forgetVaultProductInCache(ref, productId);
+      ref.invalidate(vaultItemsProvider);
       ref.invalidate(effectiveVaultProductIdsProvider);
     } on ApiException catch (error) {
+      revertOptimisticVaultToggle(ref, productId: productId, wasSaving: false);
       if (context.mounted) {
         showPremiumSnackBar(
           context,
@@ -38,14 +46,18 @@ Future<void> handleVaultSave(
     return;
   }
 
+  applyOptimisticVaultToggle(ref, productId: productId, saving: true);
+
   final auth = ref.read(authControllerProvider).value;
   AddVaultResponse? response;
   try {
     response = await ref
         .read(vaultActionsProvider.notifier)
         .saveProduct(productId);
+    ref.invalidate(vaultItemsProvider);
     ref.invalidate(effectiveVaultProductIdsProvider);
   } on ApiException catch (error) {
+    revertOptimisticVaultToggle(ref, productId: productId, wasSaving: true);
     if (context.mounted) {
       showPremiumSnackBar(
         context,
@@ -74,6 +86,7 @@ Future<void> handleVaultSave(
   }
 
   if (response != null) {
+    rememberVaultItemInCache(ref, response.vaultItem);
     await showGoalStartBottomSheet(
       context: context,
       ref: ref,

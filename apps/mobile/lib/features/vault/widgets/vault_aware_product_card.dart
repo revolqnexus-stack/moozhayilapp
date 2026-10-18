@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../components/cards/product_card.dart';
 import '../../../core/models/product.dart';
 import '../../../core/routing/app_routes.dart';
-import '../providers/vault_provider.dart';
+import '../providers/vault_product_ids_display.dart';
 import 'vault_save_handler.dart';
 
 class VaultAwareProductCard extends ConsumerWidget {
@@ -22,11 +22,8 @@ class VaultAwareProductCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final vaultIds = ref.watch(effectiveVaultProductIdsProvider);
-    final displayProduct = vaultIds.maybeWhen(
-      data: (ids) => productWithVaultState(product, ids),
-      orElse: () => product,
-    );
+    final vaultIds = ref.watch(displayVaultProductIdsProvider);
+    final displayProduct = productWithVaultState(product, vaultIds);
 
     return ProductCard(
       product: displayProduct,

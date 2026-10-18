@@ -7,6 +7,7 @@ import '../../../core/services/api_service.dart';
 import '../../../core/utils/indian_format.dart';
 import '../../auth/providers/auth_provider.dart';
 import 'cart_badge_provider.dart';
+import 'cart_summary_display.dart';
 
 part 'cart_provider.g.dart';
 
@@ -15,12 +16,43 @@ class CartRepository {
 
   final ApiService _apiService;
 
+  CartSummary _parseSummary(Map<String, dynamic> raw) {
+    _normalizeCartPayload(raw);
+    try {
+      return CartSummary.fromJson(raw);
+    } on Object catch (_) {
+      throw const ApiException(
+        'We couldn\u2019t load your bag. Please try again.',
+      );
+    }
+  }
+
+  void _normalizeCartPayload(Map<String, dynamic> raw) {
+    final items = raw['items'];
+    if (items is! List) {
+      return;
+    }
+    for (final entry in items) {
+      if (entry is! Map<String, dynamic>) {
+        continue;
+      }
+      final product = entry['product'];
+      if (product is! Map<String, dynamic>) {
+        continue;
+      }
+      final weight = product['weight_grams'];
+      if (weight is num) {
+        product['weight_grams'] = weight.toString();
+      }
+    }
+  }
+
   Future<CartSummary> getCart() async {
     try {
       final response = await _apiService.client.get<Map<String, dynamic>>(
         '/cart',
       );
-      return CartSummary.fromJson(response.data!);
+      return _parseSummary(response.data!);
     } on DioException catch (error) {
       throw ApiException.fromDio(error);
     }
@@ -32,7 +64,7 @@ class CartRepository {
         '/cart/items',
         data: {'product_id': productId, 'quantity': quantity},
       );
-      return CartSummary.fromJson(response.data!);
+      return _parseSummary(response.data!);
     } on DioException catch (error) {
       throw ApiException.fromDio(error);
     }
@@ -43,7 +75,7 @@ class CartRepository {
       final response = await _apiService.client.delete<Map<String, dynamic>>(
         '/cart/items/$productId',
       );
-      return CartSummary.fromJson(response.data!);
+      return _parseSummary(response.data!);
     } on DioException catch (error) {
       throw ApiException.fromDio(error);
     }
@@ -86,7 +118,7 @@ Future<CartSummary> cartSummary(Ref ref) async {
     );
   }
 
-  return ref.watch(cartRepositoryProvider).getCart();
+  return ref.read(cartRepositoryProvider).getCart();
 }
 
 @riverpod
@@ -97,6 +129,7 @@ class CartActions extends _$CartActions {
   Future<CartSummary> addProduct(String productId) async {
     final summary = await ref.read(cartRepositoryProvider).addItem(productId);
     ref.read(cartCountOverrideProvider.notifier).setCount(summary.itemCount);
+    ref.read(cartSummaryOverrideProvider.notifier).setSummary(summary);
     ref.invalidate(cartSummaryProvider);
     return summary;
   }
@@ -106,6 +139,7 @@ class CartActions extends _$CartActions {
         .read(cartRepositoryProvider)
         .removeItem(productId);
     ref.read(cartCountOverrideProvider.notifier).setCount(summary.itemCount);
+    ref.read(cartSummaryOverrideProvider.notifier).setSummary(summary);
     ref.invalidate(cartSummaryProvider);
     return summary;
   }

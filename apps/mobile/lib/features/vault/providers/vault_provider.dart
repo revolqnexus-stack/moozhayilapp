@@ -13,12 +13,54 @@ class VaultRepository {
 
   final ApiService _apiService;
 
+  void _normalizeProductMaps(Map<String, dynamic> raw) {
+    void walk(dynamic node) {
+      if (node is Map<String, dynamic>) {
+        final weight = node['weight_grams'];
+        if (weight is num) {
+          node['weight_grams'] = weight.toString();
+        }
+        for (final value in node.values) {
+          walk(value);
+        }
+      } else if (node is List) {
+        for (final value in node) {
+          walk(value);
+        }
+      }
+    }
+
+    walk(raw);
+  }
+
+  VaultListResponse _parseList(Map<String, dynamic> raw) {
+    _normalizeProductMaps(raw);
+    try {
+      return VaultListResponse.fromJson(raw);
+    } on Object catch (_) {
+      throw const ApiException(
+        'We couldn\u2019t load your Dream Vault. Please try again.',
+      );
+    }
+  }
+
+  AddVaultResponse _parseAdd(Map<String, dynamic> raw) {
+    _normalizeProductMaps(raw);
+    try {
+      return AddVaultResponse.fromJson(raw);
+    } on Object catch (_) {
+      throw const ApiException(
+        'We couldn\u2019t save to your Dream Vault. Please try again.',
+      );
+    }
+  }
+
   Future<VaultListResponse> list() async {
     try {
       final response = await _apiService.client.get<Map<String, dynamic>>(
         '/vault',
       );
-      return VaultListResponse.fromJson(response.data!);
+      return _parseList(response.data!);
     } on DioException catch (error) {
       throw ApiException.fromDio(error);
     }
@@ -30,7 +72,7 @@ class VaultRepository {
         '/vault',
         data: {'product_id': productId},
       );
-      return AddVaultResponse.fromJson(response.data!);
+      return _parseAdd(response.data!);
     } on DioException catch (error) {
       throw ApiException.fromDio(error);
     }
@@ -40,7 +82,23 @@ class VaultRepository {
     try {
       await _apiService.client.delete<void>('/vault/$itemId');
     } on DioException catch (error) {
-      throw ApiException.fromDio(error);
+      final apiError = ApiException.fromDio(error);
+      if (apiError.code == 'NOT_FOUND') {
+        return;
+      }
+      throw apiError;
+    }
+  }
+
+  Future<void> removeByProductId(String productId) async {
+    try {
+      await _apiService.client.delete<void>('/vault/products/$productId');
+    } on DioException catch (error) {
+      final apiError = ApiException.fromDio(error);
+      if (apiError.code == 'NOT_FOUND') {
+        return;
+      }
+      throw apiError;
     }
   }
 }
@@ -187,19 +245,10 @@ class VaultActions extends _$VaultActions {
       return;
     }
 
-    final vault = await ref.read(vaultItemsProvider.future);
-    VaultItem? match;
-    for (final item in vault.items) {
-      if (item.product.id == productId) {
-        match = item;
-        break;
-      }
-    }
-    if (match == null) {
-      return;
-    }
-
-    await removeItem(match.id);
+    await ref.read(vaultRepositoryProvider).removeByProductId(productId);
+    ref.invalidate(vaultItemsProvider);
+    ref.invalidate(vaultProductIdsProvider);
+    ref.invalidate(effectiveVaultProductIdsProvider);
   }
 
   Future<bool> toggleProduct(String productId) async {

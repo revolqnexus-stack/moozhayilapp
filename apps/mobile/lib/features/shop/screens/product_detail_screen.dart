@@ -24,7 +24,7 @@ import '../../../core/utils/app_haptics.dart';
 import '../../../core/utils/sample_catalog.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../cart/providers/cart_provider.dart';
-import '../../vault/providers/vault_provider.dart';
+import '../../vault/providers/vault_product_ids_display.dart';
 import '../../vault/widgets/vault_save_handler.dart';
 import '../providers/product_detail_provider.dart';
 import '../widgets/product_detail_action_bar.dart';
@@ -41,12 +41,12 @@ class ProductDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final product = ref.watch(productDetailProvider(productId));
-    final vaultIds = ref.watch(effectiveVaultProductIdsProvider);
+    final vaultIds = ref.watch(displayVaultProductIdsProvider);
 
     return product.when(
       data: (item) => _ProductDetailBody(
         item: item,
-        vaultIds: vaultIds,
+        vaultProductIds: vaultIds,
         productId: productId,
       ),
       loading: () {
@@ -55,7 +55,7 @@ class ProductDetailScreen extends ConsumerWidget {
           if (sample != null) {
             return _ProductDetailBody(
               item: sample,
-              vaultIds: vaultIds,
+              vaultProductIds: vaultIds,
               productId: productId,
             );
           }
@@ -77,7 +77,7 @@ class ProductDetailScreen extends ConsumerWidget {
           if (sample != null) {
             return _ProductDetailBody(
               item: sample,
-              vaultIds: vaultIds,
+              vaultProductIds: vaultIds,
               productId: productId,
             );
           }
@@ -99,12 +99,12 @@ class ProductDetailScreen extends ConsumerWidget {
 class _ProductDetailBody extends ConsumerStatefulWidget {
   const _ProductDetailBody({
     required this.item,
-    required this.vaultIds,
+    required this.vaultProductIds,
     required this.productId,
   });
 
   final Product item;
-  final AsyncValue<Set<String>> vaultIds;
+  final Set<String> vaultProductIds;
   final String productId;
 
   @override
@@ -118,9 +118,9 @@ class _ProductDetailBodyState extends ConsumerState<_ProductDetailBody> {
 
   @override
   Widget build(BuildContext context) {
-    final displayItem = widget.vaultIds.maybeWhen(
-      data: (ids) => productWithVaultState(widget.item, ids),
-      orElse: () => widget.item,
+    final displayItem = productWithVaultState(
+      widget.item,
+      widget.vaultProductIds,
     );
 
     final eyebrow = displayItem.collection?.name ?? displayItem.category?.name;

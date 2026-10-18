@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/colors.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/cart/providers/cart_badge_provider.dart';
-import '../../features/vault/providers/vault_provider.dart';
+import '../../features/vault/providers/vault_product_ids_display.dart';
 import '../../features/shop/utils/shell_route_chrome.dart';
 import '../../features/shop/widgets/shop_browse_app_bar.dart';
 import '../../../core/utils/app_haptics.dart';
@@ -51,12 +51,9 @@ class _NavigationShellState extends ConsumerState<NavigationShell> {
 
   @override
   Widget build(BuildContext context) {
-    final vaultIds = ref.watch(effectiveVaultProductIdsProvider);
+    final vaultIds = ref.watch(displayVaultProductIdsProvider);
     final cartCount = ref.watch(cartBadgeCountProvider);
-    final vaultHasSaved = vaultIds.maybeWhen(
-      data: (ids) => ids.isNotEmpty,
-      orElse: () => false,
-    );
+    final vaultHasSaved = vaultIds.isNotEmpty;
     final auth = ref.watch(authControllerProvider);
     final user = auth.value?.user;
     final userName = user?.name?.trim().isNotEmpty == true

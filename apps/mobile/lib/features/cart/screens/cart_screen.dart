@@ -20,6 +20,7 @@ import '../../../core/constants/customer_copy.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/cart_provider.dart';
+import '../providers/cart_summary_display.dart';
 import '../widgets/cart_price_lock_banner.dart';
 
 class CartScreen extends ConsumerWidget {
@@ -31,7 +32,7 @@ class CartScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authControllerProvider);
-    final cart = ref.watch(cartSummaryProvider);
+    final cart = ref.watch(cartDisplaySummaryProvider);
 
     final body = auth.when(
       data: (state) {

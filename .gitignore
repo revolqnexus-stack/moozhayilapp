@@ -19,6 +19,10 @@ secrets.txt
 .render-api-key
 PRODUCTION_ENV.txt
 !PRODUCTION_ENV.example.txt
+CRM_ADMIN_CREDENTIALS.txt
+STAGING_ENV.txt
+.upstash-credentials.json
+!/.upstash-credentials.example.json
 RAILWAY_ENV_VARIABLES.txt
 !RAILWAY_ENV_VARIABLES.example.txt
 railway-secrets.txt
@@ -74,6 +78,7 @@ apps/mobile/.pub/
 apps/mobile/ios/Pods/
 apps/mobile/ios/.symlinks/
 apps/mobile/android/.gradle/
+apps/mobile/.gradle-user-home/
 apps/mobile/android/local.properties
 apps/mobile/android/key.properties
 apps/mobile/*.iml

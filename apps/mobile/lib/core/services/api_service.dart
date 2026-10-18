@@ -110,12 +110,32 @@ class ApiService {
       final retried = await _dio.fetch<dynamic>(request);
       handler.resolve(retried);
     } on DioException catch (refreshError) {
-      await _storageService.clearTokens();
+      if (_refreshFailureInvalidatesSession(refreshError)) {
+        await _storageService.clearTokens();
+      }
       handler.next(refreshError);
     } catch (_) {
-      await _storageService.clearTokens();
       handler.next(error);
     }
+  }
+
+  /// Wipe session only when the refresh token is rejected — not on timeouts/5xx.
+  bool _refreshFailureInvalidatesSession(DioException error) {
+    final status = error.response?.statusCode;
+    if (status == 401 || status == 403) {
+      return true;
+    }
+    final data = error.response?.data;
+    if (data is Map<String, dynamic>) {
+      final apiError = data['error'];
+      if (apiError is Map<String, dynamic>) {
+        final code = apiError['code'] as String?;
+        if (code == 'UNAUTHORIZED' || code == 'INVALID_REFRESH_TOKEN') {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }
 

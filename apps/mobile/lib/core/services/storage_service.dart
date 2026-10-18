@@ -4,12 +4,15 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'storage_service.g.dart';
 
 class StorageService {
-  const StorageService(this._storage);
+  StorageService(this._storage);
 
   static const _accessTokenKey = 'auth.access_token';
   static const _refreshTokenKey = 'auth.refresh_token';
 
   final FlutterSecureStorage _storage;
+
+  /// Called after tokens are wiped (e.g. to refresh auth router state).
+  void Function()? onTokensCleared;
 
   Future<String?> readAccessToken() => _storage.read(key: _accessTokenKey);
 
@@ -30,11 +33,14 @@ class StorageService {
   Future<void> clearTokens() async {
     await _storage.delete(key: _accessTokenKey);
     await _storage.delete(key: _refreshTokenKey);
+    onTokensCleared?.call();
   }
 }
 
 @riverpod
-FlutterSecureStorage secureStorage(Ref ref) => const FlutterSecureStorage();
+FlutterSecureStorage secureStorage(Ref ref) => const FlutterSecureStorage(
+  aOptions: AndroidOptions(encryptedSharedPreferences: true),
+);
 
 @riverpod
 StorageService storageService(Ref ref) {

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../core/animations/premium_pressable.dart';
 import '../../core/constants/colors.dart';
+import '../../core/utils/app_haptics.dart';
 import '../../core/constants/iconography.dart';
 import '../../core/constants/motion.dart';
 import '../../core/constants/typography.dart';
@@ -130,9 +132,12 @@ class _Tab extends StatelessWidget {
       button: true,
       label: item.label,
       selected: isActive,
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
+      child: PremiumPressable(
+        onTap: () {
+          AppHaptics.selection();
+          onTap();
+        },
+        scaleEnd: 0.9,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

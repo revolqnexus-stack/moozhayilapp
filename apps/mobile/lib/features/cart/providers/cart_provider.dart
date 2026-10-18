@@ -6,6 +6,7 @@ import '../../../core/models/price_quote.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/utils/indian_format.dart';
 import '../../auth/providers/auth_provider.dart';
+import 'cart_badge_provider.dart';
 
 part 'cart_provider.g.dart';
 
@@ -95,6 +96,7 @@ class CartActions extends _$CartActions {
 
   Future<CartSummary> addProduct(String productId) async {
     final summary = await ref.read(cartRepositoryProvider).addItem(productId);
+    ref.read(cartCountOverrideProvider.notifier).setCount(summary.itemCount);
     ref.invalidate(cartSummaryProvider);
     return summary;
   }
@@ -103,6 +105,7 @@ class CartActions extends _$CartActions {
     final summary = await ref
         .read(cartRepositoryProvider)
         .removeItem(productId);
+    ref.read(cartCountOverrideProvider.notifier).setCount(summary.itemCount);
     ref.invalidate(cartSummaryProvider);
     return summary;
   }

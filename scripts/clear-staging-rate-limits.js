@@ -2,6 +2,7 @@
  * Clears OTP/auth rate-limit keys from Upstash Redis (staging QA reset).
  * Usage: node scripts/clear-staging-rate-limits.js
  */
+const fs = require("fs");
 const path = require("path");
 const Redis = require(path.join(
   __dirname,
@@ -12,12 +13,19 @@ const Redis = require(path.join(
   "ioredis",
 ));
 
-require("dotenv").config({
-  path: path.join(__dirname, "..", "apps", "api", ".env.cloud"),
-});
+function readRedisUrl() {
+  const envPath = path.join(__dirname, "..", "apps", "api", ".env.cloud");
+  const content = fs.readFileSync(envPath, "utf8");
+  for (const line of content.split(/\r?\n/)) {
+    if (line.startsWith("REDIS_URL=")) {
+      return line.slice("REDIS_URL=".length).trim();
+    }
+  }
+  return "";
+}
 
 async function main() {
-  const redisUrl = process.env.REDIS_URL;
+  const redisUrl = readRedisUrl();
   if (!redisUrl) {
     throw new Error("REDIS_URL missing in apps/api/.env.cloud");
   }

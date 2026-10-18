@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/animations.dart';
 import '../../core/constants/colors.dart';
+import '../../core/utils/motion_preferences.dart';
 import '../../core/constants/radii.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/constants/typography.dart';
@@ -131,7 +132,9 @@ class _ButtonBodyState extends State<_ButtonBody>
 
   void _onTapDown(_) {
     setState(() => _pressed = true);
-    _scaleCtrl.forward();
+    if (premiumMotionEnabled(context)) {
+      _scaleCtrl.forward();
+    }
   }
 
   void _onTapUp(_) {

@@ -13,6 +13,7 @@ import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../components/feedback/premium_snackbar.dart';
+import '../../../core/utils/app_haptics.dart';
 import '../../../core/utils/customer_error_copy.dart';
 import '../../cart/providers/cart_provider.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -190,6 +191,7 @@ class RedeemScreen extends ConsumerWidget {
     if (!allowed || !context.mounted) return;
 
     try {
+      AppHaptics.light();
       await ref.read(cartActionsProvider.notifier).addProduct(productId);
       if (context.mounted) {
         context.push('${AppRoutes.checkout}?redeem=1');

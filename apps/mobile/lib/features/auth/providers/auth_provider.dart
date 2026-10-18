@@ -139,9 +139,7 @@ class AuthController extends _$AuthController {
     final challenge = previous.otpChallenge;
     if (challenge == null) {
       state = AsyncData(
-        previous.copyWith(
-          verifyOtpError: StateError('OTP session is missing'),
-        ),
+        previous.copyWith(verifyOtpError: StateError('OTP session is missing')),
       );
       return null;
     }

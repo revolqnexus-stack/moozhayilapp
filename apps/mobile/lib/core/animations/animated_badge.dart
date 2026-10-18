@@ -36,14 +36,14 @@ class _AnimatedBadgeState extends State<AnimatedBadge>
     return TweenSequence<double>([
       TweenSequenceItem(
         tween: Tween(
-          begin: 0.85,
-          end: 1.1,
-        ).chain(CurveTween(curve: AppMotion.standard)),
+          begin: 0.65,
+          end: 1.35,
+        ).chain(CurveTween(curve: Curves.easeOutBack)),
         weight: 55,
       ),
       TweenSequenceItem(
         tween: Tween(
-          begin: 1.1,
+          begin: 1.35,
           end: 1.0,
         ).chain(CurveTween(curve: AppMotion.standard)),
         weight: 45,
@@ -133,14 +133,14 @@ class _AnimatedPulseDotState extends State<AnimatedPulseDot>
     return TweenSequence<double>([
       TweenSequenceItem(
         tween: Tween(
-          begin: 0.85,
-          end: 1.1,
-        ).chain(CurveTween(curve: AppMotion.standard)),
+          begin: 0.65,
+          end: 1.35,
+        ).chain(CurveTween(curve: Curves.easeOutBack)),
         weight: 55,
       ),
       TweenSequenceItem(
         tween: Tween(
-          begin: 1.1,
+          begin: 1.35,
           end: 1.0,
         ).chain(CurveTween(curve: AppMotion.standard)),
         weight: 45,

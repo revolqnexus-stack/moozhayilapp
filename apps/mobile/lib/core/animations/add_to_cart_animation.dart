@@ -51,10 +51,7 @@ class _AddToCartFlyingImageState extends State<AddToCartFlyingImage>
     );
 
     _controller.forward().then((_) {
-      widget.onComplete();
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
+      if (mounted) widget.onComplete();
     });
   }
 
@@ -104,14 +101,18 @@ void showAddToCartAnimation({
   late final OverlayEntry entry;
 
   entry = OverlayEntry(
-    builder: (context) => AddToCartFlyingImage(
-      productImageUrl: productImageUrl,
-      startRect: productImageRect,
-      endRect: cartIconRect,
-      onComplete: () {
-        onComplete();
-        entry.remove();
-      },
+    builder: (context) => Stack(
+      children: [
+        AddToCartFlyingImage(
+          productImageUrl: productImageUrl,
+          startRect: productImageRect,
+          endRect: cartIconRect,
+          onComplete: () {
+            onComplete();
+            entry.remove();
+          },
+        ),
+      ],
     ),
   );
 

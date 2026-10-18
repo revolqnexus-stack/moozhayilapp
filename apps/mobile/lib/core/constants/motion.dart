@@ -18,6 +18,15 @@ abstract final class AppMotion {
   /// Card/button press compress duration.
   static const Duration pressDuration = Duration(milliseconds: 120);
 
+  /// Icon/badge and small state changes.
+  static const Duration stateTransition = fast;
+
+  /// Sheets, dialogs, and content cross-fades.
+  static const Duration contentTransition = normal;
+
+  /// Major confirmation draw sequences (ring + check).
+  static const Duration confirmationSequence = slow;
+
   /// Bottom nav indicator slide.
   static const Duration navIndicator = Duration(milliseconds: 220);
 
@@ -35,9 +44,9 @@ abstract final class AppMotion {
   static const Curve exit = Curves.easeInCubic;
 
   // ── Distances ─────────────────────────────────────────────────────────────
-  static const double revealOffsetY = 12.0;
-  static const double pressScale = 0.985;
-  static const double cardPressScale = 0.98;
-  static const double navActiveScale = 1.08;
+  static const double revealOffsetY = 28.0;
+  static const double pressScale = 0.96;
+  static const double cardPressScale = 0.94;
+  static const double navActiveScale = 1.14;
   static const double heroImageScaleMax = 1.04;
 }

@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'core/constants/colors.dart';
 import 'core/routing/app_router.dart';
 import 'core/widgets/server_clock_lifecycle.dart';
+import 'core/services/storage_service.dart';
 import 'features/auth/providers/auth_provider.dart';
 
 /// Root widget of the Moozhayil application.
@@ -17,14 +18,33 @@ class MoozhayilApp extends ConsumerStatefulWidget {
 }
 
 class _MoozhayilAppState extends ConsumerState<MoozhayilApp> {
-  late final GoRouter _router = createAppRouter(
-    readAuthState: () => ref.read(authControllerProvider).value,
-  );
+  GoRouter? _router;
+  var _sessionCallbacksWired = false;
+
+  AuthState? _readAuthStateForRouter() {
+    final auth = ref.read(authControllerProvider);
+    if (auth.isLoading) {
+      return null;
+    }
+    if (auth.hasError) {
+      return const AuthState();
+    }
+    return auth.value;
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (!_sessionCallbacksWired) {
+      _sessionCallbacksWired = true;
+      ref.read(storageServiceProvider).onTokensCleared = () {
+        ref.invalidate(authControllerProvider);
+      };
+    }
+
+    _router ??= createAppRouter(readAuthState: _readAuthStateForRouter);
+
     ref.listen(authControllerProvider, (_, _) {
-      _router.refresh();
+      _router!.refresh();
     });
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
@@ -37,7 +57,7 @@ class _MoozhayilAppState extends ConsumerState<MoozhayilApp> {
     return MaterialApp.router(
       title: 'Moozhayil',
       debugShowCheckedModeBanner: false,
-      routerConfig: _router,
+      routerConfig: _router!,
       theme: _buildTheme(),
       builder: (context, child) {
         return ServerClockLifecycle(child: child ?? const SizedBox.shrink());

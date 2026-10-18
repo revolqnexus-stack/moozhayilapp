@@ -15,6 +15,7 @@ import '../../../core/constants/colors.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 import '../../../core/routing/app_routes.dart';
+import '../../../core/utils/app_haptics.dart';
 import '../../../core/utils/phone_utils.dart';
 import '../../vault/providers/vault_provider.dart';
 import '../providers/auth_provider.dart';
@@ -131,8 +132,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
                 child: ConstrainedBox(
-                  constraints:
-                      BoxConstraints(minHeight: constraints.maxHeight),
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -171,8 +171,9 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                       const SizedBox(height: AppSpacing.xxl),
                       OtpDotField(
                         value: state.otp,
-                        onChanged:
-                            ref.read(authControllerProvider.notifier).setOtp,
+                        onChanged: ref
+                            .read(authControllerProvider.notifier)
+                            .setOtp,
                         onCompleted: () => _verify(),
                       ),
                       if (sendError != null) ...[
@@ -249,7 +250,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     await ref.read(authControllerProvider.notifier).sendOtp();
     if (!mounted) return;
 
-    final hasError = ref.read(authControllerProvider).value?.sendOtpError != null;
+    final hasError =
+        ref.read(authControllerProvider).value?.sendOtpError != null;
     if (hasError) {
       return;
     }
@@ -268,6 +270,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     if (!mounted || user == null) {
       return;
     }
+
+    AppHaptics.light();
 
     // Navigate first; sync the guest vault in the background so routing is not
     // blocked on it.

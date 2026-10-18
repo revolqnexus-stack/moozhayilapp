@@ -6,6 +6,7 @@ import '../constants/motion.dart';
 import '../constants/spacing.dart';
 import '../constants/typography.dart';
 import '../utils/app_haptics.dart';
+import '../utils/motion_preferences.dart';
 
 /// Calm luxury success experience — ring, check, copy, optional CTAs.
 ///
@@ -103,10 +104,26 @@ class _LuxurySuccessOverlayState extends State<LuxurySuccessOverlay>
       curve: Curves.easeIn,
     );
 
-    _runSequence();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _runSequence());
   }
 
   Future<void> _runSequence() async {
+    if (!mounted) return;
+
+    if (!premiumMotionEnabled(context)) {
+      _ringCtrl.value = 1.0;
+      _checkCtrl.value = 1.0;
+      _textCtrl.value = 1.0;
+      if (widget._hasActions) {
+        _actionsCtrl.value = 1.0;
+        return;
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+      if (!mounted) return;
+      widget.onDone();
+      return;
+    }
+
     await Future<void>.delayed(const Duration(milliseconds: 120));
     if (!mounted) return;
 

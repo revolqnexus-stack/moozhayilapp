@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/animations.dart';
+import '../utils/motion_preferences.dart';
 
 /// Animates a numeric value from its previous value (or from zero on first
 /// mount) to [value], rendering the result via [formatter].
@@ -52,13 +53,25 @@ class _AnimatedCounterState extends State<AnimatedCounter>
       begin: widget.beginAt,
       end: widget.value,
     ).animate(CurvedAnimation(parent: _controller, curve: widget.curve));
-    _controller.forward();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (!premiumMotionEnabled(context)) {
+        _controller.value = 1.0;
+        return;
+      }
+      _controller.forward();
+    });
   }
 
   @override
   void didUpdateWidget(AnimatedCounter old) {
     super.didUpdateWidget(old);
     if (old.value != widget.value) {
+      if (!premiumMotionEnabled(context)) {
+        _animation = AlwaysStoppedAnimation<double>(widget.value);
+        _controller.value = 1.0;
+        return;
+      }
       final fromValue = _animation.value;
       _animation = Tween<double>(
         begin: fromValue,

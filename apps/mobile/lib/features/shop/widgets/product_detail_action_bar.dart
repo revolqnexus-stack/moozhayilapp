@@ -9,6 +9,7 @@ import '../../../components/icons/app_icons.dart';
 import '../../../components/product/vault_icon_button.dart';
 
 import '../../../core/constants/colors.dart';
+import '../../../core/constants/motion.dart';
 
 import '../../../core/constants/spacing.dart';
 
@@ -30,6 +31,8 @@ class ProductDetailActionBar extends StatelessWidget {
 
     required this.isAddingToBag,
 
+    this.showBagAddedAck = false,
+
     required this.onAddToBag,
 
     required this.onBookVideoCall,
@@ -46,6 +49,8 @@ class ProductDetailActionBar extends StatelessWidget {
   final bool isOutOfStock;
 
   final bool isAddingToBag;
+
+  final bool showBagAddedAck;
 
   final VoidCallback? onAddToBag;
 
@@ -168,6 +173,8 @@ class ProductDetailActionBar extends StatelessWidget {
 
                       isLoading: isAddingToBag,
 
+                      showSuccessAck: showBagAddedAck,
+
                       onTap: onAddToBag,
                     ),
                   ),
@@ -199,6 +206,8 @@ class _PrimaryActionButton extends StatelessWidget {
 
     required this.isLoading,
 
+    this.showSuccessAck = false,
+
     required this.onTap,
   });
 
@@ -207,6 +216,8 @@ class _PrimaryActionButton extends StatelessWidget {
   final bool isDisabled;
 
   final bool isLoading;
+
+  final bool showSuccessAck;
 
   final VoidCallback? onTap;
 
@@ -250,14 +261,27 @@ class _PrimaryActionButton extends StatelessWidget {
                   valueColor: AlwaysStoppedAnimation<Color>(AppColors.cream),
                 ),
               )
-            : Text(
-                label.toUpperCase(),
-
-                style: AppTypography.buttonLabelSM.copyWith(
-                  color: enabled ? AppColors.cream : AppColors.disabledText,
-
-                  letterSpacing: 9 * 0.18,
-                ),
+            : AnimatedSwitcher(
+                duration: AppMotion.stateTransition,
+                switchInCurve: AppMotion.entrance,
+                switchOutCurve: AppMotion.exit,
+                child: showSuccessAck
+                    ? Icon(
+                        Icons.check_rounded,
+                        key: const ValueKey('bag-added'),
+                        color: AppColors.cream,
+                        size: 22,
+                      )
+                    : Text(
+                        label.toUpperCase(),
+                        key: const ValueKey('bag-label'),
+                        style: AppTypography.buttonLabelSM.copyWith(
+                          color: enabled
+                              ? AppColors.cream
+                              : AppColors.disabledText,
+                          letterSpacing: 9 * 0.18,
+                        ),
+                      ),
               ),
       ),
     );

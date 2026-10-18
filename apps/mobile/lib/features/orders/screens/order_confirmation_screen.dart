@@ -12,6 +12,7 @@ import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 import '../../../core/routing/app_routes.dart';
 import '../providers/orders_provider.dart';
+import '../utils/order_timeline_mapper.dart';
 
 /// Order confirmation screen.
 ///
@@ -44,20 +45,42 @@ class _OrderConfirmationScreenState
     // ── Success overlay phase ─────────────────────────────────────────────
     if (_showSuccess) {
       return order.when(
-        data: (response) => LuxurySuccessOverlay(
-          title: 'Your order is confirmed.',
-          subtitle:
-              'We\u2019ll prepare your piece with care.\nYour showroom team will keep you updated.',
-          detailLine: 'Order ${response.order.orderNumber}',
-          majorSuccess: true,
-          primaryActionLabel: 'View Order',
-          onPrimaryAction: () => context.go('/orders/${widget.orderId}'),
-          secondaryActionLabel: 'Continue Shopping',
-          onSecondaryAction: () => context.go(AppRoutes.shop),
-          onDone: () {
-            if (mounted) setState(() => _showSuccess = false);
-          },
-        ),
+        data: (response) {
+          if (!orderQualifiesForSuccessCelebration(response.order.status)) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ref.invalidate(orderDetailProvider(widget.orderId));
+              if (mounted) setState(() => _showSuccess = false);
+            });
+            return const Scaffold(
+              backgroundColor: AppColors.warmIvory,
+              body: Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.5,
+                    color: AppColors.antiqueGold,
+                  ),
+                ),
+              ),
+            );
+          }
+
+          return LuxurySuccessOverlay(
+            title: 'Your order is confirmed.',
+            subtitle:
+                'We\u2019ll prepare your piece with care.\nYour showroom team will keep you updated.',
+            detailLine: 'Order ${response.order.orderNumber}',
+            majorSuccess: true,
+            primaryActionLabel: 'View Order',
+            onPrimaryAction: () => context.go('/orders/${widget.orderId}'),
+            secondaryActionLabel: 'Continue Shopping',
+            onSecondaryAction: () => context.go(AppRoutes.shop),
+            onDone: () {
+              if (mounted) setState(() => _showSuccess = false);
+            },
+          );
+        },
         loading: () => const Scaffold(
           backgroundColor: AppColors.warmIvory,
           body: Center(

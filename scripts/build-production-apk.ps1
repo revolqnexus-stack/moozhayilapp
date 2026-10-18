@@ -1,7 +1,7 @@
 # Production sideload APK (arm64 only, ~23 MB). Play Store uses build-production-android.ps1 (AAB).
 param(
   [string]$ApiBase = "",
-  [string]$OutName = "Moozhayil-prod-arm64-v9.apk"
+  [string]$OutName = "Moozhayil-prod-arm64-v12.apk"
 )
 
 $ErrorActionPreference = "Stop"
@@ -36,7 +36,14 @@ try {
     --dart-define=FIREBASE_APP_ID=$FirebaseAppId `
     --dart-define=FIREBASE_MESSAGING_SENDER_ID=$FirebaseMessagingSenderId
 
+  if ($LASTEXITCODE -ne 0) {
+    throw "flutter build apk failed with exit code $LASTEXITCODE"
+  }
+
   $built = Join-Path $MobileRoot "build\app\outputs\flutter-apk\app-arm64-v8a-release.apk"
+  if (-not (Test-Path $built)) {
+    throw "Expected APK not found: $built"
+  }
   $dest = Join-Path (Split-Path -Parent $Root) $OutName
   Copy-Item -Force $built $dest
   Write-Host "`nSideload APK: $dest"

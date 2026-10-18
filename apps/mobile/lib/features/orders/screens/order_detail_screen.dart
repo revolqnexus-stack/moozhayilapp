@@ -12,8 +12,10 @@ import '../../../core/constants/colors.dart';
 import '../../../core/constants/radii.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
+import '../../../core/animations/order_timeline_animation.dart';
 import '../../../core/utils/indian_format.dart';
 import '../providers/orders_provider.dart';
+import '../utils/order_timeline_mapper.dart';
 
 class OrderDetailScreen extends ConsumerWidget {
   const OrderDetailScreen({super.key, required this.orderId});
@@ -39,6 +41,15 @@ class OrderDetailScreen extends ConsumerWidget {
               Text(data.orderNumber, style: AppTypography.headingSM),
               const SizedBox(height: AppSpacing.xxs),
               Text(data.statusDisplay, style: AppTypography.uiBodyMD),
+              if (data.status != 'cancelled') ...[
+                const SizedBox(height: AppSpacing.lg),
+                Text('Tracking', style: AppTypography.headingSM),
+                const SizedBox(height: AppSpacing.md),
+                OrderTimelineAnimation(
+                  steps: defaultOrderTimelineSteps(),
+                  currentStep: orderTimelineCurrentStep(data.status),
+                ),
+              ],
               const SizedBox(height: AppSpacing.lg),
               Text('Items', style: AppTypography.headingSM),
               const SizedBox(height: AppSpacing.sm),

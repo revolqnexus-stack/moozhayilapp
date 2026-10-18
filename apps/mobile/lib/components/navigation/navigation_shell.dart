@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/colors.dart';
 import '../../features/auth/providers/auth_provider.dart';
-import '../../features/cart/providers/cart_provider.dart';
+import '../../features/cart/providers/cart_badge_provider.dart';
 import '../../features/vault/providers/vault_provider.dart';
 import '../../features/shop/utils/shell_route_chrome.dart';
 import '../../features/shop/widgets/shop_browse_app_bar.dart';
@@ -51,12 +51,8 @@ class _NavigationShellState extends ConsumerState<NavigationShell> {
 
   @override
   Widget build(BuildContext context) {
-    final cart = ref.watch(cartSummaryProvider);
     final vaultIds = ref.watch(effectiveVaultProductIdsProvider);
-    final cartCount = cart.maybeWhen(
-      data: (summary) => summary.itemCount,
-      orElse: () => 0,
-    );
+    final cartCount = ref.watch(cartBadgeCountProvider);
     final vaultHasSaved = vaultIds.maybeWhen(
       data: (ids) => ids.isNotEmpty,
       orElse: () => false,
@@ -83,7 +79,7 @@ class _NavigationShellState extends ConsumerState<NavigationShell> {
         vaultHasSaved: vaultHasSaved,
       );
     } else if (shellUsesMinimalAppBar(location)) {
-      appBar = AppTopBar.minimal();
+      appBar = AppTopBar.minimal(cartCount: cartCount);
     } else if (shopBrowse != null &&
         shopBrowse.kind != ShopBrowseKind.product) {
       appBar = ShopBrowseAppBar(route: shopBrowse);

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 import '../../components/feedback/premium_snackbar.dart';
+import '../animations/payment_verifying_overlay.dart';
 import 'api_service.dart';
 
 final razorpayServiceProvider = Provider<RazorpayService>((ref) {
@@ -143,15 +144,17 @@ class RazorpayService {
     switch (result) {
       case RazorpaySuccess(:final paymentId, :final orderId, :final signature):
         try {
-          // Use the new Razorpay verification endpoint
-          await _apiService.client.post<void>(
-            '/payments/verify-razorpay',
-            data: {
-              'razorpay_payment_id': paymentId,
-              'razorpay_order_id': orderId,
-              'razorpay_signature': signature,
-            },
-          );
+          if (!context.mounted) return false;
+          await withPaymentVerifyingOverlay(context, () async {
+            await _apiService.client.post<void>(
+              '/payments/verify-razorpay',
+              data: {
+                'razorpay_payment_id': paymentId,
+                'razorpay_order_id': orderId,
+                'razorpay_signature': signature,
+              },
+            );
+          });
           return true;
         } on DioException catch (e) {
           if (context.mounted) {

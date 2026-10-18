@@ -1,9 +1,49 @@
-/** Banner placements supported by the CMS API (see cms.admin.service.ts). */
+/** Placements stored in DB; app currently renders home_hero in the hero carousel. */
 export const BANNER_PLACEMENTS = [
-  { value: "home_hero", label: "Home hero" },
-  { value: "home_featured", label: "Home featured" },
-  { value: "announcement_bar", label: "Announcement bar" },
-  { value: "campaign", label: "Campaign" },
+  {
+    value: "home_hero",
+    label: "Home hero (carousel)",
+    hint: "Shown on app home. Use 9:16 or wide hero art (~1080×1920 or 16:9).",
+  },
+  {
+    value: "shop_top",
+    label: "Shop top",
+    hint: "Reserved for shop tab promos (API ready; wire in app when needed).",
+  },
+  {
+    value: "goals_top",
+    label: "Schemes / Golden Wish top",
+    hint: "Reserved for schemes tab (API ready).",
+  },
+  {
+    value: "home_featured",
+    label: "Home featured rail",
+    hint: "Future editorial band below hero.",
+  },
+  {
+    value: "announcement_bar",
+    label: "Announcement bar",
+    hint: "Short strip message (future).",
+  },
+  {
+    value: "campaign",
+    label: "Campaign",
+    hint: "Generic campaign slot.",
+  },
+] as const;
+
+/** In-app routes the mobile app understands (see cms_navigation.dart). */
+export const CTA_APP_ROUTES = [
+  { value: "", label: "Default (Shop tab)" },
+  { value: "/shop", label: "Shop catalogue" },
+  { value: "/new", label: "New arrivals" },
+  { value: "/golden-wish", label: "Golden Wish / schemes" },
+  { value: "/my-gold", label: "My Gold" },
+  { value: "/dream-vault", label: "Dream vault / wishlist" },
+  { value: "/aura", label: "Aura advisor" },
+  { value: "/store-locator", label: "Store locator" },
+  { value: "/profile/kyc", label: "Start KYC" },
+  { value: "/cart", label: "Cart" },
 ] as const;
 
 export type BannerPlacement = (typeof BANNER_PLACEMENTS)[number]["value"];

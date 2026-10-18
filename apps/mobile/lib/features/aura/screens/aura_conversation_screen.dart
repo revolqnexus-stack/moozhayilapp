@@ -7,6 +7,7 @@ import '../../../components/feedback/loading_shimmer.dart';
 import '../../../components/feedback/premium_snackbar.dart';
 import '../../../components/inputs/text_input.dart';
 import '../../../components/navigation/top_app_bar.dart';
+import '../../../core/animations/aura_thinking_animation.dart';
 import '../../../core/animations/premium_pressable.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/spacing.dart';
@@ -109,11 +110,21 @@ class _AuraConversationScreenState
                         padding: const EdgeInsets.all(
                           AppSpacing.homeScreenPadding,
                         ),
-                        itemCount: items.length,
+                        itemCount: items.length + (_isSending ? 1 : 0),
                         separatorBuilder: (_, _) =>
                             const SizedBox(height: AppSpacing.md),
-                        itemBuilder: (context, index) =>
-                            AuraConversationCard(message: items[index]),
+                        itemBuilder: (context, index) {
+                          if (_isSending && index == items.length) {
+                            return const Align(
+                              alignment: Alignment.centerLeft,
+                              child: AuraThinkingAnimation(
+                                width: 100,
+                                height: 36,
+                              ),
+                            );
+                          }
+                          return AuraConversationCard(message: items[index]);
+                        },
                       ),
                     ),
                     _QuickPromptBar(prompts: _quickPrompts, onPrompt: _send),

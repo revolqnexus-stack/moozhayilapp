@@ -8,6 +8,7 @@ import '../../../components/buttons/primary_button.dart';
 import '../../../components/feedback/error_state.dart';
 import '../../../components/feedback/loading_shimmer.dart';
 import '../../../components/navigation/top_app_bar.dart';
+import '../../../core/animations/kyc_verified_seal.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/customer_copy.dart';
 import '../../../core/constants/kyc_thresholds.dart';
@@ -16,13 +17,18 @@ import '../../../core/constants/typography.dart';
 import '../../../core/routing/app_routes.dart';
 import '../providers/kyc_provider.dart';
 
-class KycPendingScreen extends ConsumerWidget {
+class KycPendingScreen extends ConsumerStatefulWidget {
   const KycPendingScreen({super.key, this.returnRoute});
 
   final String? returnRoute;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<KycPendingScreen> createState() => _KycPendingScreenState();
+}
+
+class _KycPendingScreenState extends ConsumerState<KycPendingScreen> {
+  @override
+  Widget build(BuildContext context) {
     final status = ref.watch(kycStatusProvider);
 
     return Scaffold(
@@ -30,28 +36,26 @@ class KycPendingScreen extends ConsumerWidget {
       appBar: AppTopBar.detail(title: 'Verification Pending'),
       body: status.when(
         data: (kyc) {
-          if (isKycVerified(kyc.kycStatus) && returnRoute != null) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (context.mounted) {
-                context.go(returnRoute!);
-              }
-            });
-          }
+          final verified = isKycVerified(kyc.kycStatus);
 
           return Padding(
             padding: const EdgeInsets.all(AppSpacing.screenPadding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (verified) ...[
+                  Center(child: const KycVerifiedSeal(size: 120)),
+                  const SizedBox(height: AppSpacing.lg),
+                ],
                 Text(
-                  isKycVerified(kyc.kycStatus)
+                  verified
                       ? 'Verification complete'
                       : 'We are reviewing your documents',
                   style: AppTypography.headingMD,
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  isKycVerified(kyc.kycStatus)
+                  verified
                       ? 'You are now a verified member.'
                       : CustomerCopy.kycPendingReviewSla(
                           KycThresholds.estimatedReviewMinutes,
@@ -80,13 +84,11 @@ class KycPendingScreen extends ConsumerWidget {
                 ],
                 const Spacer(),
                 PrimaryButton(
-                  label: isKycVerified(kyc.kycStatus)
-                      ? 'Continue'
-                      : 'Back to profile',
+                  label: verified ? 'Continue' : 'Back to profile',
                   isFullWidth: true,
                   onTap: () {
-                    if (isKycVerified(kyc.kycStatus) && returnRoute != null) {
-                      context.go(returnRoute!);
+                    if (verified && widget.returnRoute != null) {
+                      context.go(widget.returnRoute!);
                     } else {
                       context.go(AppRoutes.profile);
                     }

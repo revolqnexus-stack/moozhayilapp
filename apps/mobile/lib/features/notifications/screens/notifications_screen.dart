@@ -8,7 +8,9 @@ import '../../../components/feedback/empty_state.dart';
 import '../../../components/feedback/error_state.dart';
 import '../../../components/feedback/loading_shimmer.dart';
 import '../../../components/navigation/top_app_bar.dart';
+import '../../../core/animations/staggered_list_item.dart';
 import '../../../core/constants/colors.dart';
+import '../../../core/constants/motion.dart';
 import '../../../components/editorial/editorial_panel.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
@@ -76,10 +78,17 @@ class NotificationsScreen extends ConsumerWidget {
                   itemCount: response.data.length,
                   separatorBuilder: (_, _) =>
                       const SizedBox(height: AppSpacing.md),
-                  itemBuilder: (context, index) => _NotificationCard(
-                    notification: response.data[index],
-                    onTap: () => _handleTap(context, ref, response.data[index]),
-                  ),
+                  itemBuilder: (context, index) {
+                    final staggerIndex = index > 8 ? 8 : index;
+                    return StaggeredListItem(
+                      index: staggerIndex,
+                      child: _NotificationCard(
+                        notification: response.data[index],
+                        onTap: () =>
+                            _handleTap(context, ref, response.data[index]),
+                      ),
+                    );
+                  },
                 ),
               );
             },
@@ -146,15 +155,20 @@ class _NotificationCard extends StatelessWidget {
                   ),
                 ),
               ),
-              if (!notification.isRead)
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: AppColors.gold,
-                    shape: BoxShape.circle,
-                  ),
-                ),
+              AnimatedSwitcher(
+                duration: AppMotion.stateTransition,
+                child: notification.isRead
+                    ? const SizedBox.shrink(key: ValueKey('read'))
+                    : Container(
+                        key: const ValueKey('unread'),
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: AppColors.gold,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.xs),

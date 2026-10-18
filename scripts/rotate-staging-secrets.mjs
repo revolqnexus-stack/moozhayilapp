@@ -5,6 +5,7 @@
  * Preserves: PII_ENCRYPTION_SECRET, DATABASE_URL, REDIS_URL (require manual Neon/Upstash rotation)
  *
  * Usage: node scripts/rotate-staging-secrets.mjs
+ * Requires STAGING_ENV.txt (see setup-step2-infrastructure.mjs).
  */
 import crypto from "crypto";
 import fs from "fs";
@@ -14,7 +15,7 @@ import { createRequire } from "module";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..");
-const ENV_FILE = path.join(ROOT, "PRODUCTION_ENV.txt");
+const ENV_FILE = path.join(ROOT, "STAGING_ENV.txt");
 const KEY_FILE = path.join(ROOT, ".render-api-key");
 const SERVICE_ID = "srv-dammuh61egvs73csp3ng";
 
@@ -140,7 +141,7 @@ async function rotateFirebaseKey() {
 
 async function main() {
   if (!fs.existsSync(ENV_FILE)) {
-    throw new Error("Missing PRODUCTION_ENV.txt (local gitignored file)");
+    throw new Error("Missing STAGING_ENV.txt — run node scripts/setup-step2-infrastructure.mjs first");
   }
   if (!fs.existsSync(KEY_FILE)) {
     throw new Error("Missing .render-api-key");
@@ -165,7 +166,7 @@ async function main() {
     Object.assign(updates, firebaseUpdates);
   }
 
-  console.log("Updating local PRODUCTION_ENV.txt...");
+  console.log("Updating local STAGING_ENV.txt...");
   updateEnvFile(updates);
 
   console.log("Pushing rotated secrets to Render staging...");

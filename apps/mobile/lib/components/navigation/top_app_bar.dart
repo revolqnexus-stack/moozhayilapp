@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/animations/animated_badge.dart';
+import '../../core/animations/bag_animation_targets.dart';
 import '../../core/animations/premium_pressable.dart';
+import '../../core/utils/app_haptics.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/iconography.dart';
 import '../../core/constants/spacing.dart';
@@ -56,9 +58,12 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  /// Minimal variant: back arrow only.
-  factory AppTopBar.minimal() {
-    return const AppTopBar._(variant: _AppTopBarVariant.minimal);
+  /// Minimal variant: back + bag (product detail — enables fly-to-bag motion).
+  factory AppTopBar.minimal({int cartCount = 0}) {
+    return AppTopBar._(
+      variant: _AppTopBarVariant.minimal,
+      cartCount: cartCount,
+    );
   }
 
   // ignore: library_private_types_in_public_api
@@ -180,6 +185,11 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
             semanticLabel: 'Go back',
           ),
           const Spacer(),
+          _CartIconButton(
+            key: BagAnimationTargets.cartIconKey,
+            count: cartCount,
+            onPressed: () => context.push(AppRoutes.cart),
+          ),
         ],
       ),
     );
@@ -273,7 +283,11 @@ class _DreamVaultIconButton extends StatelessWidget {
 }
 
 class _CartIconButton extends StatelessWidget {
-  const _CartIconButton({required this.count, required this.onPressed});
+  const _CartIconButton({
+    super.key,
+    required this.count,
+    required this.onPressed,
+  });
 
   final int count;
   final VoidCallback onPressed;
@@ -284,7 +298,12 @@ class _CartIconButton extends StatelessWidget {
       button: true,
       label: count > 0 ? 'Bag, $count items' : 'Bag',
       child: PremiumPressable(
-        onTap: onPressed,
+        onTap: () {
+          AppHaptics.light();
+          onPressed();
+        },
+        scaleEnd: 0.88,
+        enableHaptic: true,
         child: SizedBox(
           width: 40,
           height: 40,

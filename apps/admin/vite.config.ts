@@ -1,13 +1,17 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
+// Proxying keeps the browser on the dev origin, so no CORS entry is needed to
+// point local admin at a deployed API.
+const apiTarget = process.env.ADMIN_DEV_API_TARGET ?? "http://localhost:3080";
+
 export default defineConfig({
   plugins: [react()],
 
   server: {
     port: 5180,
     proxy: {
-      "/v1": "http://localhost:3080",
+      "/v1": { target: apiTarget, changeOrigin: true },
     },
   },
 

@@ -3,9 +3,11 @@
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../config/api_config.dart';
 import '../models/auth_models.dart';
 import '../models/user.dart';
 import 'api_service.dart';
+import 'api_warmup.dart';
 import 'storage_service.dart';
 
 part 'auth_service.g.dart';
@@ -128,24 +130,32 @@ class AuthService {
       return null;
     }
 
-    try {
-      return await me();
-    } on ApiException catch (error) {
-      if (_isTransientError(error)) {
-        return null;
-      }
-      if (await _tryRefreshSession()) {
-        try {
-          return await me();
-        } on ApiException catch (retryError) {
-          if (_isTransientError(retryError)) {
-            return null;
+    await warmProductionApi();
+
+    for (var attempt = 0; attempt < 2; attempt++) {
+      try {
+        return await me();
+      } on ApiException catch (error) {
+        if (_isTransientError(error)) {
+          if (attempt == 0) {
+            await Future<void>.delayed(const Duration(milliseconds: 800));
+            continue;
+          }
+          return null;
+        }
+        if (await _tryRefreshSession()) {
+          try {
+            return await me();
+          } on ApiException catch (retryError) {
+            if (_isTransientError(retryError)) {
+              return null;
+            }
           }
         }
+        return null;
       }
-      await _storageService.clearTokens();
-      return null;
     }
+    return null;
   }
 
   bool _isTransientError(ApiException error) {
@@ -153,7 +163,8 @@ class AuthService {
     return message.contains('internet') ||
         message.contains('waking up') ||
         message.contains('timeout') ||
-        message.contains('connection');
+        message.contains('connection') ||
+        message.contains('something went wrong');
   }
 
   Future<bool> _tryRefreshSession() async {
@@ -161,15 +172,28 @@ class AuthService {
     if (refreshToken == null || refreshToken.isEmpty) {
       return false;
     }
+    final refreshDio = Dio(
+      BaseOptions(
+        baseUrl: resolveApiBaseUrl(),
+        connectTimeout: const Duration(seconds: 25),
+        receiveTimeout: const Duration(seconds: 25),
+        sendTimeout: const Duration(seconds: 25),
+        responseType: ResponseType.json,
+      ),
+    );
     try {
-      final response = await _apiService.client.post<Map<String, dynamic>>(
+      final response = await refreshDio.post<Map<String, dynamic>>(
         '/auth/refresh',
         data: {'refresh_token': refreshToken},
       );
       final result = RefreshTokenResult.fromJson(response.data!);
       await _storageService.saveAccessToken(result.accessToken);
       return true;
-    } on DioException {
+    } on DioException catch (error) {
+      final status = error.response?.statusCode;
+      if (status == 401 || status == 403) {
+        await _storageService.clearTokens();
+      }
       return false;
     }
   }

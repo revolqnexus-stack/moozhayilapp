@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,6 +17,10 @@ import '../../../core/models/product.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/utils/customer_error_copy.dart';
+import '../../../core/animations/add_to_cart_animation.dart';
+import '../../../core/animations/bag_animation_targets.dart';
+import '../../../core/animations/bag_celebration_overlay.dart';
+import '../../../core/utils/app_haptics.dart';
 import '../../../core/utils/sample_catalog.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../cart/providers/cart_provider.dart';
@@ -107,6 +113,8 @@ class _ProductDetailBody extends ConsumerStatefulWidget {
 
 class _ProductDetailBodyState extends ConsumerState<_ProductDetailBody> {
   var _addingToBag = false;
+  var _bagAddedAck = false;
+  final _heroImageKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +128,10 @@ class _ProductDetailBodyState extends ConsumerState<_ProductDetailBody> {
       backgroundColor: AppColors.paper,
       body: ListView(
         children: [
-          ProductImageGallery(product: displayItem),
+          ProductImageGallery(
+            key: _heroImageKey,
+            product: displayItem,
+          ),
           Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
@@ -214,9 +225,10 @@ class _ProductDetailBodyState extends ConsumerState<_ProductDetailBody> {
         isInVault: displayItem.isInVault,
         isOutOfStock: !displayItem.stockAvailable,
         isAddingToBag: _addingToBag,
+        showBagAddedAck: _bagAddedAck,
         onAddToBag: !displayItem.stockAvailable
             ? null
-            : () => _addToBag(context, displayItem.id),
+            : () => _addToBag(context, displayItem),
         onBookVideoCall: () =>
             showProductVideoCallBottomSheet(context, product: displayItem),
         onToggleVault: () => handleVaultSave(context, ref, displayItem.id),
@@ -224,7 +236,7 @@ class _ProductDetailBodyState extends ConsumerState<_ProductDetailBody> {
     );
   }
 
-  Future<void> _addToBag(BuildContext context, String productId) async {
+  Future<void> _addToBag(BuildContext context, Product product) async {
     final auth = ref.read(authControllerProvider).value;
     if (auth?.step != AuthFlowStep.signedIn) {
       context.push(
@@ -236,9 +248,24 @@ class _ProductDetailBodyState extends ConsumerState<_ProductDetailBody> {
       return;
     }
 
-    setState(() => _addingToBag = true);
+    AppHaptics.light();
+    setState(() {
+      _addingToBag = true;
+      _bagAddedAck = false;
+    });
     try {
-      await ref.read(cartActionsProvider.notifier).addProduct(productId);
+      await ref.read(cartActionsProvider.notifier).addProduct(product.id);
+      if (!mounted) return;
+      setState(() {
+        _addingToBag = false;
+        _bagAddedAck = true;
+      });
+
+      AppHaptics.medium();
+      if (context.mounted) {
+        await _playAddToBagMotion(context, product);
+      }
+
       if (context.mounted) {
         showPremiumSnackBar(
           context,
@@ -247,12 +274,61 @@ class _ProductDetailBodyState extends ConsumerState<_ProductDetailBody> {
           onAction: () => context.push(AppRoutes.cart),
         );
       }
+      await Future<void>.delayed(const Duration(milliseconds: 1200));
+      if (mounted) setState(() => _bagAddedAck = false);
     } on ApiException catch (_) {
       if (context.mounted) {
         showPremiumSnackBar(context, CustomerCopy.addToBagError, haptic: false);
       }
-    } finally {
-      if (mounted) setState(() => _addingToBag = false);
+      if (mounted) {
+        setState(() {
+          _addingToBag = false;
+          _bagAddedAck = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _playAddToBagMotion(BuildContext context, Product product) async {
+    final imageUrl = product.primaryImage ??
+        (product.images.isNotEmpty ? product.images.first.url : '');
+    final heroBox =
+        _heroImageKey.currentContext?.findRenderObject() as RenderBox?;
+    final cartRect = BagAnimationTargets.cartIconRectOnScreen();
+
+    if (imageUrl.isNotEmpty &&
+        heroBox != null &&
+        heroBox.hasSize &&
+        cartRect != null) {
+      final start = heroBox.localToGlobal(Offset.zero) & heroBox.size;
+      final end = cartRect;
+      final flightEnd = Rect.fromCenter(
+        center: end.center,
+        width: 44,
+        height: 44,
+      );
+      final flightStart = Rect.fromCenter(
+        center: start.center,
+        width: start.width * 0.35,
+        height: start.height * 0.35,
+      );
+
+      final flightDone = Completer<void>();
+      showAddToCartAnimation(
+        context: context,
+        productImageUrl: imageUrl,
+        productImageRect: flightStart,
+        cartIconRect: flightEnd,
+        onComplete: () => flightDone.complete(),
+      );
+      await flightDone.future.timeout(
+        const Duration(milliseconds: 900),
+        onTimeout: () {},
+      );
+    }
+
+    if (context.mounted) {
+      await showBagCelebrationOverlay(context);
     }
   }
 }

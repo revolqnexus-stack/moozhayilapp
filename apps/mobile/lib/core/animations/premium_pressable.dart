@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../constants/motion.dart';
 import '../utils/app_haptics.dart';
+import '../utils/motion_preferences.dart';
 
 /// Tactile press feedback for premium cards, rows, and tappable surfaces.
 class PremiumPressable extends StatefulWidget {
@@ -49,6 +50,7 @@ class _PremiumPressableState extends State<PremiumPressable>
 
   void _onTapDown(TapDownDetails _) {
     if (widget.onTap == null) return;
+    if (!premiumMotionEnabled(context)) return;
     _controller.forward();
   }
 

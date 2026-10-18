@@ -14,6 +14,8 @@ class GoldProgressRing extends StatefulWidget {
     this.animateOnMount = true,
     this.showPercentage = true,
     this.centerWidget,
+    this.trackColor,
+    this.progressColor,
   });
 
   final double percent; // 0.0 to 1.0
@@ -22,6 +24,8 @@ class GoldProgressRing extends StatefulWidget {
   final bool animateOnMount;
   final bool showPercentage;
   final Widget? centerWidget;
+  final Color? trackColor;
+  final Color? progressColor;
 
   @override
   State<GoldProgressRing> createState() => _GoldProgressRingState();
@@ -96,7 +100,7 @@ class _GoldProgressRingState extends State<GoldProgressRing>
                 size: Size(widget.size, widget.size),
                 painter: _RingPainter(
                   progress: 1.0,
-                  color: AppColors.pearl,
+                  color: widget.trackColor ?? AppColors.pearl,
                   strokeWidth: widget.strokeWidth,
                 ),
               ),
@@ -106,7 +110,7 @@ class _GoldProgressRingState extends State<GoldProgressRing>
                 size: Size(widget.size, widget.size),
                 painter: _RingPainter(
                   progress: _progressAnimation.value,
-                  color: AppColors.gold,
+                  color: widget.progressColor ?? AppColors.gold,
                   strokeWidth: widget.strokeWidth,
                 ),
               ),

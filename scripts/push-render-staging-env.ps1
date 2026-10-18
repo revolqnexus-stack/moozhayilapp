@@ -21,19 +21,11 @@ $overrides = @{
   STORAGE_BACKEND       = "local"
   ENABLE_DEMO_SEEDS     = "true"
   CORS_ALLOWED_ORIGINS  = "http://localhost:5180,http://localhost:5173,https://$ServiceHost"
-}
-
-# Firebase stays live on staging when credentials exist.
-$stagingVars = @{}
-Get-Content $EnvFile | ForEach-Object {
-  if ($_ -match '^\s*([A-Z_][A-Z0-9_]*)=(.*)$') {
-    $stagingVars[$Matches[1]] = $Matches[2].Trim()
-  }
-}
-if ($stagingVars["FIREBASE_PROJECT_ID"] -and $stagingVars["FIREBASE_CLIENT_EMAIL"] -and $stagingVars["FIREBASE_PRIVATE_KEY"]) {
-  $overrides["FIREBASE_MODE"] = "live"
-} else {
-  $overrides["FIREBASE_MODE"] = "mock"
+  FIREBASE_MODE         = "mock"
+  FIREBASE_PROJECT_ID   = "mock-staging"
+  FIREBASE_CLIENT_EMAIL = "mock@staging.moozhayil.local"
+  FIREBASE_PRIVATE_KEY  = "mock"
+  S3_BUCKET             = "staging-local-unused"
 }
 
 & (Join-Path $Root "scripts/push-render-env-core.ps1") `

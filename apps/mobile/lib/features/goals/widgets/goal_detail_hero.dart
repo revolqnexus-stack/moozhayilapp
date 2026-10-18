@@ -5,7 +5,7 @@ import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 import '../../../core/models/goal.dart';
 import '../../../components/progress/linear_progress_bar.dart';
-import '../../../components/progress/progress_ring.dart';
+import '../../../core/animations/gold_progress_ring.dart';
 
 /// Ink hero for active plan detail — mirrors [MyGoldHero] structure.
 class GoalDetailHero extends StatelessWidget {
@@ -43,13 +43,14 @@ class GoalDetailHero extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              ProgressRing(
-                percent: goal.percentComplete,
+              GoldProgressRing(
+                percent: goal.percentComplete / 100.0,
                 size: 72,
                 strokeWidth: 5,
                 trackColor: AppColors.paper.withValues(alpha: 0.15),
                 progressColor: AppColors.gold,
-                center: Text(
+                showPercentage: false,
+                centerWidget: Text(
                   '${goal.percentComplete}%',
                   style: AppTypography.uiLabel.copyWith(
                     color: AppColors.cream,

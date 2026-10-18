@@ -74,8 +74,9 @@ import 'app_routes.dart';
 /// [context.go] using constants from [AppRoutes]. Never use Navigator.push.
 /// Stable router — do not recreate when auth changes (that reset navigation and
 /// dropped OTP sessions). Call [GoRouter.refresh] when auth updates instead.
-GoRouter createAppRouter({required AuthState? Function() readAuthState}) =>
-    GoRouter(
+GoRouter createAppRouter({
+  required AuthState? Function() readAuthState,
+}) => GoRouter(
   initialLocation: AppRoutes.splash,
   debugLogDiagnostics: false,
   redirect: (context, state) {

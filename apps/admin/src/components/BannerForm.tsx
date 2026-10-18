@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   BANNER_PLACEMENTS,
+  CTA_APP_ROUTES,
   type BannerFormValues,
 } from "../config/cms";
 import { Input } from "./Input";
@@ -46,8 +47,9 @@ export function BannerForm({
       <div className="banner-form__header">
         <h2>{mode === "create" ? "New banner" : "Edit banner"}</h2>
         <p className="muted">
-          Paste a public CDN URL. Use a 3:4 or 16:9 image for hero placements.
-          Preview updates as you type.
+          Upload or paste a public image URL. Hero flyers: portrait 9:16 works
+          best on phones. Set a button label and destination so taps open the
+          right screen in the app.
         </p>
       </div>
 
@@ -112,6 +114,12 @@ export function BannerForm({
               </option>
             ))}
           </select>
+          <p className="muted field__hint">
+            {
+              BANNER_PLACEMENTS.find((p) => p.value === values.placement)?.hint ??
+              ""
+            }
+          </p>
         </div>
 
         <Input
@@ -134,14 +142,51 @@ export function BannerForm({
           disabled={saving}
           placeholder="Shop now"
         />
-        <Input
-          label="CTA route"
-          name="cta_route"
-          value={values.cta_route}
-          onChange={(event) => patch({ cta_route: event.target.value })}
-          disabled={saving}
-          placeholder="/catalogue/festive"
-        />
+        <div className="field">
+          <label className="field__label" htmlFor="cta_route">
+            Button leads to (in app)
+          </label>
+          <select
+            id="cta_route"
+            className="field__input"
+            value={
+              CTA_APP_ROUTES.some((r) => r.value === values.cta_route)
+                ? values.cta_route
+                : values.cta_route
+                  ? "__custom__"
+                  : ""
+            }
+            onChange={(event) => {
+              const next = event.target.value;
+              if (next !== "__custom__") {
+                patch({ cta_route: next });
+              }
+            }}
+            disabled={saving}
+          >
+            {CTA_APP_ROUTES.map((route) => (
+              <option key={route.value || "default"} value={route.value}>
+                {route.label}
+              </option>
+            ))}
+            <option value="__custom__">Custom path…</option>
+          </select>
+          {values.cta_route &&
+          !CTA_APP_ROUTES.some((r) => r.value === values.cta_route) ? (
+            <Input
+              label="Custom route"
+              name="cta_route_custom"
+              value={values.cta_route}
+              onChange={(event) => patch({ cta_route: event.target.value })}
+              disabled={saving}
+              placeholder="/shop/collection/uuid"
+            />
+          ) : null}
+          <p className="muted field__hint">
+            The app shows the hero button only when CTA label is set. Empty
+            destination defaults to Shop. Product: /shop/product/&lt;id&gt;
+          </p>
+        </div>
       </div>
 
       <div className="banner-form__row">

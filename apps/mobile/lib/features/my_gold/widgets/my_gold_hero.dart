@@ -48,19 +48,13 @@ class MyGoldHero extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          _BalanceGramsDisplay(
-            balance: balance,
-            isLoading: isLoading,
-          ),
+          _BalanceGramsDisplay(balance: balance, isLoading: isLoading),
           const SizedBox(height: AppSpacing.xxs),
           FadeSlideIn(
             delay: const Duration(milliseconds: 180),
             duration: AppMotion.normal,
             offsetY: 6,
-            child: _BalanceValueDisplay(
-              balance: balance,
-              isLoading: isLoading,
-            ),
+            child: _BalanceValueDisplay(balance: balance, isLoading: isLoading),
           ),
           const SizedBox(height: AppSpacing.md),
           FadeSlideIn(
@@ -89,10 +83,7 @@ class MyGoldHero extends StatelessWidget {
 }
 
 class _BalanceGramsDisplay extends StatelessWidget {
-  const _BalanceGramsDisplay({
-    required this.balance,
-    required this.isLoading,
-  });
+  const _BalanceGramsDisplay({required this.balance, required this.isLoading});
 
   final GoldBalance balance;
   final bool isLoading;
@@ -116,10 +107,7 @@ class _BalanceGramsDisplay extends StatelessWidget {
 }
 
 class _BalanceValueDisplay extends StatelessWidget {
-  const _BalanceValueDisplay({
-    required this.balance,
-    required this.isLoading,
-  });
+  const _BalanceValueDisplay({required this.balance, required this.isLoading});
 
   final GoldBalance balance;
   final bool isLoading;

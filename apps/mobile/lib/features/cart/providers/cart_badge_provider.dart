@@ -9,15 +9,15 @@ class CartCountOverride extends Notifier<int?> {
   void setCount(int count) => state = count;
 }
 
-final cartCountOverrideProvider =
-    NotifierProvider<CartCountOverride, int?>(CartCountOverride.new);
+final cartCountOverrideProvider = NotifierProvider<CartCountOverride, int?>(
+  CartCountOverride.new,
+);
 
 final cartBadgeCountProvider = Provider<int>((ref) {
   final override = ref.watch(cartCountOverrideProvider);
   if (override != null) return override;
 
-  return ref.watch(cartSummaryProvider).maybeWhen(
-        data: (summary) => summary.itemCount,
-        orElse: () => 0,
-      );
+  return ref
+      .watch(cartSummaryProvider)
+      .maybeWhen(data: (summary) => summary.itemCount, orElse: () => 0);
 });

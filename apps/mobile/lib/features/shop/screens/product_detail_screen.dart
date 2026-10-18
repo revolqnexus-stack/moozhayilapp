@@ -128,10 +128,7 @@ class _ProductDetailBodyState extends ConsumerState<_ProductDetailBody> {
       backgroundColor: AppColors.paper,
       body: ListView(
         children: [
-          ProductImageGallery(
-            key: _heroImageKey,
-            product: displayItem,
-          ),
+          ProductImageGallery(key: _heroImageKey, product: displayItem),
           Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
@@ -289,8 +286,12 @@ class _ProductDetailBodyState extends ConsumerState<_ProductDetailBody> {
     }
   }
 
-  Future<void> _playAddToBagMotion(BuildContext context, Product product) async {
-    final imageUrl = product.primaryImage ??
+  Future<void> _playAddToBagMotion(
+    BuildContext context,
+    Product product,
+  ) async {
+    final imageUrl =
+        product.primaryImage ??
         (product.images.isNotEmpty ? product.images.first.url : '');
     final heroBox =
         _heroImageKey.currentContext?.findRenderObject() as RenderBox?;

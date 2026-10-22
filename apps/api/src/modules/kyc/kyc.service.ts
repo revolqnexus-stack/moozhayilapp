@@ -24,8 +24,18 @@ import { maskName } from "../../utils/pii";
 import type {
   SendAadhaarOtpInput,
   VerifyAadhaarOtpInput,
+  VerifyBankAccountInput,
   VerifyPanInput,
 } from "./kyc.schema";
+import {
+  isBankNameMatchResultOk,
+  maskBankAccountNumber,
+} from "./bank_account.util";
+import { mapStampMitraErrorToAppError } from "./stampmitra.errors";
+import {
+  verifyBankAccountWithStampMitra,
+  type StampMitraBankAccountVerifyResponse,
+} from "./stampmitra.client";
 import { kycProviderClient } from "./kyc_provider.client";
 
 function piiSecret(): string {
@@ -153,6 +163,7 @@ export class KycService {
       kyc_status: user.kycStatus,
       aadhaar_verified: doc?.aadhaarVerified ?? false,
       pan_verified: doc?.panVerified ?? false,
+      bank_verified: doc?.bankVerified ?? false,
       selfie_verified: doc?.selfieVerified ?? false,
       submitted_at: doc?.submittedAt?.toISOString() ?? null,
       rejection_reason: doc?.rejectionReason ?? null,
@@ -277,9 +288,71 @@ export class KycService {
     await assertCanStartKyc(userId);
     await markInProgress(userId);
 
-    const providerResult = await kycProviderClient.verifyPan(input.pan_number);
-    if (!providerResult.verified) {
-      throw new AppError(422, "UNPROCESSABLE", "PAN verification failed");
+    const providerResult = await kycProviderClient.verifyPan(
+      input.pan_number,
+      input.name,
+    );
+    const now = new Date();
+    const panIsValid = providerResult.panStatus.toUpperCase() === "VALID";
+    const nameMismatch =
+      input.name &&
+      providerResult.nameMatchResult &&
+      providerResult.nameMatchResult.toUpperCase() !== "MATCH";
+
+    await writeAuditLog({
+      actorType: "user",
+      actorId: userId,
+      action: "kyc_pan_verification",
+      entityType: "user",
+      entityId: userId,
+      after: {
+        reference_id: providerResult.referenceId,
+        valid: providerResult.verified,
+        pan_status: providerResult.panStatus,
+        name_match_result: providerResult.nameMatchResult,
+      },
+    });
+
+    const auditFields = {
+      panVerificationReferenceId: providerResult.referenceId,
+      panVerificationValid: providerResult.verified,
+      panVerifiedAt: now,
+      panVerified: false,
+    };
+
+    if (!panIsValid) {
+      await prisma.kycDocument.upsert({
+        where: { userId },
+        create: { userId, ...auditFields },
+        update: auditFields,
+      });
+
+      return {
+        verified: false,
+        reference_id: providerResult.referenceId,
+        pan_status: providerResult.panStatus,
+        name_match_result: providerResult.nameMatchResult,
+        message: providerResult.message || "PAN not valid",
+      };
+    }
+
+    if (nameMismatch || !providerResult.verified) {
+      await prisma.kycDocument.upsert({
+        where: { userId },
+        create: { userId, ...auditFields },
+        update: auditFields,
+      });
+
+      return {
+        verified: false,
+        reference_id: providerResult.referenceId,
+        pan_status: providerResult.panStatus,
+        name_match_result: providerResult.nameMatchResult,
+        name_on_pan_masked: providerResult.nameOnPan
+          ? maskName(providerResult.nameOnPan)
+          : null,
+        message: "Name does not match PAN records",
+      };
     }
 
     await prisma.kycDocument.upsert({
@@ -287,26 +360,197 @@ export class KycService {
       create: {
         userId,
         panNumberEncrypted: encryptSensitive(input.pan_number, piiSecret()),
-        panVerified: true,
         nameOnPanEncrypted: encryptSensitive(
           providerResult.nameOnPan,
           piiSecret(),
         ),
+        panVerificationReferenceId: providerResult.referenceId,
+        panVerificationValid: true,
+        panVerifiedAt: now,
+        panVerified: true,
       },
       update: {
         panNumberEncrypted: encryptSensitive(input.pan_number, piiSecret()),
-        panVerified: true,
         nameOnPanEncrypted: encryptSensitive(
           providerResult.nameOnPan,
           piiSecret(),
         ),
+        panVerificationReferenceId: providerResult.referenceId,
+        panVerificationValid: true,
+        panVerifiedAt: now,
+        panVerified: true,
       },
     });
 
     return {
       verified: true,
+      reference_id: providerResult.referenceId,
+      pan_status: providerResult.panStatus,
+      name_match_result: providerResult.nameMatchResult,
       name_on_pan_masked: maskName(providerResult.nameOnPan),
       pan_type: providerResult.panType,
+      message: providerResult.message,
+    };
+  }
+
+  async verifyBankAccount(userId: string, input: VerifyBankAccountInput) {
+    await assertCanStartKyc(userId);
+    await markInProgress(userId);
+
+    const env = loadEnv();
+    let providerResult: StampMitraBankAccountVerifyResponse;
+
+    if (env.KYC_PROVIDER_MODE === "mock") {
+      if (env.NODE_ENV === "production" && !env.MOOZHAYIL_ALLOW_MOCK_KYC) {
+        throw new AppError(503, "PROVIDER_UNAVAILABLE", "Mock KYC disabled in production");
+      }
+
+      const mockName = "MOCK BANK USER";
+      const nameMatchResult =
+        input.name && input.name.trim().toUpperCase() !== mockName
+          ? "NO_MATCH"
+          : "GOOD_MATCH";
+
+      providerResult = {
+        referenceId: `mock_bank_${input.account_number.slice(-4)}`,
+        valid: true,
+        nameAtBank: mockName,
+        bankName: "Mock Bank",
+        utr: "",
+        city: "Thrissur",
+        branch: "Main",
+        micr: "",
+        nameMatchScore: nameMatchResult === "GOOD_MATCH" ? "100" : "20",
+        nameMatchResult,
+        accountStatus: "ACCOUNT_IS_VALID",
+        accountStatusCode: "1",
+      };
+    } else {
+      try {
+        providerResult = await verifyBankAccountWithStampMitra({
+          accountNumber: input.account_number,
+          ifsc: input.ifsc,
+          name: input.name,
+        });
+      } catch (error) {
+        throw mapStampMitraErrorToAppError(error, {
+          operation: "verify_bank_account",
+          requiredScope: "verification.bank-account.read",
+        });
+      }
+    }
+
+    const now = new Date();
+    const nameProvided = Boolean(input.name);
+    const nameMatchOk = isBankNameMatchResultOk(
+      providerResult.nameMatchResult,
+      nameProvided,
+    );
+    const verified =
+      providerResult.valid && nameMatchOk && providerResult.accountStatus !== "";
+
+    await writeAuditLog({
+      actorType: "user",
+      actorId: userId,
+      action: "kyc_bank_verification",
+      entityType: "user",
+      entityId: userId,
+      after: {
+        reference_id: providerResult.referenceId,
+        valid: verified,
+        account_status: providerResult.accountStatus,
+        name_match_result: providerResult.nameMatchResult,
+        account_masked: maskBankAccountNumber(input.account_number),
+      },
+    });
+
+    const auditFields = {
+      bankVerificationReferenceId: providerResult.referenceId,
+      bankVerificationValid: verified,
+      bankVerifiedAt: now,
+      bankVerified: false,
+    };
+
+    if (!providerResult.valid) {
+      await prisma.kycDocument.upsert({
+        where: { userId },
+        create: { userId, ...auditFields },
+        update: auditFields,
+      });
+
+      return {
+        verified: false,
+        reference_id: providerResult.referenceId,
+        account_status: providerResult.accountStatus,
+        name_match_result: providerResult.nameMatchResult,
+        message: "Bank account could not be verified",
+      };
+    }
+
+    if (!nameMatchOk) {
+      await prisma.kycDocument.upsert({
+        where: { userId },
+        create: { userId, ...auditFields },
+        update: auditFields,
+      });
+
+      return {
+        verified: false,
+        reference_id: providerResult.referenceId,
+        account_status: providerResult.accountStatus,
+        name_match_result: providerResult.nameMatchResult,
+        name_at_bank_masked: providerResult.nameAtBank
+          ? maskName(providerResult.nameAtBank)
+          : null,
+        bank_name: providerResult.bankName,
+        message: "Name does not match bank records",
+      };
+    }
+
+    await prisma.kycDocument.upsert({
+      where: { userId },
+      create: {
+        userId,
+        bankAccountNumberEncrypted: encryptSensitive(
+          input.account_number,
+          piiSecret(),
+        ),
+        bankIfscEncrypted: encryptSensitive(input.ifsc, piiSecret()),
+        nameAtBankEncrypted: providerResult.nameAtBank
+          ? encryptSensitive(providerResult.nameAtBank, piiSecret())
+          : null,
+        bankVerificationReferenceId: providerResult.referenceId,
+        bankVerificationValid: true,
+        bankVerifiedAt: now,
+        bankVerified: true,
+      },
+      update: {
+        bankAccountNumberEncrypted: encryptSensitive(
+          input.account_number,
+          piiSecret(),
+        ),
+        bankIfscEncrypted: encryptSensitive(input.ifsc, piiSecret()),
+        nameAtBankEncrypted: providerResult.nameAtBank
+          ? encryptSensitive(providerResult.nameAtBank, piiSecret())
+          : null,
+        bankVerificationReferenceId: providerResult.referenceId,
+        bankVerificationValid: true,
+        bankVerifiedAt: now,
+        bankVerified: true,
+      },
+    });
+
+    return {
+      verified: true,
+      reference_id: providerResult.referenceId,
+      account_status: providerResult.accountStatus,
+      name_match_result: providerResult.nameMatchResult,
+      name_at_bank_masked: providerResult.nameAtBank
+        ? maskName(providerResult.nameAtBank)
+        : null,
+      bank_name: providerResult.bankName,
+      branch: providerResult.branch,
+      account_masked: maskBankAccountNumber(input.account_number),
     };
   }
 

@@ -1,6 +1,8 @@
 import { loadEnv } from "../../config/env";
 import { AppError } from "../../middleware/error.middleware";
 import { withRetry } from "../../utils/retry";
+import { mapStampMitraErrorToAppError } from "./stampmitra.errors";
+import { verifyPanWithStampMitra } from "./stampmitra.client";
 
 export interface AadhaarOtpSendResult {
   providerSessionId: string;
@@ -15,6 +17,10 @@ export interface PanVerifyResult {
   verified: boolean;
   nameOnPan: string;
   panType: string;
+  referenceId: string;
+  panStatus: string;
+  nameMatchResult: string;
+  message: string;
 }
 
 export interface SelfieVerifyResult {
@@ -121,7 +127,7 @@ export class KycProviderClient {
     };
   }
 
-  async verifyPan(panNumber: string): Promise<PanVerifyResult> {
+  async verifyPan(panNumber: string, name?: string): Promise<PanVerifyResult> {
     const env = loadEnv();
     if (env.KYC_PROVIDER_MODE === "mock") {
       if (env.NODE_ENV === "production" && !env.MOOZHAYIL_ALLOW_MOCK_KYC) {
@@ -133,27 +139,57 @@ export class KycProviderClient {
           verified: false,
           nameOnPan: "",
           panType: "individual",
+          referenceId: "mock_pan_invalid_format",
+          panStatus: "INVALID",
+          nameMatchResult: "",
+          message: "Invalid PAN format",
         };
       }
 
+      const mockName = "MOCK KYC USER";
+      const nameMatchResult =
+        name && name.trim().length > 0 && name.trim().toUpperCase() !== mockName
+          ? "MISMATCH"
+          : "MATCH";
+
       return {
-        verified: true,
-        nameOnPan: "MOCK KYC USER",
+        verified: nameMatchResult === "MATCH",
+        nameOnPan: mockName,
         panType: "individual",
+        referenceId: `mock_pan_${panNumber.slice(-4)}`,
+        panStatus: "VALID",
+        nameMatchResult,
+        message: "PAN is Valid",
       };
     }
 
-    const result = await liveKycRequest<{
-      verified: boolean;
-      name_on_pan: string;
-      pan_type: string;
-    }>("/pan/verify", { pan_number: panNumber });
+    try {
+      const result = await verifyPanWithStampMitra({
+        pan: panNumber,
+        name: name?.trim() || undefined,
+      });
 
-    return {
-      verified: result.verified,
-      nameOnPan: result.name_on_pan,
-      panType: result.pan_type,
-    };
+      const nameMismatch =
+        name &&
+        name.trim().length > 0 &&
+        result.nameMatchResult &&
+        result.nameMatchResult.toUpperCase() !== "MATCH";
+
+      return {
+        verified: result.valid && !nameMismatch,
+        nameOnPan: result.registeredName,
+        panType: "individual",
+        referenceId: result.referenceId,
+        panStatus: result.panStatus,
+        nameMatchResult: result.nameMatchResult,
+        message: result.message,
+      };
+    } catch (error) {
+      throw mapStampMitraErrorToAppError(error, {
+        operation: "verify_pan",
+        requiredScope: "verification.pan.read",
+      });
+    }
   }
 
   async verifySelfie(buffer: Buffer, mimeType: string): Promise<SelfieVerifyResult> {

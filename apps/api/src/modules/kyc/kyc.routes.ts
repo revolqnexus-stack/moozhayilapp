@@ -25,6 +25,10 @@ kycRouter.post("/pan/verify", (req, res, next) => {
   void kycController.verifyPan(req, res).catch(next);
 });
 
+kycRouter.post("/bank-account/verify", (req, res, next) => {
+  void kycController.verifyBankAccount(req, res).catch(next);
+});
+
 kycRouter.post("/selfie", uploadSelfieMiddleware, (req, res, next) => {
   void kycController.uploadSelfie(req, res).catch(next);
 });

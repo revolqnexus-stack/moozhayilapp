@@ -23,6 +23,8 @@ const envSchema = z.object({
   KYC_PROVIDER_MODE: z.enum(["mock", "live"]).default("mock"),
   KYC_PROVIDER_BASE_URL: z.string().url().optional(),
   KYC_PROVIDER_API_KEY: z.string().min(8).optional(),
+  /** StampMitra sandbox: sk_test_… · production: sk_live_… (PAN verification). */
+  STAMPMITRA_API_KEY: z.string().min(16).optional(),
   KYC_UPLOAD_DIR: z.string().min(1).default("./uploads/kyc"),
   MEDIA_UPLOAD_DIR: z.string().min(1).default("./uploads/media"),
   STORAGE_BACKEND: z.enum(["local", "s3"]).default("local"),
@@ -111,6 +113,22 @@ const developmentSecrets = {
   ADMIN_JWT_SECRET: "dev_admin_jwt_secret_change_before_prod_32",
 };
 
+function assertStampMitraConfiguration(data: z.infer<typeof envSchema>) {
+  const mockKycOk =
+    data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC;
+
+  if (
+    data.NODE_ENV !== "test" &&
+    data.KYC_PROVIDER_MODE === "live" &&
+    !mockKycOk &&
+    !data.STAMPMITRA_API_KEY
+  ) {
+    throw new Error(
+      "Invalid environment configuration: STAMPMITRA_API_KEY is required when KYC_PROVIDER_MODE=live (PAN verification uses StampMitra).",
+    );
+  }
+}
+
 function assertProductionProviderModes(data: z.infer<typeof envSchema>) {
   const mockKycOk =
     data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC;
@@ -185,6 +203,11 @@ function assertProductionLiveCredentials(data: z.infer<typeof envSchema>) {
       : data.KYC_PROVIDER_API_KEY
         ? null
         : "KYC_PROVIDER_API_KEY",
+    data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC
+      ? null
+      : data.STAMPMITRA_API_KEY
+        ? null
+        : "STAMPMITRA_API_KEY",
     data.FIREBASE_PROJECT_ID ? null : "FIREBASE_PROJECT_ID",
     data.FIREBASE_CLIENT_EMAIL ? null : "FIREBASE_CLIENT_EMAIL",
     data.FIREBASE_PRIVATE_KEY ? null : "FIREBASE_PRIVATE_KEY",
@@ -214,6 +237,7 @@ function assertProductionNoTestCredentials(data: z.infer<typeof envSchema>) {
     ["RAZORPAY_KEY_SECRET", data.RAZORPAY_KEY_SECRET],
     ["MSG91_AUTH_KEY", data.MSG91_AUTH_KEY],
     ["KYC_PROVIDER_API_KEY", data.KYC_PROVIDER_API_KEY],
+    ["STAMPMITRA_API_KEY", data.STAMPMITRA_API_KEY],
     ["S3_ACCESS_KEY_ID", data.S3_ACCESS_KEY_ID],
     ["S3_SECRET_ACCESS_KEY", data.S3_SECRET_ACCESS_KEY],
   ];
@@ -302,6 +326,8 @@ export function loadEnv(input: NodeJS.ProcessEnv = process.env): Env {
   }
 
   const data = parsed.data;
+
+  assertStampMitraConfiguration(data);
 
   if (data.NODE_ENV === "production") {
     const missingSecrets = [

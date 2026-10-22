@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$KycStatusResponse {
 
-@JsonKey(name: 'kyc_status') String get kycStatus;@JsonKey(name: 'aadhaar_verified') bool get aadhaarVerified;@JsonKey(name: 'pan_verified') bool get panVerified;@JsonKey(name: 'selfie_verified') bool get selfieVerified;@JsonKey(name: 'submitted_at') String? get submittedAt;@JsonKey(name: 'rejection_reason') String? get rejectionReason;@JsonKey(name: 'resubmission_allowed_at') String? get resubmissionAllowedAt;
+@JsonKey(name: 'kyc_status') String get kycStatus;@JsonKey(name: 'aadhaar_verified') bool get aadhaarVerified;@JsonKey(name: 'pan_verified') bool get panVerified;@JsonKey(name: 'bank_verified') bool get bankVerified;@JsonKey(name: 'selfie_verified') bool get selfieVerified;@JsonKey(name: 'submitted_at') String? get submittedAt;@JsonKey(name: 'rejection_reason') String? get rejectionReason;@JsonKey(name: 'resubmission_allowed_at') String? get resubmissionAllowedAt;
 /// Create a copy of KycStatusResponse
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $KycStatusResponseCopyWith<KycStatusResponse> get copyWith => _$KycStatusRespons
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is KycStatusResponse&&(identical(other.kycStatus, kycStatus) || other.kycStatus == kycStatus)&&(identical(other.aadhaarVerified, aadhaarVerified) || other.aadhaarVerified == aadhaarVerified)&&(identical(other.panVerified, panVerified) || other.panVerified == panVerified)&&(identical(other.selfieVerified, selfieVerified) || other.selfieVerified == selfieVerified)&&(identical(other.submittedAt, submittedAt) || other.submittedAt == submittedAt)&&(identical(other.rejectionReason, rejectionReason) || other.rejectionReason == rejectionReason)&&(identical(other.resubmissionAllowedAt, resubmissionAllowedAt) || other.resubmissionAllowedAt == resubmissionAllowedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KycStatusResponse&&(identical(other.kycStatus, kycStatus) || other.kycStatus == kycStatus)&&(identical(other.aadhaarVerified, aadhaarVerified) || other.aadhaarVerified == aadhaarVerified)&&(identical(other.panVerified, panVerified) || other.panVerified == panVerified)&&(identical(other.bankVerified, bankVerified) || other.bankVerified == bankVerified)&&(identical(other.selfieVerified, selfieVerified) || other.selfieVerified == selfieVerified)&&(identical(other.submittedAt, submittedAt) || other.submittedAt == submittedAt)&&(identical(other.rejectionReason, rejectionReason) || other.rejectionReason == rejectionReason)&&(identical(other.resubmissionAllowedAt, resubmissionAllowedAt) || other.resubmissionAllowedAt == resubmissionAllowedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,kycStatus,aadhaarVerified,panVerified,selfieVerified,submittedAt,rejectionReason,resubmissionAllowedAt);
+int get hashCode => Object.hash(runtimeType,kycStatus,aadhaarVerified,panVerified,bankVerified,selfieVerified,submittedAt,rejectionReason,resubmissionAllowedAt);
 
 @override
 String toString() {
-  return 'KycStatusResponse(kycStatus: $kycStatus, aadhaarVerified: $aadhaarVerified, panVerified: $panVerified, selfieVerified: $selfieVerified, submittedAt: $submittedAt, rejectionReason: $rejectionReason, resubmissionAllowedAt: $resubmissionAllowedAt)';
+  return 'KycStatusResponse(kycStatus: $kycStatus, aadhaarVerified: $aadhaarVerified, panVerified: $panVerified, bankVerified: $bankVerified, selfieVerified: $selfieVerified, submittedAt: $submittedAt, rejectionReason: $rejectionReason, resubmissionAllowedAt: $resubmissionAllowedAt)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $KycStatusResponseCopyWith<$Res>  {
   factory $KycStatusResponseCopyWith(KycStatusResponse value, $Res Function(KycStatusResponse) _then) = _$KycStatusResponseCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'kyc_status') String kycStatus,@JsonKey(name: 'aadhaar_verified') bool aadhaarVerified,@JsonKey(name: 'pan_verified') bool panVerified,@JsonKey(name: 'selfie_verified') bool selfieVerified,@JsonKey(name: 'submitted_at') String? submittedAt,@JsonKey(name: 'rejection_reason') String? rejectionReason,@JsonKey(name: 'resubmission_allowed_at') String? resubmissionAllowedAt
+@JsonKey(name: 'kyc_status') String kycStatus,@JsonKey(name: 'aadhaar_verified') bool aadhaarVerified,@JsonKey(name: 'pan_verified') bool panVerified,@JsonKey(name: 'bank_verified') bool bankVerified,@JsonKey(name: 'selfie_verified') bool selfieVerified,@JsonKey(name: 'submitted_at') String? submittedAt,@JsonKey(name: 'rejection_reason') String? rejectionReason,@JsonKey(name: 'resubmission_allowed_at') String? resubmissionAllowedAt
 });
 
 
@@ -65,11 +65,12 @@ class _$KycStatusResponseCopyWithImpl<$Res>
 
 /// Create a copy of KycStatusResponse
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? kycStatus = null,Object? aadhaarVerified = null,Object? panVerified = null,Object? selfieVerified = null,Object? submittedAt = freezed,Object? rejectionReason = freezed,Object? resubmissionAllowedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? kycStatus = null,Object? aadhaarVerified = null,Object? panVerified = null,Object? bankVerified = null,Object? selfieVerified = null,Object? submittedAt = freezed,Object? rejectionReason = freezed,Object? resubmissionAllowedAt = freezed,}) {
   return _then(_self.copyWith(
 kycStatus: null == kycStatus ? _self.kycStatus : kycStatus // ignore: cast_nullable_to_non_nullable
 as String,aadhaarVerified: null == aadhaarVerified ? _self.aadhaarVerified : aadhaarVerified // ignore: cast_nullable_to_non_nullable
 as bool,panVerified: null == panVerified ? _self.panVerified : panVerified // ignore: cast_nullable_to_non_nullable
+as bool,bankVerified: null == bankVerified ? _self.bankVerified : bankVerified // ignore: cast_nullable_to_non_nullable
 as bool,selfieVerified: null == selfieVerified ? _self.selfieVerified : selfieVerified // ignore: cast_nullable_to_non_nullable
 as bool,submittedAt: freezed == submittedAt ? _self.submittedAt : submittedAt // ignore: cast_nullable_to_non_nullable
 as String?,rejectionReason: freezed == rejectionReason ? _self.rejectionReason : rejectionReason // ignore: cast_nullable_to_non_nullable
@@ -159,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'kyc_status')  String kycStatus, @JsonKey(name: 'aadhaar_verified')  bool aadhaarVerified, @JsonKey(name: 'pan_verified')  bool panVerified, @JsonKey(name: 'selfie_verified')  bool selfieVerified, @JsonKey(name: 'submitted_at')  String? submittedAt, @JsonKey(name: 'rejection_reason')  String? rejectionReason, @JsonKey(name: 'resubmission_allowed_at')  String? resubmissionAllowedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'kyc_status')  String kycStatus, @JsonKey(name: 'aadhaar_verified')  bool aadhaarVerified, @JsonKey(name: 'pan_verified')  bool panVerified, @JsonKey(name: 'bank_verified')  bool bankVerified, @JsonKey(name: 'selfie_verified')  bool selfieVerified, @JsonKey(name: 'submitted_at')  String? submittedAt, @JsonKey(name: 'rejection_reason')  String? rejectionReason, @JsonKey(name: 'resubmission_allowed_at')  String? resubmissionAllowedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _KycStatusResponse() when $default != null:
-return $default(_that.kycStatus,_that.aadhaarVerified,_that.panVerified,_that.selfieVerified,_that.submittedAt,_that.rejectionReason,_that.resubmissionAllowedAt);case _:
+return $default(_that.kycStatus,_that.aadhaarVerified,_that.panVerified,_that.bankVerified,_that.selfieVerified,_that.submittedAt,_that.rejectionReason,_that.resubmissionAllowedAt);case _:
   return orElse();
 
 }
@@ -180,10 +181,10 @@ return $default(_that.kycStatus,_that.aadhaarVerified,_that.panVerified,_that.se
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'kyc_status')  String kycStatus, @JsonKey(name: 'aadhaar_verified')  bool aadhaarVerified, @JsonKey(name: 'pan_verified')  bool panVerified, @JsonKey(name: 'selfie_verified')  bool selfieVerified, @JsonKey(name: 'submitted_at')  String? submittedAt, @JsonKey(name: 'rejection_reason')  String? rejectionReason, @JsonKey(name: 'resubmission_allowed_at')  String? resubmissionAllowedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'kyc_status')  String kycStatus, @JsonKey(name: 'aadhaar_verified')  bool aadhaarVerified, @JsonKey(name: 'pan_verified')  bool panVerified, @JsonKey(name: 'bank_verified')  bool bankVerified, @JsonKey(name: 'selfie_verified')  bool selfieVerified, @JsonKey(name: 'submitted_at')  String? submittedAt, @JsonKey(name: 'rejection_reason')  String? rejectionReason, @JsonKey(name: 'resubmission_allowed_at')  String? resubmissionAllowedAt)  $default,) {final _that = this;
 switch (_that) {
 case _KycStatusResponse():
-return $default(_that.kycStatus,_that.aadhaarVerified,_that.panVerified,_that.selfieVerified,_that.submittedAt,_that.rejectionReason,_that.resubmissionAllowedAt);case _:
+return $default(_that.kycStatus,_that.aadhaarVerified,_that.panVerified,_that.bankVerified,_that.selfieVerified,_that.submittedAt,_that.rejectionReason,_that.resubmissionAllowedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +201,10 @@ return $default(_that.kycStatus,_that.aadhaarVerified,_that.panVerified,_that.se
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'kyc_status')  String kycStatus, @JsonKey(name: 'aadhaar_verified')  bool aadhaarVerified, @JsonKey(name: 'pan_verified')  bool panVerified, @JsonKey(name: 'selfie_verified')  bool selfieVerified, @JsonKey(name: 'submitted_at')  String? submittedAt, @JsonKey(name: 'rejection_reason')  String? rejectionReason, @JsonKey(name: 'resubmission_allowed_at')  String? resubmissionAllowedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'kyc_status')  String kycStatus, @JsonKey(name: 'aadhaar_verified')  bool aadhaarVerified, @JsonKey(name: 'pan_verified')  bool panVerified, @JsonKey(name: 'bank_verified')  bool bankVerified, @JsonKey(name: 'selfie_verified')  bool selfieVerified, @JsonKey(name: 'submitted_at')  String? submittedAt, @JsonKey(name: 'rejection_reason')  String? rejectionReason, @JsonKey(name: 'resubmission_allowed_at')  String? resubmissionAllowedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _KycStatusResponse() when $default != null:
-return $default(_that.kycStatus,_that.aadhaarVerified,_that.panVerified,_that.selfieVerified,_that.submittedAt,_that.rejectionReason,_that.resubmissionAllowedAt);case _:
+return $default(_that.kycStatus,_that.aadhaarVerified,_that.panVerified,_that.bankVerified,_that.selfieVerified,_that.submittedAt,_that.rejectionReason,_that.resubmissionAllowedAt);case _:
   return null;
 
 }
@@ -215,12 +216,13 @@ return $default(_that.kycStatus,_that.aadhaarVerified,_that.panVerified,_that.se
 @JsonSerializable()
 
 class _KycStatusResponse implements KycStatusResponse {
-  const _KycStatusResponse({@JsonKey(name: 'kyc_status') required this.kycStatus, @JsonKey(name: 'aadhaar_verified') this.aadhaarVerified = false, @JsonKey(name: 'pan_verified') this.panVerified = false, @JsonKey(name: 'selfie_verified') this.selfieVerified = false, @JsonKey(name: 'submitted_at') this.submittedAt, @JsonKey(name: 'rejection_reason') this.rejectionReason, @JsonKey(name: 'resubmission_allowed_at') this.resubmissionAllowedAt});
+  const _KycStatusResponse({@JsonKey(name: 'kyc_status') required this.kycStatus, @JsonKey(name: 'aadhaar_verified') this.aadhaarVerified = false, @JsonKey(name: 'pan_verified') this.panVerified = false, @JsonKey(name: 'bank_verified') this.bankVerified = false, @JsonKey(name: 'selfie_verified') this.selfieVerified = false, @JsonKey(name: 'submitted_at') this.submittedAt, @JsonKey(name: 'rejection_reason') this.rejectionReason, @JsonKey(name: 'resubmission_allowed_at') this.resubmissionAllowedAt});
   factory _KycStatusResponse.fromJson(Map<String, dynamic> json) => _$KycStatusResponseFromJson(json);
 
 @override@JsonKey(name: 'kyc_status') final  String kycStatus;
 @override@JsonKey(name: 'aadhaar_verified') final  bool aadhaarVerified;
 @override@JsonKey(name: 'pan_verified') final  bool panVerified;
+@override@JsonKey(name: 'bank_verified') final  bool bankVerified;
 @override@JsonKey(name: 'selfie_verified') final  bool selfieVerified;
 @override@JsonKey(name: 'submitted_at') final  String? submittedAt;
 @override@JsonKey(name: 'rejection_reason') final  String? rejectionReason;
@@ -239,16 +241,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _KycStatusResponse&&(identical(other.kycStatus, kycStatus) || other.kycStatus == kycStatus)&&(identical(other.aadhaarVerified, aadhaarVerified) || other.aadhaarVerified == aadhaarVerified)&&(identical(other.panVerified, panVerified) || other.panVerified == panVerified)&&(identical(other.selfieVerified, selfieVerified) || other.selfieVerified == selfieVerified)&&(identical(other.submittedAt, submittedAt) || other.submittedAt == submittedAt)&&(identical(other.rejectionReason, rejectionReason) || other.rejectionReason == rejectionReason)&&(identical(other.resubmissionAllowedAt, resubmissionAllowedAt) || other.resubmissionAllowedAt == resubmissionAllowedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _KycStatusResponse&&(identical(other.kycStatus, kycStatus) || other.kycStatus == kycStatus)&&(identical(other.aadhaarVerified, aadhaarVerified) || other.aadhaarVerified == aadhaarVerified)&&(identical(other.panVerified, panVerified) || other.panVerified == panVerified)&&(identical(other.bankVerified, bankVerified) || other.bankVerified == bankVerified)&&(identical(other.selfieVerified, selfieVerified) || other.selfieVerified == selfieVerified)&&(identical(other.submittedAt, submittedAt) || other.submittedAt == submittedAt)&&(identical(other.rejectionReason, rejectionReason) || other.rejectionReason == rejectionReason)&&(identical(other.resubmissionAllowedAt, resubmissionAllowedAt) || other.resubmissionAllowedAt == resubmissionAllowedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,kycStatus,aadhaarVerified,panVerified,selfieVerified,submittedAt,rejectionReason,resubmissionAllowedAt);
+int get hashCode => Object.hash(runtimeType,kycStatus,aadhaarVerified,panVerified,bankVerified,selfieVerified,submittedAt,rejectionReason,resubmissionAllowedAt);
 
 @override
 String toString() {
-  return 'KycStatusResponse(kycStatus: $kycStatus, aadhaarVerified: $aadhaarVerified, panVerified: $panVerified, selfieVerified: $selfieVerified, submittedAt: $submittedAt, rejectionReason: $rejectionReason, resubmissionAllowedAt: $resubmissionAllowedAt)';
+  return 'KycStatusResponse(kycStatus: $kycStatus, aadhaarVerified: $aadhaarVerified, panVerified: $panVerified, bankVerified: $bankVerified, selfieVerified: $selfieVerified, submittedAt: $submittedAt, rejectionReason: $rejectionReason, resubmissionAllowedAt: $resubmissionAllowedAt)';
 }
 
 
@@ -259,7 +261,7 @@ abstract mixin class _$KycStatusResponseCopyWith<$Res> implements $KycStatusResp
   factory _$KycStatusResponseCopyWith(_KycStatusResponse value, $Res Function(_KycStatusResponse) _then) = __$KycStatusResponseCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'kyc_status') String kycStatus,@JsonKey(name: 'aadhaar_verified') bool aadhaarVerified,@JsonKey(name: 'pan_verified') bool panVerified,@JsonKey(name: 'selfie_verified') bool selfieVerified,@JsonKey(name: 'submitted_at') String? submittedAt,@JsonKey(name: 'rejection_reason') String? rejectionReason,@JsonKey(name: 'resubmission_allowed_at') String? resubmissionAllowedAt
+@JsonKey(name: 'kyc_status') String kycStatus,@JsonKey(name: 'aadhaar_verified') bool aadhaarVerified,@JsonKey(name: 'pan_verified') bool panVerified,@JsonKey(name: 'bank_verified') bool bankVerified,@JsonKey(name: 'selfie_verified') bool selfieVerified,@JsonKey(name: 'submitted_at') String? submittedAt,@JsonKey(name: 'rejection_reason') String? rejectionReason,@JsonKey(name: 'resubmission_allowed_at') String? resubmissionAllowedAt
 });
 
 
@@ -276,11 +278,12 @@ class __$KycStatusResponseCopyWithImpl<$Res>
 
 /// Create a copy of KycStatusResponse
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? kycStatus = null,Object? aadhaarVerified = null,Object? panVerified = null,Object? selfieVerified = null,Object? submittedAt = freezed,Object? rejectionReason = freezed,Object? resubmissionAllowedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? kycStatus = null,Object? aadhaarVerified = null,Object? panVerified = null,Object? bankVerified = null,Object? selfieVerified = null,Object? submittedAt = freezed,Object? rejectionReason = freezed,Object? resubmissionAllowedAt = freezed,}) {
   return _then(_KycStatusResponse(
 kycStatus: null == kycStatus ? _self.kycStatus : kycStatus // ignore: cast_nullable_to_non_nullable
 as String,aadhaarVerified: null == aadhaarVerified ? _self.aadhaarVerified : aadhaarVerified // ignore: cast_nullable_to_non_nullable
 as bool,panVerified: null == panVerified ? _self.panVerified : panVerified // ignore: cast_nullable_to_non_nullable
+as bool,bankVerified: null == bankVerified ? _self.bankVerified : bankVerified // ignore: cast_nullable_to_non_nullable
 as bool,selfieVerified: null == selfieVerified ? _self.selfieVerified : selfieVerified // ignore: cast_nullable_to_non_nullable
 as bool,submittedAt: freezed == submittedAt ? _self.submittedAt : submittedAt // ignore: cast_nullable_to_non_nullable
 as String?,rejectionReason: freezed == rejectionReason ? _self.rejectionReason : rejectionReason // ignore: cast_nullable_to_non_nullable

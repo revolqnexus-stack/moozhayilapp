@@ -80,6 +80,8 @@ export class GoldLedgerService {
     contributionId: string;
     amountPaise: number;
     goldRatePerGramPaise: number;
+    /** When set (e.g. CREST locked weight), ledger matches this instead of amount÷rate. */
+    gramsDelta?: Decimal.Value;
     tx?: Prisma.TransactionClient;
   }) {
     const db = input.tx ?? prisma;
@@ -95,10 +97,13 @@ export class GoldLedgerService {
       return existingBySource;
     }
 
-    const gramsDelta = calculateGramsFromPaise(
-      input.amountPaise,
-      input.goldRatePerGramPaise,
-    );
+    const gramsDelta =
+      input.gramsDelta != null
+        ? new Decimal(input.gramsDelta)
+        : calculateGramsFromPaise(
+            input.amountPaise,
+            input.goldRatePerGramPaise,
+          );
 
     if (gramsDelta.lte(0)) {
       throw new AppError(

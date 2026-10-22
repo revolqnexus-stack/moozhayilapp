@@ -50,12 +50,39 @@ class KycRepository {
     }
   }
 
-  Future<void> verifyPan(String panNumber) async {
+  Future<PanVerifyResponse> verifyPan(
+    String panNumber, {
+    String? name,
+  }) async {
     try {
-      await _apiService.client.post<Map<String, dynamic>>(
+      final response = await _apiService.client.post<Map<String, dynamic>>(
         '/kyc/pan/verify',
-        data: {'pan_number': panNumber},
+        data: {
+          'pan_number': panNumber,
+          if (name != null && name.trim().isNotEmpty) 'name': name.trim(),
+        },
       );
+      return PanVerifyResponse.fromJson(response.data!);
+    } on DioException catch (error) {
+      throw ApiException.fromDio(error);
+    }
+  }
+
+  Future<BankVerifyResponse> verifyBankAccount(
+    String accountNumber, {
+    required String ifsc,
+    String? name,
+  }) async {
+    try {
+      final response = await _apiService.client.post<Map<String, dynamic>>(
+        '/kyc/bank-account/verify',
+        data: {
+          'account_number': accountNumber,
+          'ifsc': ifsc,
+          if (name != null && name.trim().isNotEmpty) 'name': name.trim(),
+        },
+      );
+      return BankVerifyResponse.fromJson(response.data!);
     } on DioException catch (error) {
       throw ApiException.fromDio(error);
     }
@@ -140,9 +167,33 @@ class KycFlowActions extends _$KycFlowActions {
     ref.invalidate(kycStatusProvider);
   }
 
-  Future<void> verifyPan(String panNumber) async {
-    await ref.read(kycRepositoryProvider).verifyPan(panNumber);
-    ref.invalidate(kycStatusProvider);
+  Future<PanVerifyResponse> verifyPan(
+    String panNumber, {
+    String? name,
+  }) async {
+    final result = await ref
+        .read(kycRepositoryProvider)
+        .verifyPan(panNumber, name: name);
+    if (result.verified) {
+      ref.invalidate(kycStatusProvider);
+    }
+    return result;
+  }
+
+  Future<BankVerifyResponse> verifyBankAccount(
+    String accountNumber, {
+    required String ifsc,
+    String? name,
+  }) async {
+    final result = await ref.read(kycRepositoryProvider).verifyBankAccount(
+          accountNumber,
+          ifsc: ifsc,
+          name: name,
+        );
+    if (result.verified) {
+      ref.invalidate(kycStatusProvider);
+    }
+    return result;
   }
 
   Future<void> uploadSelfie(String filePath) async {

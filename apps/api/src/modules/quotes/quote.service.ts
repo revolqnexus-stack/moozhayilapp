@@ -110,7 +110,7 @@ export class QuoteService {
     const serverTime = new Date();
     await this.invalidateActiveQuotes(userId);
 
-    const priced = await this.priceItems(userId, items, false);
+    const priced = await this.priceItems(userId, items, true);
     const lines = this.toLineSnapshots(priced.lines);
     const totals = aggregateQuoteTotals(lines);
     const validUntil = new Date(serverTime.getTime() + PRICE_VALIDITY_MS);

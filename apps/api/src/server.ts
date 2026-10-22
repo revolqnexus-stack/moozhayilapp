@@ -3,6 +3,10 @@ import dotenv from "dotenv";
 dotenv.config({
   path: process.env.MOOZHAYIL_ENV_FILE ?? ".env",
 });
+dotenv.config({
+  path: ".env.local",
+  override: true,
+});
 import { createApp, validateEnvironment } from "./app";
 import { initMonitoring } from "./utils/monitoring";
 

@@ -6,6 +6,7 @@ import { AppError } from "../../middleware/error.middleware";
 import {
   sendAadhaarOtpSchema,
   verifyAadhaarOtpSchema,
+  verifyBankAccountSchema,
   verifyPanSchema,
 } from "./kyc.schema";
 import { kycService } from "./kyc.service";
@@ -61,6 +62,13 @@ export class KycController {
   async verifyPan(req: Request, res: Response): Promise<void> {
     const input = verifyPanSchema.parse(req.body);
     res.status(200).json(await kycService.verifyPan(requireUserId(req), input));
+  }
+
+  async verifyBankAccount(req: Request, res: Response): Promise<void> {
+    const input = verifyBankAccountSchema.parse(req.body);
+    res
+      .status(200)
+      .json(await kycService.verifyBankAccount(requireUserId(req), input));
   }
 
   async uploadSelfie(req: Request, res: Response): Promise<void> {

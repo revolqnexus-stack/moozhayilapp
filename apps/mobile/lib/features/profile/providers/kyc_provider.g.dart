@@ -115,7 +115,7 @@ final class KycFlowActionsProvider
   KycFlowActions create() => KycFlowActions();
 }
 
-String _$kycFlowActionsHash() => r'0d06f4eac5ca474c30ea0c330e3ccb3667f15bd5';
+String _$kycFlowActionsHash() => r'3d2eeda94332304ec2cf482879d6255e01bd2ce6';
 
 abstract class _$KycFlowActions extends $AsyncNotifier<void> {
   FutureOr<void> build();

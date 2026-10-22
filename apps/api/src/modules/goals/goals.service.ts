@@ -307,9 +307,10 @@ export class GoalsService {
       GOAL_ACCUMULATION_PURITY,
     );
 
-    const bookingRatePaisePerGram = isDhanamScheme(schemeType)
-      ? rate.ratePerGramPaise
-      : null;
+    const bookingRatePaisePerGram =
+      isDhanamScheme(schemeType) || isCrestScheme(schemeType)
+        ? rate.ratePerGramPaise
+        : null;
 
     if (isCrestScheme(schemeType) && !targetGrams) {
       targetGrams = calculateGramsFromPaise(

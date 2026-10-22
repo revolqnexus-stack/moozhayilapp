@@ -66,6 +66,7 @@ abstract final class AppRoutes {
   static const profileKycAadhaar = '/profile/kyc/aadhaar';
   static const profileKycAadhaarOtp = '/profile/kyc/aadhaar/otp';
   static const profileKycPan = '/profile/kyc/pan';
+  static const profileKycBank = '/profile/kyc/bank';
   static const profileKycSelfie = '/profile/kyc/selfie';
   static const profileKycReview = '/profile/kyc/review';
   static const profileKycPending = '/profile/kyc/pending';

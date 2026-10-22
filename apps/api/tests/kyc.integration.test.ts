@@ -1,4 +1,16 @@
+import dotenv from "dotenv";
 import request from "supertest";
+
+dotenv.config();
+
+function stripEmptyEnv(keys: string[]) {
+  for (const key of keys) {
+    if (process.env[key] === "") {
+      delete process.env[key];
+    }
+  }
+}
+
 import { createApp } from "../src/app";
 import { prisma } from "../src/db/prisma";
 import {
@@ -55,13 +67,33 @@ function adminAuthHeaders(adminId: string, role: import("@prisma/client").AdminR
 }
 
 describe("Phase 6 KYC and admin review", () => {
-  const app = createApp();
+  let app: ReturnType<typeof createApp>;
 
   beforeAll(() => {
+    stripEmptyEnv([
+      "KYC_PROVIDER_BASE_URL",
+      "KYC_PROVIDER_API_KEY",
+      "STAMPMITRA_API_KEY",
+      "S3_ENDPOINT",
+      "S3_BUCKET",
+      "S3_ACCESS_KEY_ID",
+      "S3_SECRET_ACCESS_KEY",
+      "S3_PUBLIC_BASE_URL",
+      "MSG91_AUTH_KEY",
+      "MSG91_OTP_TEMPLATE_ID",
+      "RAZORPAY_WEBHOOK_SECRET",
+      "CASHFREE_APP_ID",
+      "CASHFREE_SECRET_KEY",
+      "FIREBASE_PROJECT_ID",
+      "FIREBASE_CLIENT_EMAIL",
+      "FIREBASE_PRIVATE_KEY",
+      "SENTRY_DSN",
+    ]);
     process.env.NODE_ENV = "test";
     process.env.TEST_OTP_CODE = "123456";
     process.env.TEST_KYC_AADHAAR_OTP = "654321";
     process.env.KYC_PROVIDER_MODE = "mock";
+    app = createApp();
   });
 
   beforeEach(async () => {
@@ -156,10 +188,14 @@ describe("Phase 6 KYC and admin review", () => {
       .set("Authorization", `Bearer ${auth.accessToken}`)
       .send({ session_id: sendOtp.body.session_id, otp: "654321" });
 
-    await request(app)
+    const panVerify = await request(app)
       .post("/v1/kyc/pan/verify")
       .set("Authorization", `Bearer ${auth.accessToken}`)
       .send({ pan_number: "ABCDE1234F" });
+
+    expect(panVerify.status).toBe(200);
+    expect(panVerify.body.verified).toBe(true);
+    expect(panVerify.body.reference_id).toEqual(expect.any(String));
 
     await request(app)
       .post("/v1/kyc/selfie")

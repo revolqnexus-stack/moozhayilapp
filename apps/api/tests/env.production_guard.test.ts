@@ -32,6 +32,7 @@ const productionBase = {
   RAZORPAY_WEBHOOK_SECRET: "webhook_secret",
   KYC_PROVIDER_BASE_URL: "https://kyc.example.com",
   KYC_PROVIDER_API_KEY: "kyc_api_key",
+  STAMPMITRA_API_KEY: "sk_live_stampmitra_production_key",
   KYC_WEBHOOK_SECRET: "kyc_webhook_secret",
   GOLD_RATE_WEBHOOK_SECRET: "gold_webhook_secret",
   FIREBASE_PROJECT_ID: "moozhayil-prod",

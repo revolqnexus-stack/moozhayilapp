@@ -110,6 +110,12 @@ services:
         sync: false
       - key: KYC_PROVIDER_API_KEY
         sync: false
+      - key: STAMPMITRA_API_KEY
+        sync: false
+      - key: KYC_WEBHOOK_SECRET
+        sync: false
+      - key: GOLD_RATE_WEBHOOK_SECRET
+        sync: false
       - key: S3_ENDPOINT
         sync: false
       - key: S3_BUCKET

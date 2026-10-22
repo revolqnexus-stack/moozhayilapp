@@ -2,7 +2,6 @@ import type { Contribution, Goal, KycStatus } from "@prisma/client";
 import { prisma } from "../../db/prisma";
 import { loadEnv } from "../../config/env";
 import { AppError } from "../../middleware/error.middleware";
-import { calculateGramsFromPaise } from "../../utils/gold";
 import { formatPaise } from "../../utils/money";
 import { goldRatesService } from "../gold_rates/gold_rates.service";
 import { GOAL_ACCUMULATION_PURITY } from "../../config/goals.constants";
@@ -17,6 +16,7 @@ import {
 import {
   countCompletedCrestPayments,
   isCrestScheme,
+  resolveContributionGramsCredited,
   validateCrestContributionAmount,
 } from "../goals/crest.service";
 import {
@@ -116,6 +116,11 @@ export class ContributionsService {
         goal.bookingRatePaisePerGram,
         rate.ratePerGramPaise,
       );
+    } else if (
+      isCrestScheme(goal.schemeType) &&
+      goal.bookingRatePaisePerGram != null
+    ) {
+      creditRatePaise = goal.bookingRatePaisePerGram;
     }
 
     const contributionMonth = isAuraScheme(goal.schemeType)
@@ -254,10 +259,12 @@ export class ContributionsService {
       );
     }
 
-    const gramsCredited = calculateGramsFromPaise(
-      contribution.amountPaise,
-      contribution.goldRatePerGramPaise,
-    );
+    const gramsCredited = resolveContributionGramsCredited({
+      schemeType: contribution.goal.schemeType,
+      targetGrams: contribution.goal.targetGrams,
+      amountPaise: contribution.amountPaise,
+      goldRatePerGramPaise: contribution.goldRatePerGramPaise,
+    });
     const now = new Date();
 
     const completed = await prisma.$transaction(async (tx) => {
@@ -298,6 +305,7 @@ export class ContributionsService {
         contributionId: contribution.id,
         amountPaise: contribution.amountPaise,
         goldRatePerGramPaise: contribution.goldRatePerGramPaise,
+        gramsDelta: gramsCredited,
         tx,
       });
 
@@ -457,6 +465,11 @@ export class ContributionsService {
         goal.bookingRatePaisePerGram,
         rate.ratePerGramPaise,
       );
+    } else if (
+      isCrestScheme(goal.schemeType) &&
+      goal.bookingRatePaisePerGram != null
+    ) {
+      creditRatePaise = goal.bookingRatePaisePerGram;
     }
 
     const contributionMonth = isAuraScheme(goal.schemeType)

@@ -87,7 +87,7 @@ final class CartSummaryProvider
   }
 }
 
-String _$cartSummaryHash() => r'd028532f92131e93c910465f13b82674dd9b1044';
+String _$cartSummaryHash() => r'ab8bf170430f742b87e9ca04ce8d224cdb46f3e1';
 
 @ProviderFor(CartActions)
 const cartActionsProvider = CartActionsProvider._();
@@ -113,7 +113,7 @@ final class CartActionsProvider
   CartActions create() => CartActions();
 }
 
-String _$cartActionsHash() => r'43dcb287dd9c54c144fdfc5185727e0d72d0a0b9';
+String _$cartActionsHash() => r'90d647293b361e8ea56d2e3023ac2cf619d646da';
 
 abstract class _$CartActions extends $AsyncNotifier<void> {
   FutureOr<void> build();

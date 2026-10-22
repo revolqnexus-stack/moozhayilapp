@@ -1,6 +1,8 @@
 import type { Goal, SchemeType } from "@prisma/client";
+import Decimal from "decimal.js";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/error.middleware";
+import { calculateGramsFromPaise } from "../../utils/gold";
 import {
   CREST_ADVANCE_STEP_PAISE,
   CREST_DURATION_MONTHS,
@@ -14,6 +16,26 @@ export function isCrestScheme(
   schemeType: SchemeType | null | undefined,
 ): boolean {
   return schemeType === CREST_SCHEME_TYPE;
+}
+
+/** Grams posted for a completed contribution (CREST uses locked targetGrams when set). */
+export function resolveContributionGramsCredited(input: {
+  schemeType: SchemeType | null | undefined;
+  targetGrams: Decimal.Value | null | undefined;
+  amountPaise: number;
+  goldRatePerGramPaise: number;
+}): Decimal {
+  let grams = calculateGramsFromPaise(
+    input.amountPaise,
+    input.goldRatePerGramPaise,
+  );
+  if (isCrestScheme(input.schemeType) && input.targetGrams != null) {
+    const locked = new Decimal(input.targetGrams);
+    if (locked.gt(0)) {
+      grams = locked;
+    }
+  }
+  return grams;
 }
 
 export function validateCrestCreateInput(input: CreateGoalInput): void {

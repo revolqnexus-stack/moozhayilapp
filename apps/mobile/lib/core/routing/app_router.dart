@@ -30,6 +30,7 @@ import '../../features/onboarding/screens/onboarding_screen.dart';
 import '../../features/profile/screens/kyc_landing_screen.dart';
 import '../../features/profile/screens/aadhaar_screen.dart';
 import '../../features/profile/screens/aadhaar_otp_screen.dart';
+import '../../features/profile/screens/bank_account_screen.dart';
 import '../../features/profile/screens/pan_screen.dart';
 import '../../features/profile/screens/selfie_screen.dart';
 import '../../features/profile/screens/kyc_review_screen.dart';
@@ -263,6 +264,10 @@ GoRouter createAppRouter({
                     GoRoute(
                       path: 'pan',
                       builder: (context, state) => const PanScreen(),
+                    ),
+                    GoRoute(
+                      path: 'bank',
+                      builder: (context, state) => const BankAccountScreen(),
                     ),
                     GoRoute(
                       path: 'selfie',

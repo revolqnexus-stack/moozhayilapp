@@ -240,7 +240,7 @@ final class VaultActionsProvider
   VaultActions create() => VaultActions();
 }
 
-String _$vaultActionsHash() => r'3c2fe057895d683c1832898acd6c7c2707ce55ed';
+String _$vaultActionsHash() => r'ab6b61bd9a314e7af40e74c2dbc061128882ce7d';
 
 abstract class _$VaultActions extends $AsyncNotifier<void> {
   FutureOr<void> build();

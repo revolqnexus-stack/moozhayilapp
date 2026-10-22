@@ -54,7 +54,7 @@ final class SecureStorageProvider
   }
 }
 
-String _$secureStorageHash() => r'5f0f1e7075cbfc89c9f88bceffd63f21bf812b87';
+String _$secureStorageHash() => r'd236803f715ed93447aac62dad02fd72721571b1';
 
 @ProviderFor(storageService)
 const storageServiceProvider = StorageServiceProvider._();

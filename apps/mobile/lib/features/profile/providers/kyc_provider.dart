@@ -50,10 +50,7 @@ class KycRepository {
     }
   }
 
-  Future<PanVerifyResponse> verifyPan(
-    String panNumber, {
-    String? name,
-  }) async {
+  Future<PanVerifyResponse> verifyPan(String panNumber, {String? name}) async {
     try {
       final response = await _apiService.client.post<Map<String, dynamic>>(
         '/kyc/pan/verify',
@@ -167,10 +164,7 @@ class KycFlowActions extends _$KycFlowActions {
     ref.invalidate(kycStatusProvider);
   }
 
-  Future<PanVerifyResponse> verifyPan(
-    String panNumber, {
-    String? name,
-  }) async {
+  Future<PanVerifyResponse> verifyPan(String panNumber, {String? name}) async {
     final result = await ref
         .read(kycRepositoryProvider)
         .verifyPan(panNumber, name: name);
@@ -185,11 +179,9 @@ class KycFlowActions extends _$KycFlowActions {
     required String ifsc,
     String? name,
   }) async {
-    final result = await ref.read(kycRepositoryProvider).verifyBankAccount(
-          accountNumber,
-          ifsc: ifsc,
-          name: name,
-        );
+    final result = await ref
+        .read(kycRepositoryProvider)
+        .verifyBankAccount(accountNumber, ifsc: ifsc, name: name);
     if (result.verified) {
       ref.invalidate(kycStatusProvider);
     }

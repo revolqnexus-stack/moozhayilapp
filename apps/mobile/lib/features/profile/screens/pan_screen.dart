@@ -93,7 +93,8 @@ class _PanScreenState extends ConsumerState<PanScreen> {
     return switch (_uiState) {
       _PanUiState.verified => 'PAN verified successfully.',
       _PanUiState.notValid =>
-        _lastResult?.message ?? 'PAN not valid. Check the number and try again.',
+        _lastResult?.message ??
+            'PAN not valid. Check the number and try again.',
       _PanUiState.nameMismatch => 'Name does not match PAN records.',
       _ => null,
     };
@@ -102,7 +103,8 @@ class _PanScreenState extends ConsumerState<PanScreen> {
   Color _statusColor() {
     return switch (_uiState) {
       _PanUiState.verified => AppColors.successFill,
-      _PanUiState.notValid || _PanUiState.nameMismatch => AppColors.burgundyDeep,
+      _PanUiState.notValid ||
+      _PanUiState.nameMismatch => AppColors.burgundyDeep,
       _ => AppColors.slateMist,
     };
   }

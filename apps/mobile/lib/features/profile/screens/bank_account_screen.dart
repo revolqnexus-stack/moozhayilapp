@@ -125,8 +125,8 @@ class _BankAccountScreenState extends ConsumerState<BankAccountScreen> {
   Color _statusColor() {
     return switch (_uiState) {
       _BankUiState.verified => AppColors.successFill,
-      _BankUiState.notVerified || _BankUiState.nameMismatch =>
-        AppColors.burgundyDeep,
+      _BankUiState.notVerified ||
+      _BankUiState.nameMismatch => AppColors.burgundyDeep,
       _ => AppColors.slateMist,
     };
   }
@@ -147,7 +147,9 @@ class _BankAccountScreenState extends ConsumerState<BankAccountScreen> {
             const SizedBox(height: AppSpacing.sm),
             Text(
               'Penny-drop verification via our KYC partner. Used for payouts and high-value scheme redemptions.',
-              style: AppTypography.uiBodySM.copyWith(color: AppColors.slateMist),
+              style: AppTypography.uiBodySM.copyWith(
+                color: AppColors.slateMist,
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
             AppTextInput(

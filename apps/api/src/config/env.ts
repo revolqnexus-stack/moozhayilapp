@@ -195,19 +195,24 @@ function assertProductionLiveCredentials(data: z.infer<typeof envSchema>) {
       : null,
     data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC
       ? null
-      : data.KYC_PROVIDER_BASE_URL
+      : data.STAMPMITRA_API_KEY
         ? null
-        : "KYC_PROVIDER_BASE_URL",
-    data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC
-      ? null
-      : data.KYC_PROVIDER_API_KEY
-        ? null
-        : "KYC_PROVIDER_API_KEY",
+        : "STAMPMITRA_API_KEY",
+    // Aadhaar/selfie vendor is optional when StampMitra covers PAN/bank.
     data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC
       ? null
       : data.STAMPMITRA_API_KEY
         ? null
-        : "STAMPMITRA_API_KEY",
+        : data.KYC_PROVIDER_BASE_URL
+          ? null
+          : "KYC_PROVIDER_BASE_URL",
+    data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC
+      ? null
+      : data.STAMPMITRA_API_KEY
+        ? null
+        : data.KYC_PROVIDER_API_KEY
+          ? null
+          : "KYC_PROVIDER_API_KEY",
     data.FIREBASE_PROJECT_ID ? null : "FIREBASE_PROJECT_ID",
     data.FIREBASE_CLIENT_EMAIL ? null : "FIREBASE_CLIENT_EMAIL",
     data.FIREBASE_PRIVATE_KEY ? null : "FIREBASE_PRIVATE_KEY",

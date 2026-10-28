@@ -94,6 +94,18 @@ describe("Production environment guards", () => {
     ).toThrow("Production REDIS_URL must not use staging Redis host");
   });
 
+  it("allows live KYC with StampMitra only (no Aadhaar vendor)", () => {
+    expect(() =>
+      loadEnv({
+        ...productionBase,
+        KYC_PROVIDER_MODE: "live",
+        KYC_PROVIDER_BASE_URL: undefined,
+        KYC_PROVIDER_API_KEY: undefined,
+        STAMPMITRA_API_KEY: "sk_test_stampmitra_sandbox_key",
+      }),
+    ).not.toThrow();
+  });
+
   it("allows mock KYC in production when MOOZHAYIL_ALLOW_MOCK_KYC is true", () => {
     expect(() =>
       loadEnv({

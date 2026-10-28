@@ -7,7 +7,22 @@ StampMitra checks run **server-side only** via `apps/api/src/modules/kyc/stampmi
 | `POST /v1/kyc/pan/verify` | `POST /v1/verify/pan` | `verification.pan.read` |
 | `POST /v1/kyc/bank-account/verify` | `POST /v1/verify/bank-account` | `verification.bank-account.read` |
 
-## Local sandbox
+## Prove sandbox usage (needed before they issue `sk_live_`)
+
+Production is mock KYC and **will not** call StampMitra. Send sandbox traffic from your laptop:
+
+1. Put `STAMPMITRA_API_KEY=sk_test_...` in `apps/api/.env.local` (gitignored). Never in the Flutter app.
+2. From the repo root:
+
+```bash
+node scripts/stampmitra-sandbox-ping.mjs
+node scripts/stampmitra-sandbox-ping.mjs --pan ABCDE1234F --name "TEST USER"
+```
+
+3. A 200, 400, or 422 still counts as a received request. Screenshot the printed `requestId` for StampMitra.
+4. Use their documented sandbox PAN if they gave you one. Do not use a real customer PAN.
+
+## Local sandbox (full app flow)
 
 1. Copy `STAMPMITRA_API_KEY=sk_test_xxx` from `.env.example`.
 2. Put your sandbox key in `apps/api/.env.local` (gitignored).

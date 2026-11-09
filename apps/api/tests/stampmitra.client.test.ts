@@ -104,6 +104,26 @@ describe("StampMitra client", () => {
     expect(mapped.details?.stampmitra_request_id).toBe("req-401");
   });
 
+  it("maps 402 wallet empty to provider unavailable without leaking wallet details", () => {
+    const mapped = mapStampMitraErrorToAppError(
+      new StampMitraError(
+        402,
+        "PAYMENT_REQUIRED",
+        "The Service Fee Wallet balance is too low for this order.",
+        "req-402",
+      ),
+      {
+        operation: "verify_pan",
+        requiredScope: "verification.pan.read",
+      },
+    );
+
+    expect(mapped.statusCode).toBe(503);
+    expect(mapped.code).toBe("PROVIDER_UNAVAILABLE");
+    expect(mapped.message).not.toMatch(/wallet/i);
+    expect(mapped.details?.operational_alert).toBe("STAMPMITRA_WALLET_BALANCE");
+  });
+
   it("maps 403 with required scope detail", () => {
     const mapped = mapStampMitraErrorToAppError(
       new StampMitraError(

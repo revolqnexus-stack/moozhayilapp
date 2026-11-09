@@ -8,7 +8,10 @@ abstract final class CustomerErrorCopy {
     }
     if (error is ApiException) {
       if (error.code == 'PROVIDER_UNAVAILABLE') {
-        return 'We couldn\u2019t send a verification code. Please try again in a moment.';
+        if (error.message.trim().isNotEmpty) {
+          return error.message;
+        }
+        return 'Verification is temporarily unavailable. Please try again in a moment.';
       }
       if (error.code == 'RATE_LIMITED') {
         return 'Too many attempts. Please wait about 10 minutes, then try again.';

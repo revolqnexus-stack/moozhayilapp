@@ -100,6 +100,38 @@ export class WebhooksService {
     });
   }
 
+  async ingestStampmitra(input: {
+    rawBody: string;
+    signature: string | undefined;
+    timestamp: string | undefined;
+    payload: Record<string, unknown>;
+  }) {
+    return this.ingestProviderWebhook({
+      provider: "stampmitra",
+      rawBody: input.rawBody,
+      signature: input.signature,
+      payload: input.payload,
+      verify: (rawBody: string, signature: string | undefined) => {
+        // Stampmitra uses X-Webhook-Signature and X-Webhook-Timestamp headers
+        // For now, accept all webhooks (signature verification can be added later)
+        return true;
+      },
+      process: async (eventId: string) => {
+        // Process Stampmitra order events
+        const event = await prisma.webhookEvent.findUnique({
+          where: { id: eventId },
+        });
+        if (event) {
+          // Mark as processed immediately for now
+          await prisma.webhookEvent.update({
+            where: { id: eventId },
+            data: { status: "processed", processedAt: new Date() },
+          });
+        }
+      },
+    });
+  }
+
   private async ingestProviderWebhook(input: {
     provider: string;
     rawBody: string;

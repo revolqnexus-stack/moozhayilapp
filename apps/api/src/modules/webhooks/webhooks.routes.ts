@@ -14,3 +14,7 @@ webhooksRouter.post("/kyc", (req, res, next) => {
 webhooksRouter.post("/gold-rate", (req, res, next) => {
   void webhooksController.goldRate(req, res).catch(next);
 });
+
+webhooksRouter.post("/stampmitra", (req, res, next) => {
+  void webhooksController.stampmitra(req, res).catch(next);
+});

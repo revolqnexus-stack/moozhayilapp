@@ -111,7 +111,7 @@ export class WebhooksService {
       rawBody: input.rawBody,
       signature: input.signature,
       payload: input.payload,
-      verify: (rawBody: string, signature: string | undefined) => {
+      verify: (_rawBody: string, _signature: string | undefined) => {
         // Stampmitra uses X-Webhook-Signature and X-Webhook-Timestamp headers
         // For now, accept all webhooks (signature verification can be added later)
         return true;

@@ -8,7 +8,7 @@ import {
 export const kycRouter = Router();
 
 // Debug endpoint - no auth required
-kycRouter.get("/debug-columns", async (req, res) => {
+kycRouter.get("/debug-columns", async (_req, res) => {
   try {
     const { prisma } = await import("../../db/prisma");
     const result = await prisma.$queryRaw`

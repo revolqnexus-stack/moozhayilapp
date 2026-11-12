@@ -36,6 +36,23 @@ kycRouter.get("/debug-config", async (_req, res) => {
   });
 });
 
+// Test PAN verification without auth
+kycRouter.post("/debug-test-pan", async (_req, res) => {
+  try {
+    const { kycProviderClient } = await import("./kyc_provider.client");
+    const result = await kycProviderClient.verifyPan("ABCDE1234F", "Test User");
+    res.json({ success: true, result });
+  } catch (error: any) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      code: error.code,
+      statusCode: error.statusCode,
+      details: error.details,
+    });
+  }
+});
+
 kycRouter.use(authenticate);
 
 kycRouter.get("/status", (req, res, next) => {

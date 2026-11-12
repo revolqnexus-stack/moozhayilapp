@@ -288,10 +288,20 @@ export class KycService {
     await assertCanStartKyc(userId);
     await markInProgress(userId);
 
+    console.log('[KYC] Starting PAN verification', { userId, pan: input.pan_number.slice(0, 5) + '***' });
+
     const providerResult = await kycProviderClient.verifyPan(
       input.pan_number,
       input.name,
     );
+    
+    console.log('[KYC] Provider result received', { 
+      verified: providerResult.verified, 
+      panStatus: providerResult.panStatus,
+      nameMatchResult: providerResult.nameMatchResult,
+      referenceId: providerResult.referenceId 
+    });
+
     const now = new Date();
     const panIsValid = providerResult.panStatus.toUpperCase() === "VALID";
     const nameMismatch =
@@ -321,6 +331,7 @@ export class KycService {
     };
 
     if (!panIsValid) {
+      console.log('[KYC] PAN not valid, saving audit fields', { panStatus: providerResult.panStatus });
       await prisma.kycDocument.upsert({
         where: { userId },
         create: { userId, ...auditFields },
@@ -337,6 +348,7 @@ export class KycService {
     }
 
     if (nameMismatch || !providerResult.verified) {
+      console.log('[KYC] Name mismatch or not verified', { nameMismatch, verified: providerResult.verified });
       await prisma.kycDocument.upsert({
         where: { userId },
         create: { userId, ...auditFields },
@@ -355,32 +367,41 @@ export class KycService {
       };
     }
 
-    await prisma.kycDocument.upsert({
-      where: { userId },
-      create: {
-        userId,
-        panNumberEncrypted: encryptSensitive(input.pan_number, piiSecret()),
-        nameOnPanEncrypted: encryptSensitive(
-          providerResult.nameOnPan,
-          piiSecret(),
-        ),
-        panVerificationReferenceId: providerResult.referenceId,
-        panVerificationValid: true,
-        panVerifiedAt: now,
-        panVerified: true,
-      },
-      update: {
-        panNumberEncrypted: encryptSensitive(input.pan_number, piiSecret()),
-        nameOnPanEncrypted: encryptSensitive(
-          providerResult.nameOnPan,
-          piiSecret(),
-        ),
-        panVerificationReferenceId: providerResult.referenceId,
-        panVerificationValid: true,
-        panVerifiedAt: now,
-        panVerified: true,
-      },
-    });
+    console.log('[KYC] PAN verified successfully, saving to database');
+    
+    try {
+      await prisma.kycDocument.upsert({
+        where: { userId },
+        create: {
+          userId,
+          panNumberEncrypted: encryptSensitive(input.pan_number, piiSecret()),
+          nameOnPanEncrypted: encryptSensitive(
+            providerResult.nameOnPan,
+            piiSecret(),
+          ),
+          panVerificationReferenceId: providerResult.referenceId,
+          panVerificationValid: true,
+          panVerifiedAt: now,
+          panVerified: true,
+        },
+        update: {
+          panNumberEncrypted: encryptSensitive(input.pan_number, piiSecret()),
+          nameOnPanEncrypted: encryptSensitive(
+            providerResult.nameOnPan,
+            piiSecret(),
+          ),
+          panVerificationReferenceId: providerResult.referenceId,
+          panVerificationValid: true,
+          panVerifiedAt: now,
+          panVerified: true,
+        },
+      });
+      
+      console.log('[KYC] Database save successful');
+    } catch (dbError) {
+      console.error('[KYC] Database save failed', dbError);
+      throw dbError;
+    }
 
     return {
       verified: true,

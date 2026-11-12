@@ -73,6 +73,31 @@ kycRouter.get("/debug-users", async (_req, res) => {
   }
 });
 
+// Debug authenticated PAN verification with detailed errors
+kycRouter.post("/debug-auth-pan", authenticate, async (req, res) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "No user ID in token" });
+    }
+    
+    const { kycService } = await import("./kyc.service");
+    const result = await kycService.verifyPan(userId, {
+      pan_number: "IHZPB3148C",
+      name: "Test User",
+    });
+    
+    res.json({ success: true, result });
+  } catch (error: any) {
+    res.status(500).json({ 
+      error: error.message,
+      code: error.code,
+      stack: error.stack,
+      name: error.name,
+    });
+  }
+});
+
 kycRouter.use(authenticate);
 
 kycRouter.get("/status", (req, res, next) => {

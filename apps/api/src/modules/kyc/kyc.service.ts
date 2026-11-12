@@ -288,7 +288,11 @@ export class KycService {
     await assertCanStartKyc(userId);
     await markInProgress(userId);
 
-    console.log('[KYC] Starting PAN verification', { userId, pan: input.pan_number.slice(0, 5) + '***' });
+    console.log('[KYC] Starting PAN verification', { 
+      userId, 
+      pan: input.pan_number.slice(0, 5) + '***',
+      timestamp: new Date().toISOString()
+    });
 
     const providerResult = await kycProviderClient.verifyPan(
       input.pan_number,

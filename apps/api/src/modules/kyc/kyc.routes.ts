@@ -53,6 +53,26 @@ kycRouter.post("/debug-test-pan", async (_req, res) => {
   }
 });
 
+// List all users in database
+kycRouter.get("/debug-users", async (_req, res) => {
+  try {
+    const { prisma } = await import("../../db/prisma");
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        phoneNumber: true,
+        kycStatus: true,
+        createdAt: true,
+      },
+    });
+    res.json({ users, count: users.length });
+  } catch (error: any) {
+    res.status(500).json({ 
+      error: error.message,
+    });
+  }
+});
+
 kycRouter.use(authenticate);
 
 kycRouter.get("/status", (req, res, next) => {

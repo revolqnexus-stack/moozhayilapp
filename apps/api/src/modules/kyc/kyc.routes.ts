@@ -24,6 +24,18 @@ kycRouter.get("/debug-columns", async (_req, res) => {
   }
 });
 
+// Debug config endpoint
+kycRouter.get("/debug-config", async (_req, res) => {
+  const { loadEnv } = await import("../../config/env");
+  const env = loadEnv();
+  res.json({
+    KYC_PROVIDER_MODE: env.KYC_PROVIDER_MODE,
+    hasStampmitraKey: !!env.STAMPMITRA_API_KEY,
+    stampmitraKeyPrefix: env.STAMPMITRA_API_KEY?.substring(0, 7),
+    NODE_ENV: env.NODE_ENV,
+  });
+});
+
 kycRouter.use(authenticate);
 
 kycRouter.get("/status", (req, res, next) => {

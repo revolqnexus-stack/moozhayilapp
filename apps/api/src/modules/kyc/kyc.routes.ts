@@ -60,7 +60,7 @@ kycRouter.get("/debug-users", async (_req, res) => {
     const users = await prisma.user.findMany({
       select: {
         id: true,
-        phoneNumber: true,
+        phone: true,
         kycStatus: true,
         createdAt: true,
       },

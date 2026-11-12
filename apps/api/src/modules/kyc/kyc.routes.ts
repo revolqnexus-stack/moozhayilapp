@@ -73,8 +73,10 @@ kycRouter.get("/debug-users", async (_req, res) => {
   }
 });
 
+kycRouter.use(authenticate);
+
 // Debug authenticated PAN verification with detailed errors
-kycRouter.post("/debug-auth-pan", authenticate, async (req, res) => {
+kycRouter.post("/debug-auth-pan", async (req, res) => {
   try {
     const userId = req.user?.userId;
     if (!userId) {
@@ -97,8 +99,6 @@ kycRouter.post("/debug-auth-pan", authenticate, async (req, res) => {
     });
   }
 });
-
-kycRouter.use(authenticate);
 
 kycRouter.get("/status", (req, res, next) => {
   void kycController.status(req, res).catch(next);

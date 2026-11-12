@@ -19,7 +19,6 @@ import {
   sha256,
 } from "../../utils/crypto";
 import { storeKycSelfie } from "../../utils/kyc_storage";
-import { namesMatch } from "../../utils/name_match";
 import { maskName } from "../../utils/pii";
 import type {
   SendAadhaarOtpInput,

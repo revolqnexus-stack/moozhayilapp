@@ -76,11 +76,12 @@ kycRouter.get("/debug-users", async (_req, res) => {
 kycRouter.use(authenticate);
 
 // Debug authenticated PAN verification with detailed errors
-kycRouter.post("/debug-auth-pan", async (req, res) => {
+kycRouter.post("/debug-auth-pan", async (req, res): Promise<void> => {
   try {
     const userId = req.user?.userId;
     if (!userId) {
-      return res.status(401).json({ error: "No user ID in token" });
+      res.status(401).json({ error: "No user ID in token" });
+      return;
     }
     
     const { kycService } = await import("./kyc.service");

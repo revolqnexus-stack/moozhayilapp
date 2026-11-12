@@ -114,13 +114,10 @@ const developmentSecrets = {
 };
 
 function assertStampMitraConfiguration(data: z.infer<typeof envSchema>) {
-  const mockKycOk =
-    data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC;
-
+  // Only check StampMitra for PAN verification
   if (
     data.NODE_ENV !== "test" &&
     data.KYC_PROVIDER_MODE === "live" &&
-    !mockKycOk &&
     !data.STAMPMITRA_API_KEY
   ) {
     throw new Error(
@@ -130,13 +127,10 @@ function assertStampMitraConfiguration(data: z.infer<typeof envSchema>) {
 }
 
 function assertProductionProviderModes(data: z.infer<typeof envSchema>) {
-  const mockKycOk =
-    data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC;
-
+  // Remove KYC_PROVIDER_MODE check entirely - we don't need Aadhaar vendor
   const mockProviders = [
     data.SMS_PROVIDER_MODE === "mock" ? "SMS_PROVIDER_MODE" : null,
     data.PAYMENT_PROVIDER_MODE === "mock" ? "PAYMENT_PROVIDER_MODE" : null,
-    data.KYC_PROVIDER_MODE === "mock" && !mockKycOk ? "KYC_PROVIDER_MODE" : null,
     data.FIREBASE_MODE === "mock" ? "FIREBASE_MODE" : null,
   ].filter(Boolean);
 
@@ -193,26 +187,10 @@ function assertProductionLiveCredentials(data: z.infer<typeof envSchema>) {
     data.PAYMENT_PROVIDER === "razorpay" && !data.RAZORPAY_WEBHOOK_SECRET
       ? "RAZORPAY_WEBHOOK_SECRET"
       : null,
-    data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC
-      ? null
-      : data.STAMPMITRA_API_KEY
-        ? null
-        : "STAMPMITRA_API_KEY",
-    // Aadhaar/selfie vendor is optional when StampMitra covers PAN/bank.
-    data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC
-      ? null
-      : data.STAMPMITRA_API_KEY
-        ? null
-        : data.KYC_PROVIDER_BASE_URL
-          ? null
-          : "KYC_PROVIDER_BASE_URL",
-    data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC
-      ? null
-      : data.STAMPMITRA_API_KEY
-        ? null
-        : data.KYC_PROVIDER_API_KEY
-          ? null
-          : "KYC_PROVIDER_API_KEY",
+    // Only StampMitra required for KYC (PAN verification)
+    data.KYC_PROVIDER_MODE === "live" && !data.STAMPMITRA_API_KEY
+      ? "STAMPMITRA_API_KEY"
+      : null,
     data.FIREBASE_PROJECT_ID ? null : "FIREBASE_PROJECT_ID",
     data.FIREBASE_CLIENT_EMAIL ? null : "FIREBASE_CLIENT_EMAIL",
     data.FIREBASE_PRIVATE_KEY ? null : "FIREBASE_PRIVATE_KEY",

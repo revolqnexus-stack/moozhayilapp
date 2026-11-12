@@ -646,11 +646,12 @@ export class KycService {
       throw new AppError(422, "UNPROCESSABLE", "Selfie verification is required");
     }
 
-    if (!doc.aadhaarVerified && !doc.panVerified) {
+    // Only PAN is required now (no Aadhaar requirement)
+    if (!doc.panVerified) {
       throw new AppError(
         422,
         "UNPROCESSABLE",
-        "Aadhaar or PAN verification is required before submission",
+        "PAN verification is required before submission",
       );
     }
 
@@ -699,36 +700,15 @@ export class KycService {
       throw new AppError(422, "UNPROCESSABLE", "Selfie verification is missing");
     }
 
-    const hasAadhaar = doc.aadhaarVerified;
-    const hasPan = doc.panVerified;
-
-    if (hasAadhaar && hasPan) {
-      const aadhaarName = doc.nameOnAadhaarEncrypted
-        ? decryptSensitive(doc.nameOnAadhaarEncrypted, piiSecret())
-        : "";
-      const panName = doc.nameOnPanEncrypted
-        ? decryptSensitive(doc.nameOnPanEncrypted, piiSecret())
-        : "";
-
-      if (!namesMatch(aadhaarName, panName)) {
-        throw new AppError(
-          422,
-          "UNPROCESSABLE",
-          "Names on Aadhaar and PAN do not match",
-        );
-      }
-
-      return "enhanced_verified";
-    }
-
-    if ((hasAadhaar && doc.selfieVerified) || (hasPan && doc.selfieVerified)) {
+    // Only PAN + selfie required now
+    if (doc.panVerified && doc.selfieVerified) {
       return "basic_verified";
     }
 
     throw new AppError(
       422,
       "UNPROCESSABLE",
-      "Insufficient verified documents for approval",
+      "PAN and selfie verification required",
     );
   }
 }

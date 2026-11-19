@@ -43,6 +43,32 @@ class PanVerificationResult {
   final bool nameMismatch;
 }
 
+class BankVerificationResult {
+  const BankVerificationResult({
+    required this.referenceId,
+    required this.verified,
+    required this.message,
+    required this.maskedAccountNumber,
+    this.accountHolderName,
+  });
+
+  factory BankVerificationResult.fromJson(Map<String, dynamic> json) {
+    return BankVerificationResult(
+      referenceId: json['reference_id'] as String? ?? '',
+      verified: json['verified'] as bool? ?? false,
+      message: json['message'] as String? ?? '',
+      maskedAccountNumber: json['masked_account_number'] as String? ?? '',
+      accountHolderName: json['account_holder_name'] as String?,
+    );
+  }
+
+  final String referenceId;
+  final bool verified;
+  final String message;
+  final String maskedAccountNumber;
+  final String? accountHolderName;
+}
+
 class KycRepository {
   const KycRepository(this._apiService);
 
@@ -99,6 +125,27 @@ class KycRepository {
         },
       );
       return PanVerificationResult.fromJson(response.data!);
+    } on DioException catch (error) {
+      throw ApiException.fromDio(error);
+    }
+  }
+
+  Future<BankVerificationResult> verifyBankAccount(
+    String accountNumber, {
+    required String ifsc,
+    String? name,
+  }) async {
+    final trimmedName = name?.trim();
+    try {
+      final response = await _apiService.client.post<Map<String, dynamic>>(
+        '/kyc/bank/verify',
+        data: {
+          'account_number': accountNumber,
+          'ifsc': ifsc,
+          if (trimmedName != null && trimmedName.isNotEmpty) 'name': trimmedName,
+        },
+      );
+      return BankVerificationResult.fromJson(response.data!);
     } on DioException catch (error) {
       throw ApiException.fromDio(error);
     }
@@ -190,6 +237,22 @@ class KycFlowActions extends _$KycFlowActions {
     final result = await ref
         .read(kycRepositoryProvider)
         .verifyPan(panNumber: panNumber, name: name);
+    ref.invalidate(kycStatusProvider);
+    return result;
+  }
+
+  Future<BankVerificationResult> verifyBankAccount(
+    String accountNumber, {
+    required String ifsc,
+    String? name,
+  }) async {
+    final result = await ref
+        .read(kycRepositoryProvider)
+        .verifyBankAccount(
+          accountNumber,
+          ifsc: ifsc,
+          name: name,
+        );
     ref.invalidate(kycStatusProvider);
     return result;
   }

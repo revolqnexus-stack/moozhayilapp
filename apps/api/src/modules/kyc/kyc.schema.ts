@@ -51,3 +51,22 @@ export function isPanNameMismatch(
 export type SendAadhaarOtpInput = z.infer<typeof sendAadhaarOtpSchema>;
 export type VerifyAadhaarOtpInput = z.infer<typeof verifyAadhaarOtpSchema>;
 export type VerifyPanInput = z.infer<typeof verifyPanSchema>;
+
+export const verifyBankAccountSchema = z.object({
+  account_number: z
+    .string()
+    .min(4, "Account number is too short")
+    .max(20, "Account number is too long"),
+  ifsc: z
+    .string()
+    .regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Enter a valid IFSC code"),
+  name: z
+    .string()
+    .optional()
+    .transform((value) => {
+      const trimmed = value?.trim() ?? "";
+      return trimmed.length > 0 ? trimmed : undefined;
+    }),
+});
+
+export type VerifyBankAccountInput = z.infer<typeof verifyBankAccountSchema>;

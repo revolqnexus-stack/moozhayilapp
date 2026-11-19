@@ -41,6 +41,18 @@ export interface PanVerification {
   message: string;
 }
 
+export interface BankVerification {
+  referenceId: string;
+  verified: boolean;
+  accountStatus?: string;
+  nameMatchResult?: string;
+  nameAtBankMasked?: string;
+  bankName?: string;
+  branch?: string;
+  accountMasked?: string;
+  message: string;
+}
+
 export interface StampMitraClientOptions {
   fetch?: typeof fetch;
   sleep?: (ms: number) => Promise<void>;
@@ -118,6 +130,22 @@ export class StampMitraClient {
     }
 
     return this.post<PanVerification>("/v1/verify/pan", body, readPanVerification);
+  }
+
+  async verifyBankAccount(input: {
+    accountNumber: string;
+    ifsc: string;
+    name?: string;
+  }): Promise<BankVerification> {
+    const body: Record<string, unknown> = {
+      account_number: input.accountNumber,
+      ifsc: input.ifsc,
+    };
+    if (input.name) {
+      body.name = input.name;
+    }
+
+    return this.post<BankVerification>("/v1/verify/bank-account", body, readBankVerification);
   }
 
   private async post<T>(
@@ -323,6 +351,43 @@ function readPanVerification(payload: unknown): PanVerification {
     panStatus: body.panStatus,
     nameMatchResult:
       typeof body.nameMatchResult === "string" ? body.nameMatchResult : null,
+    message: body.message,
+  };
+}
+
+function readBankVerification(payload: unknown): BankVerification {
+  if (!payload || typeof payload !== "object") {
+    throw new StampMitraError(
+      502,
+      "BAD_RESPONSE",
+      "StampMitra returned an unexpected bank verification response",
+    );
+  }
+
+  const body = payload as Record<string, unknown>;
+  if (typeof body.referenceId !== "string" || typeof body.message !== "string") {
+    throw new StampMitraError(
+      502,
+      "BAD_RESPONSE",
+      "StampMitra returned an unexpected bank verification response",
+    );
+  }
+
+  return {
+    referenceId: body.referenceId,
+    verified: typeof body.verified === "boolean" ? body.verified : false,
+    accountStatus:
+      typeof body.accountStatus === "string" ? body.accountStatus : undefined,
+    nameMatchResult:
+      typeof body.nameMatchResult === "string" ? body.nameMatchResult : undefined,
+    nameAtBankMasked:
+      typeof body.nameAtBankMasked === "string"
+        ? body.nameAtBankMasked
+        : undefined,
+    bankName: typeof body.bankName === "string" ? body.bankName : undefined,
+    branch: typeof body.branch === "string" ? body.branch : undefined,
+    accountMasked:
+      typeof body.accountMasked === "string" ? body.accountMasked : undefined,
     message: body.message,
   };
 }

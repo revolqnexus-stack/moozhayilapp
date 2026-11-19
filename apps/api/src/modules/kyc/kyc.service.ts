@@ -25,6 +25,7 @@ import type {
   SendAadhaarOtpInput,
   VerifyAadhaarOtpInput,
   VerifyPanInput,
+  VerifyBankAccountInput,
 } from "./kyc.schema";
 import { isPanNameMismatch } from "./kyc.schema";
 import { kycProviderClient } from "./kyc_provider.client";
@@ -178,6 +179,45 @@ export function mapPanProviderError(error: StampMitraError): AppError {
     503,
     "PROVIDER_UNAVAILABLE",
     "We couldn't verify the PAN just now. Please try again.",
+  );
+}
+
+export function mapBankProviderError(error: StampMitraError): AppError {
+  if (error.status === 400) {
+    const field = /ifsc/i.test(error.message) ? "ifsc" : "account";
+    return new AppError(400, "BAD_REQUEST", error.message, {
+      fields: { [field]: error.message },
+    });
+  }
+
+  if (error.status === 401 || error.status === 402) {
+    return new AppError(
+      503,
+      "PROVIDER_UNAVAILABLE",
+      "Verification is temporarily unavailable.",
+    );
+  }
+
+  if (error.status === 403) {
+    return new AppError(
+      403,
+      "FORBIDDEN",
+      `Bank account verification needs scope.`,
+    );
+  }
+
+  if (error.status === 404) {
+    return new AppError(404, "NOT_FOUND", "That bank check could not be found.");
+  }
+
+  if (error.status === 429) {
+    return new AppError(429, "RATE_LIMITED", "Please try again shortly.");
+  }
+
+  return new AppError(
+    503,
+    "PROVIDER_UNAVAILABLE",
+    "We couldn't verify the bank account just now. Please try again.",
   );
 }
 
@@ -400,6 +440,59 @@ export class KycService {
       name_match_result: providerResult.nameMatchResult,
       message: providerResult.message,
       pan_masked: maskPan(input.pan_number),
+      name_mismatch: nameMismatch,
+    };
+  }
+
+  async verifyBankAccount(userId: string, input: VerifyBankAccountInput) {
+    await assertCanStartKyc(userId);
+    await markInProgress(userId);
+
+    let providerResult;
+    try {
+      providerResult = await stampMitraClient.verifyBankAccount({
+        accountNumber: input.account_number,
+        ifsc: input.ifsc,
+        name: input.name,
+      });
+    } catch (error) {
+      if (error instanceof StampMitraError) {
+        throw mapBankProviderError(error);
+      }
+      throw error;
+    }
+
+    const nameMismatch = input.name
+      ? providerResult.nameMatchResult &&
+        providerResult.nameMatchResult.toUpperCase() !== "MATCH" &&
+        providerResult.nameMatchResult.toUpperCase() !== "GOOD_MATCH" &&
+        providerResult.nameMatchResult.toUpperCase() !== "PARTIAL_MATCH"
+      : false;
+
+    await writeAuditLog({
+      actorType: "user",
+      actorId: userId,
+      action: "kyc_bank_account_checked",
+      entityType: "user",
+      entityId: userId,
+      after: {
+        reference_id: providerResult.referenceId,
+        verified: providerResult.verified,
+        name_mismatch: nameMismatch,
+        checked_at: new Date().toISOString(),
+      },
+    });
+
+    return {
+      verified: providerResult.verified,
+      reference_id: providerResult.referenceId,
+      account_status: providerResult.accountStatus,
+      name_match_result: providerResult.nameMatchResult,
+      name_at_bank_masked: providerResult.nameAtBankMasked,
+      bank_name: providerResult.bankName,
+      branch: providerResult.branch,
+      account_masked: providerResult.accountMasked,
+      message: providerResult.message,
       name_mismatch: nameMismatch,
     };
   }

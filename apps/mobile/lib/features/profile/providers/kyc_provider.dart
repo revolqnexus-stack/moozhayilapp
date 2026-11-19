@@ -43,32 +43,6 @@ class PanVerificationResult {
   final bool nameMismatch;
 }
 
-class BankVerificationResult {
-  const BankVerificationResult({
-    required this.referenceId,
-    required this.verified,
-    required this.message,
-    required this.maskedAccountNumber,
-    this.accountHolderName,
-  });
-
-  factory BankVerificationResult.fromJson(Map<String, dynamic> json) {
-    return BankVerificationResult(
-      referenceId: json['reference_id'] as String? ?? '',
-      verified: json['verified'] as bool? ?? false,
-      message: json['message'] as String? ?? '',
-      maskedAccountNumber: json['masked_account_number'] as String? ?? '',
-      accountHolderName: json['account_holder_name'] as String?,
-    );
-  }
-
-  final String referenceId;
-  final bool verified;
-  final String message;
-  final String maskedAccountNumber;
-  final String? accountHolderName;
-}
-
 class KycRepository {
   const KycRepository(this._apiService);
 
@@ -130,7 +104,7 @@ class KycRepository {
     }
   }
 
-  Future<BankVerificationResult> verifyBankAccount(
+  Future<BankVerifyResponse> verifyBankAccount(
     String accountNumber, {
     required String ifsc,
     String? name,
@@ -145,7 +119,7 @@ class KycRepository {
           if (trimmedName != null && trimmedName.isNotEmpty) 'name': trimmedName,
         },
       );
-      return BankVerificationResult.fromJson(response.data!);
+      return BankVerifyResponse.fromJson(response.data!);
     } on DioException catch (error) {
       throw ApiException.fromDio(error);
     }
@@ -241,7 +215,7 @@ class KycFlowActions extends _$KycFlowActions {
     return result;
   }
 
-  Future<BankVerificationResult> verifyBankAccount(
+  Future<BankVerifyResponse> verifyBankAccount(
     String accountNumber, {
     required String ifsc,
     String? name,

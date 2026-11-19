@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/utils/customer_error_copy.dart';
-
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,9 +9,9 @@ import '../../../components/navigation/top_app_bar.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
-import '../../../core/models/kyc_status.dart';
 import '../../../core/routing/app_routes.dart';
-import '../../../core/utils/pan_mask.dart';
+import '../../../core/services/api_service.dart';
+import '../../../core/utils/customer_error_copy.dart';
 import '../providers/kyc_provider.dart';
 
 enum _PanUiState { idle, submitting, verified, notValid, nameMismatch, error }
@@ -25,94 +24,128 @@ class PanScreen extends ConsumerStatefulWidget {
 }
 
 class _PanScreenState extends ConsumerState<PanScreen> {
+  static final _panPattern = RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$');
+
   var _pan = '';
   var _name = '';
-  String? _errorMessage;
-  _PanUiState _uiState = _PanUiState.idle;
-  String? _maskedPan;
-  PanVerifyResponse? _lastResult;
-
-  bool get _loading => _uiState == _PanUiState.submitting;
+  var _state = _PanUiState.idle;
+  var _maskPanField = false;
+  String? _panError;
+  String? _nameError;
+  String? _statusMessage;
 
   Future<void> _verify() async {
-    final value = _pan.trim().toUpperCase();
-    if (!RegExp(r'^[A-Z]{5}\d{4}[A-Z]$').hasMatch(value)) {
+    final pan = _pan.trim().toUpperCase();
+    final name = _name.trim();
+    String? panError;
+    String? nameError;
+    if (!_panPattern.hasMatch(pan)) {
+      panError = 'Enter a valid PAN (e.g. ABCDE1234F)';
+    }
+    if (name.length > 256) {
+      nameError = 'Name must be 256 characters or fewer';
+    }
+    if (panError != null || nameError != null) {
       setState(() {
-        _uiState = _PanUiState.error;
-        _errorMessage = 'Enter a valid PAN (e.g. ABCDE1234F)';
+        _state = _PanUiState.idle;
+        _panError = panError;
+        _nameError = nameError;
+        _statusMessage = null;
       });
       return;
     }
 
-    final trimmedName = _name.trim();
-
     setState(() {
-      _uiState = _PanUiState.submitting;
-      _errorMessage = null;
-      _lastResult = null;
+      _pan = pan;
+      _name = name;
+      _state = _PanUiState.submitting;
+      _panError = null;
+      _nameError = null;
+      _statusMessage = null;
     });
 
     try {
-      final result = await ref
-          .read(kycFlowActionsProvider.notifier)
-          .verifyPan(value, name: trimmedName.isEmpty ? null : trimmedName);
+      final result = await ref.read(kycFlowActionsProvider.notifier).verifyPan(
+            panNumber: pan,
+            name: name,
+          );
+      if (!mounted) return;
 
-      if (!mounted) {
+      if (!result.valid) {
+        setState(() {
+          _state = _PanUiState.notValid;
+          _maskPanField = true;
+          _statusMessage = 'PAN not valid';
+        });
+        return;
+      }
+
+      if (result.nameMismatch ||
+          (name.isNotEmpty &&
+              result.nameMatchResult != null &&
+              result.nameMatchResult!.toUpperCase() != 'MATCH')) {
+        setState(() {
+          _state = _PanUiState.nameMismatch;
+          _maskPanField = true;
+          _statusMessage = 'Name does not match PAN records';
+        });
         return;
       }
 
       setState(() {
-        _maskedPan = maskPan(value);
-        _lastResult = result;
+        _state = _PanUiState.verified;
+        _maskPanField = true;
+        _statusMessage = result.message.isEmpty ? 'PAN is valid' : result.message;
       });
-
-      if (result.verified) {
-        setState(() => _uiState = _PanUiState.verified);
-        await Future<void>.delayed(const Duration(milliseconds: 600));
-        if (mounted) {
-          context.push(AppRoutes.profileKycBank);
-        }
-        return;
-      }
-
-      if (result.isNameMismatch) {
-        setState(() => _uiState = _PanUiState.nameMismatch);
-        return;
-      }
-
-      setState(() => _uiState = _PanUiState.notValid);
     } catch (error) {
+      if (!mounted) return;
+      final fieldErrors = _fieldErrors(error);
       setState(() {
-        _uiState = _PanUiState.error;
-        _errorMessage = CustomerErrorCopy.message(error);
+        _state = _PanUiState.error;
+        _maskPanField = true;
+        _panError = fieldErrors.$1;
+        _nameError = fieldErrors.$2;
+        _statusMessage = _customerMessage(error);
       });
     }
   }
 
-  String? _statusLine() {
-    return switch (_uiState) {
-      _PanUiState.verified => 'PAN verified successfully.',
-      _PanUiState.notValid =>
-        _lastResult?.message ??
-            'PAN not valid. Check the number and try again.',
-      _PanUiState.nameMismatch => 'Name does not match PAN records.',
-      _ => null,
-    };
+  (String?, String?) _fieldErrors(Object error) {
+    if (error is! ApiException) return (null, null);
+    final fields = error.details?['fields'];
+    if (fields is! Map) return (null, null);
+    final pan = fields['pan'];
+    final name = fields['name'];
+    return (pan is String ? pan : null, name is String ? name : null);
   }
 
-  Color _statusColor() {
-    return switch (_uiState) {
-      _PanUiState.verified => AppColors.successFill,
-      _PanUiState.notValid ||
-      _PanUiState.nameMismatch => AppColors.burgundyDeep,
-      _ => AppColors.slateMist,
-    };
+  String _customerMessage(Object error) {
+    if (error is ApiException) {
+      return error.message;
+    }
+    return CustomerErrorCopy.message(error);
+  }
+
+  String get _visiblePan => _maskPanField ? _maskPan(_pan) : _pan;
+
+  String _maskPan(String pan) {
+    if (!_panPattern.hasMatch(pan)) return pan;
+    return '${pan.substring(0, 5)}••••${pan.substring(9)}';
+  }
+
+  void _editPan() {
+    setState(() {
+      _state = _PanUiState.idle;
+      _maskPanField = false;
+      _statusMessage = null;
+      _panError = null;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final status = ref.watch(kycStatusProvider);
-    final statusLine = _statusLine();
+    final submitting = _state == _PanUiState.submitting;
 
     return Scaffold(
       backgroundColor: AppColors.warmIvory,
@@ -134,63 +167,81 @@ class _PanScreenState extends ConsumerState<PanScreen> {
             AppTextInput(
               label: 'PAN number',
               placeholder: 'ABCDE1234F',
-              value: _maskedPan ?? _pan,
-              errorText: _uiState == _PanUiState.error ? _errorMessage : null,
-              onChanged: (value) {
-                if (_maskedPan != null) {
-                  return;
-                }
-                setState(() {
-                  _pan = value.toUpperCase();
-                  if (_uiState == _PanUiState.error) {
-                    _uiState = _PanUiState.idle;
-                    _errorMessage = null;
-                  }
-                });
-              },
+              value: _visiblePan,
+              errorText: _panError,
+              maxLength: 10,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]')),
+                TextInputFormatter.withFunction((oldValue, newValue) {
+                  return newValue.copyWith(text: newValue.text.toUpperCase());
+                }),
+              ],
+              onChanged: submitting || _maskPanField
+                  ? (_) {}
+                  : (value) => setState(() {
+                        _pan = value.toUpperCase();
+                        _panError = null;
+                      }),
             ),
+            if (_maskPanField && !submitting)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: _editPan,
+                  child: const Text('Change PAN'),
+                ),
+              ),
             const SizedBox(height: AppSpacing.md),
             AppTextInput(
               label: 'Name on PAN (optional)',
-              placeholder: 'As on your PAN card',
+              placeholder: 'Name as on the card',
               value: _name,
-              onChanged: (value) => setState(() {
-                _name = value;
-                if (_uiState == _PanUiState.nameMismatch) {
-                  _uiState = _PanUiState.idle;
-                }
-              }),
+              errorText: _nameError,
+              maxLength: 256,
+              onChanged: submitting
+                  ? (_) {}
+                  : (value) => setState(() {
+                        _name = value;
+                        _nameError = null;
+                        if (_state == _PanUiState.nameMismatch ||
+                            _state == _PanUiState.notValid ||
+                            _state == _PanUiState.error) {
+                          _state = _PanUiState.idle;
+                          _statusMessage = null;
+                        }
+                      }),
             ),
-            if (statusLine != null) ...[
+            if (_statusMessage != null) ...[
               const SizedBox(height: AppSpacing.md),
               Text(
-                statusLine,
-                style: AppTypography.uiBodySM.copyWith(color: _statusColor()),
-              ),
-            ],
-            if (_lastResult?.nameOnPanMasked != null &&
-                _uiState == _PanUiState.nameMismatch) ...[
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                'Registered name: ${_lastResult!.nameOnPanMasked}',
+                _statusMessage!,
                 style: AppTypography.uiBodySM.copyWith(
-                  color: AppColors.slateMist,
+                  color: _state == _PanUiState.verified
+                      ? AppColors.successFill
+                      : AppColors.errorFill,
                 ),
               ),
             ],
             const SizedBox(height: AppSpacing.lg),
             PrimaryButton(
-              label: _uiState == _PanUiState.nameMismatch
-                  ? 'Try again'
-                  : 'Verify PAN',
+              label: _state == _PanUiState.verified ? 'PAN verified' : 'Verify PAN',
               isFullWidth: true,
-              isLoading: _loading,
-              onTap: _loading ? null : _verify,
+              isLoading: submitting,
+              isDisabled: _state == _PanUiState.verified,
+              onTap: _verify,
             ),
+            if (_state == _PanUiState.verified) ...[
+              const SizedBox(height: AppSpacing.sm),
+              PrimaryButton(
+                label: 'Continue',
+                isFullWidth: true,
+                onTap: () => context.push(AppRoutes.profileKycSelfie),
+              ),
+            ],
             const SizedBox(height: AppSpacing.sm),
             status.when(
               data: (kyc) {
-                if (kyc.aadhaarVerified) {
+                if (kyc.aadhaarVerified && _state != _PanUiState.verified) {
                   return PrimaryButton(
                     label: 'Skip to selfie',
                     isFullWidth: true,

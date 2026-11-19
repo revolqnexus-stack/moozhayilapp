@@ -60,8 +60,21 @@ export class KycController {
   }
 
   async verifyPan(req: Request, res: Response): Promise<void> {
-    const input = verifyPanSchema.parse(req.body);
-    res.status(200).json(await kycService.verifyPan(requireUserId(req), input));
+    const parsed = verifyPanSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const fields = parsed.error.flatten().fieldErrors;
+      const panMessage =
+        fields.pan_number?.[0] ?? "Enter a valid PAN (ABCDE1234F)";
+      const nameMessage = fields.name?.[0];
+      throw new AppError(400, "BAD_REQUEST", nameMessage ?? panMessage, {
+        fields: {
+          ...(fields.pan_number ? { pan: panMessage } : {}),
+          ...(nameMessage ? { name: nameMessage } : {}),
+        },
+      });
+    }
+
+    res.status(200).json(await kycService.verifyPan(requireUserId(req), parsed.data));
   }
 
   async verifyBankAccount(req: Request, res: Response): Promise<void> {

@@ -1,16 +1,4 @@
-import dotenv from "dotenv";
 import request from "supertest";
-
-dotenv.config();
-
-function stripEmptyEnv(keys: string[]) {
-  for (const key of keys) {
-    if (process.env[key] === "") {
-      delete process.env[key];
-    }
-  }
-}
-
 import { createApp } from "../src/app";
 import { prisma } from "../src/db/prisma";
 import {
@@ -67,33 +55,13 @@ function adminAuthHeaders(adminId: string, role: import("@prisma/client").AdminR
 }
 
 describe("Phase 6 KYC and admin review", () => {
-  let app: ReturnType<typeof createApp>;
+  const app = createApp();
 
   beforeAll(() => {
-    stripEmptyEnv([
-      "KYC_PROVIDER_BASE_URL",
-      "KYC_PROVIDER_API_KEY",
-      "STAMPMITRA_API_KEY",
-      "S3_ENDPOINT",
-      "S3_BUCKET",
-      "S3_ACCESS_KEY_ID",
-      "S3_SECRET_ACCESS_KEY",
-      "S3_PUBLIC_BASE_URL",
-      "MSG91_AUTH_KEY",
-      "MSG91_OTP_TEMPLATE_ID",
-      "RAZORPAY_WEBHOOK_SECRET",
-      "CASHFREE_APP_ID",
-      "CASHFREE_SECRET_KEY",
-      "FIREBASE_PROJECT_ID",
-      "FIREBASE_CLIENT_EMAIL",
-      "FIREBASE_PRIVATE_KEY",
-      "SENTRY_DSN",
-    ]);
     process.env.NODE_ENV = "test";
     process.env.TEST_OTP_CODE = "123456";
     process.env.TEST_KYC_AADHAAR_OTP = "654321";
     process.env.KYC_PROVIDER_MODE = "mock";
-    app = createApp();
   });
 
   beforeEach(async () => {
@@ -188,14 +156,41 @@ describe("Phase 6 KYC and admin review", () => {
       .set("Authorization", `Bearer ${auth.accessToken}`)
       .send({ session_id: sendOtp.body.session_id, otp: "654321" });
 
-    const panVerify = await request(app)
-      .post("/v1/kyc/pan/verify")
-      .set("Authorization", `Bearer ${auth.accessToken}`)
-      .send({ pan_number: "ABCDE1234F" });
+    const originalFetch = global.fetch;
+    process.env.STAMPMITRA_API_KEY = "sk_test_xxx";
+    global.fetch = jest.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (!url.includes("api-b2b.stampmitra.in")) {
+        return originalFetch(input);
+      }
 
-    expect(panVerify.status).toBe(200);
-    expect(panVerify.body.verified).toBe(true);
-    expect(panVerify.body.reference_id).toEqual(expect.any(String));
+      return new Response(
+        JSON.stringify({
+          referenceId: "SMV-20260927-8F42K7",
+          valid: true,
+          registeredName: "MOCK KYC USER",
+          panStatus: "VALID",
+          nameMatchResult: "MATCH",
+          message: "PAN is Valid",
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    }) as typeof fetch;
+
+    try {
+      const pan = await request(app)
+        .post("/v1/kyc/pan/verify")
+        .set("Authorization", `Bearer ${auth.accessToken}`)
+        .send({ pan_number: "ABCDE1234F" });
+
+      expect(pan.status).toBe(200);
+      expect(pan.body.reference_id).toBe("SMV-20260927-8F42K7");
+      expect(pan.body.valid).toBe(true);
+      expect(pan.body.pan_masked).toBe("ABCDE••••F");
+      expect(JSON.stringify(pan.body)).not.toContain("ABCDE1234F");
+    } finally {
+      global.fetch = originalFetch;
+    }
 
     await request(app)
       .post("/v1/kyc/selfie")

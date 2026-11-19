@@ -23,8 +23,8 @@ const envSchema = z.object({
   KYC_PROVIDER_MODE: z.enum(["mock", "live"]).default("mock"),
   KYC_PROVIDER_BASE_URL: z.string().url().optional(),
   KYC_PROVIDER_API_KEY: z.string().min(8).optional(),
-  /** StampMitra sandbox: sk_test_… · production: sk_live_… (PAN verification). */
-  STAMPMITRA_API_KEY: z.string().min(16).optional(),
+  /** StampMitra sandbox (sk_test_...) or production (sk_live_...) API key. */
+  STAMPMITRA_API_KEY: z.string().min(8).optional(),
   KYC_UPLOAD_DIR: z.string().min(1).default("./uploads/kyc"),
   MEDIA_UPLOAD_DIR: z.string().min(1).default("./uploads/media"),
   STORAGE_BACKEND: z.enum(["local", "s3"]).default("local"),
@@ -113,24 +113,14 @@ const developmentSecrets = {
   ADMIN_JWT_SECRET: "dev_admin_jwt_secret_change_before_prod_32",
 };
 
-function assertStampMitraConfiguration(data: z.infer<typeof envSchema>) {
-  // Only check StampMitra for PAN verification
-  if (
-    data.NODE_ENV !== "test" &&
-    data.KYC_PROVIDER_MODE === "live" &&
-    !data.STAMPMITRA_API_KEY
-  ) {
-    throw new Error(
-      "Invalid environment configuration: STAMPMITRA_API_KEY is required when KYC_PROVIDER_MODE=live (PAN verification uses StampMitra).",
-    );
-  }
-}
-
 function assertProductionProviderModes(data: z.infer<typeof envSchema>) {
-  // Remove KYC_PROVIDER_MODE check entirely - we don't need Aadhaar vendor
+  const mockKycOk =
+    data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC;
+
   const mockProviders = [
     data.SMS_PROVIDER_MODE === "mock" ? "SMS_PROVIDER_MODE" : null,
     data.PAYMENT_PROVIDER_MODE === "mock" ? "PAYMENT_PROVIDER_MODE" : null,
+    data.KYC_PROVIDER_MODE === "mock" && !mockKycOk ? "KYC_PROVIDER_MODE" : null,
     data.FIREBASE_MODE === "mock" ? "FIREBASE_MODE" : null,
   ].filter(Boolean);
 
@@ -187,13 +177,20 @@ function assertProductionLiveCredentials(data: z.infer<typeof envSchema>) {
     data.PAYMENT_PROVIDER === "razorpay" && !data.RAZORPAY_WEBHOOK_SECRET
       ? "RAZORPAY_WEBHOOK_SECRET"
       : null,
-    // Only StampMitra required for KYC (PAN verification)
-    data.KYC_PROVIDER_MODE === "live" && !data.STAMPMITRA_API_KEY
-      ? "STAMPMITRA_API_KEY"
-      : null,
+    data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC
+      ? null
+      : data.KYC_PROVIDER_BASE_URL
+        ? null
+        : "KYC_PROVIDER_BASE_URL",
+    data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC
+      ? null
+      : data.KYC_PROVIDER_API_KEY
+        ? null
+        : "KYC_PROVIDER_API_KEY",
     data.FIREBASE_PROJECT_ID ? null : "FIREBASE_PROJECT_ID",
     data.FIREBASE_CLIENT_EMAIL ? null : "FIREBASE_CLIENT_EMAIL",
     data.FIREBASE_PRIVATE_KEY ? null : "FIREBASE_PRIVATE_KEY",
+    data.STAMPMITRA_API_KEY ? null : "STAMPMITRA_API_KEY",
     data.KYC_WEBHOOK_SECRET ? null : "KYC_WEBHOOK_SECRET",
     data.GOLD_RATE_WEBHOOK_SECRET ? null : "GOLD_RATE_WEBHOOK_SECRET",
   ].filter(Boolean);
@@ -215,12 +212,20 @@ function assertProductionNoTestCredentials(data: z.infer<typeof envSchema>) {
     invalid.push("RAZORPAY_KEY_ID must be a live key (rzp_live_*) in production");
   }
 
+  if (
+    data.STAMPMITRA_API_KEY &&
+    !data.STAMPMITRA_API_KEY.startsWith("sk_live_")
+  ) {
+    invalid.push(
+      "STAMPMITRA_API_KEY must be a live key (sk_live_...) in production",
+    );
+  }
+
   const placeholderPattern = /^(YOUR_|REPLACE_ME|<|mock$|mock@)/i;
   const credentialFields: Array<[string, string | undefined]> = [
     ["RAZORPAY_KEY_SECRET", data.RAZORPAY_KEY_SECRET],
     ["MSG91_AUTH_KEY", data.MSG91_AUTH_KEY],
     ["KYC_PROVIDER_API_KEY", data.KYC_PROVIDER_API_KEY],
-    ["STAMPMITRA_API_KEY", data.STAMPMITRA_API_KEY],
     ["S3_ACCESS_KEY_ID", data.S3_ACCESS_KEY_ID],
     ["S3_SECRET_ACCESS_KEY", data.S3_SECRET_ACCESS_KEY],
   ];
@@ -310,7 +315,11 @@ export function loadEnv(input: NodeJS.ProcessEnv = process.env): Env {
 
   const data = parsed.data;
 
-  assertStampMitraConfiguration(data);
+  if (data.NODE_ENV !== "test" && !data.STAMPMITRA_API_KEY) {
+    throw new Error(
+      "STAMPMITRA_API_KEY is missing. Set a StampMitra sandbox key (sk_test_...) before starting the API.",
+    );
+  }
 
   if (data.NODE_ENV === "production") {
     const missingSecrets = [

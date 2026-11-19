@@ -35,6 +35,7 @@ const productionBase = {
   STAMPMITRA_API_KEY: "sk_live_stampmitra_production_key",
   KYC_WEBHOOK_SECRET: "kyc_webhook_secret",
   GOLD_RATE_WEBHOOK_SECRET: "gold_webhook_secret",
+  STAMPMITRA_API_KEY: "sk_live_production_key",
   FIREBASE_PROJECT_ID: "moozhayil-prod",
   FIREBASE_CLIENT_EMAIL: "firebase@moozhayil.com",
   FIREBASE_PRIVATE_KEY: "firebase_private_key",
@@ -140,5 +141,24 @@ describe("Production environment guards", () => {
         MSG91_DLT_PE_ID: "1016720216615695729",
       }),
     ).toThrow("MSG91_DLT_PE_ID is the Brand DLT ID");
+  });
+
+  it("fails startup outside tests when STAMPMITRA_API_KEY is missing", () => {
+    expect(() =>
+      loadEnv({
+        NODE_ENV: "development",
+        DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/moozhayil",
+        REDIS_URL: "redis://localhost:6379",
+      }),
+    ).toThrow("STAMPMITRA_API_KEY is missing");
+  });
+
+  it("rejects a StampMitra sandbox key in production", () => {
+    expect(() =>
+      loadEnv({
+        ...productionBase,
+        STAMPMITRA_API_KEY: "sk_test_sandbox_key",
+      }),
+    ).toThrow("STAMPMITRA_API_KEY must be a live key");
   });
 });

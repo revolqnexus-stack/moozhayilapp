@@ -1,8 +1,10 @@
 import dotenv from "dotenv";
 
-dotenv.config({
-  path: process.env.MOOZHAYIL_ENV_FILE ?? ".env",
-});
+const envFile = process.env.MOOZHAYIL_ENV_FILE ?? ".env";
+dotenv.config({ path: envFile });
+if (!process.env.MOOZHAYIL_ENV_FILE) {
+  dotenv.config({ path: ".env.local", override: true });
+}
 import http from "http";
 import { validateEnvironment } from "../app";
 import { logger } from "../utils/logger";

@@ -67,3 +67,12 @@ export function maskName(name: string): string {
 
   return `${maskedFirst} ${maskedLast}`;
 }
+
+export function maskPan(pan: string): string {
+  const value = pan.trim().toUpperCase();
+  if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(value)) {
+    return "••••••••••";
+  }
+
+  return `${value.slice(0, 5)}••••${value.slice(-1)}`;
+}

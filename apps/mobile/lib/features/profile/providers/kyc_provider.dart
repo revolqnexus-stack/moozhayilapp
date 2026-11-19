@@ -8,6 +8,41 @@ import '../../auth/providers/auth_provider.dart';
 
 part 'kyc_provider.g.dart';
 
+class PanVerificationResult {
+  const PanVerificationResult({
+    required this.referenceId,
+    required this.valid,
+    required this.panStatus,
+    required this.message,
+    required this.panMasked,
+    required this.nameMismatch,
+    this.registeredName,
+    this.nameMatchResult,
+  });
+
+  factory PanVerificationResult.fromJson(Map<String, dynamic> json) {
+    return PanVerificationResult(
+      referenceId: json['reference_id'] as String? ?? '',
+      valid: json['valid'] as bool? ?? false,
+      registeredName: json['registered_name'] as String?,
+      panStatus: json['pan_status'] as String? ?? '',
+      nameMatchResult: json['name_match_result'] as String?,
+      message: json['message'] as String? ?? '',
+      panMasked: json['pan_masked'] as String? ?? '',
+      nameMismatch: json['name_mismatch'] as bool? ?? false,
+    );
+  }
+
+  final String referenceId;
+  final bool valid;
+  final String? registeredName;
+  final String panStatus;
+  final String? nameMatchResult;
+  final String message;
+  final String panMasked;
+  final bool nameMismatch;
+}
+
 class KycRepository {
   const KycRepository(this._apiService);
 
@@ -50,36 +85,20 @@ class KycRepository {
     }
   }
 
-  Future<PanVerifyResponse> verifyPan(String panNumber, {String? name}) async {
+  Future<PanVerificationResult> verifyPan({
+    required String panNumber,
+    String? name,
+  }) async {
+    final trimmedName = name?.trim();
     try {
       final response = await _apiService.client.post<Map<String, dynamic>>(
         '/kyc/pan/verify',
         data: {
           'pan_number': panNumber,
-          if (name != null && name.trim().isNotEmpty) 'name': name.trim(),
+          if (trimmedName != null && trimmedName.isNotEmpty) 'name': trimmedName,
         },
       );
-      return PanVerifyResponse.fromJson(response.data!);
-    } on DioException catch (error) {
-      throw ApiException.fromDio(error);
-    }
-  }
-
-  Future<BankVerifyResponse> verifyBankAccount(
-    String accountNumber, {
-    required String ifsc,
-    String? name,
-  }) async {
-    try {
-      final response = await _apiService.client.post<Map<String, dynamic>>(
-        '/kyc/bank-account/verify',
-        data: {
-          'account_number': accountNumber,
-          'ifsc': ifsc,
-          if (name != null && name.trim().isNotEmpty) 'name': name.trim(),
-        },
-      );
-      return BankVerifyResponse.fromJson(response.data!);
+      return PanVerificationResult.fromJson(response.data!);
     } on DioException catch (error) {
       throw ApiException.fromDio(error);
     }
@@ -164,27 +183,14 @@ class KycFlowActions extends _$KycFlowActions {
     ref.invalidate(kycStatusProvider);
   }
 
-  Future<PanVerifyResponse> verifyPan(String panNumber, {String? name}) async {
-    final result = await ref
-        .read(kycRepositoryProvider)
-        .verifyPan(panNumber, name: name);
-    if (result.verified) {
-      ref.invalidate(kycStatusProvider);
-    }
-    return result;
-  }
-
-  Future<BankVerifyResponse> verifyBankAccount(
-    String accountNumber, {
-    required String ifsc,
+  Future<PanVerificationResult> verifyPan({
+    required String panNumber,
     String? name,
   }) async {
     final result = await ref
         .read(kycRepositoryProvider)
-        .verifyBankAccount(accountNumber, ifsc: ifsc, name: name);
-    if (result.verified) {
-      ref.invalidate(kycStatusProvider);
-    }
+        .verifyPan(panNumber: panNumber, name: name);
+    ref.invalidate(kycStatusProvider);
     return result;
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:moozhayil/core/constants/kyc_thresholds.dart';
 import 'package:moozhayil/core/kyc/decide_kyc_gate.dart';
 import 'package:moozhayil/core/models/kyc_status.dart';
+import 'package:moozhayil/features/profile/providers/kyc_provider.dart';
 import 'package:moozhayil/features/profile/providers/profile_provider.dart';
 
 void main() {
@@ -33,6 +34,26 @@ void main() {
       expect(model.kycStatus, 'in_review');
       expect(model.aadhaarVerified, isTrue);
       expect(model.selfieVerified, isTrue);
+    });
+  });
+
+  group('PAN verification result', () {
+    test('parses StampMitra fields from the backend payload', () {
+      final model = PanVerificationResult.fromJson({
+        'reference_id': 'SMV-20260927-8F42K7',
+        'valid': true,
+        'registered_name': 'R**** K****',
+        'pan_status': 'VALID',
+        'name_match_result': 'MATCH',
+        'message': 'PAN is Valid',
+        'pan_masked': 'ABCDE••••F',
+        'name_mismatch': false,
+      });
+
+      expect(model.referenceId, 'SMV-20260927-8F42K7');
+      expect(model.valid, isTrue);
+      expect(model.panMasked, 'ABCDE••••F');
+      expect(model.nameMismatch, isFalse);
     });
   });
 

@@ -5,6 +5,8 @@
 # --- Secrets / environment ---
 .env
 .env.*
+.env.local
+**/.env.local
 !.env.example
 !.env.cloud.example
 !**/.env.cloud.example

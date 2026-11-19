@@ -55,11 +55,16 @@ export type VerifyPanInput = z.infer<typeof verifyPanSchema>;
 export const verifyBankAccountSchema = z.object({
   account_number: z
     .string()
-    .min(4, "Account number is too short")
-    .max(20, "Account number is too long"),
+    .transform((value) => value.replace(/\D/g, ""))
+    .pipe(
+      z.string().min(12, "Account number is too short").max(20, "Account number is too long"),
+    ),
   ifsc: z
     .string()
-    .regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Enter a valid IFSC code"),
+    .transform((value) => value.toUpperCase())
+    .pipe(
+      z.string().regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Enter a valid IFSC code"),
+    ),
   name: z
     .string()
     .optional()

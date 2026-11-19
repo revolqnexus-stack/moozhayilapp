@@ -179,14 +179,18 @@ function assertProductionLiveCredentials(data: z.infer<typeof envSchema>) {
       : null,
     data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC
       ? null
-      : data.KYC_PROVIDER_BASE_URL
+      : data.STAMPMITRA_API_KEY
         ? null
-        : "KYC_PROVIDER_BASE_URL",
+        : data.KYC_PROVIDER_BASE_URL
+          ? null
+          : "KYC_PROVIDER_BASE_URL",
     data.KYC_PROVIDER_MODE === "mock" && data.MOOZHAYIL_ALLOW_MOCK_KYC
       ? null
-      : data.KYC_PROVIDER_API_KEY
+      : data.STAMPMITRA_API_KEY
         ? null
-        : "KYC_PROVIDER_API_KEY",
+        : data.KYC_PROVIDER_API_KEY
+          ? null
+          : "KYC_PROVIDER_API_KEY",
     data.FIREBASE_PROJECT_ID ? null : "FIREBASE_PROJECT_ID",
     data.FIREBASE_CLIENT_EMAIL ? null : "FIREBASE_CLIENT_EMAIL",
     data.FIREBASE_PRIVATE_KEY ? null : "FIREBASE_PRIVATE_KEY",
@@ -214,7 +218,8 @@ function assertProductionNoTestCredentials(data: z.infer<typeof envSchema>) {
 
   if (
     data.STAMPMITRA_API_KEY &&
-    !data.STAMPMITRA_API_KEY.startsWith("sk_live_")
+    !data.STAMPMITRA_API_KEY.startsWith("sk_live_") &&
+    (data.KYC_PROVIDER_BASE_URL || data.KYC_PROVIDER_API_KEY)
   ) {
     invalid.push(
       "STAMPMITRA_API_KEY must be a live key (sk_live_...) in production",

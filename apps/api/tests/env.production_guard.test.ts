@@ -35,7 +35,6 @@ const productionBase = {
   STAMPMITRA_API_KEY: "sk_live_stampmitra_production_key",
   KYC_WEBHOOK_SECRET: "kyc_webhook_secret",
   GOLD_RATE_WEBHOOK_SECRET: "gold_webhook_secret",
-  STAMPMITRA_API_KEY: "sk_live_production_key",
   FIREBASE_PROJECT_ID: "moozhayil-prod",
   FIREBASE_CLIENT_EMAIL: "firebase@moozhayil.com",
   FIREBASE_PRIVATE_KEY: "firebase_private_key",

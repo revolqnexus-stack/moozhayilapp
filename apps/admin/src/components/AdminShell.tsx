@@ -67,7 +67,9 @@ export function AdminShell() {
         </header>
 
         <main className="admin-content">
-          <Outlet />
+          <div className="page-enter">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

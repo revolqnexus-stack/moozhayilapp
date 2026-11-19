@@ -46,31 +46,32 @@ export function DashboardPage() {
       {data ? (
         <>
           <div className="grid-2">
-            <Panel>
+            <Panel className="reveal-item">
               <div className="stat">{String(data.users_total ?? 0)}</div>
               <div className="muted">Registered customers</div>
             </Panel>
-            <Panel>
+            <Panel className="reveal-item">
               <div className="stat">{String(data.kyc_pending_reviews ?? 0)}</div>
               <div className="muted">KYC pending</div>
             </Panel>
-            <Panel>
+            <Panel className="reveal-item">
               <div className="stat">{String(data.sar_pending_reviews ?? 0)}</div>
               <div className="muted">SAR pending</div>
             </Panel>
-            <Panel>
+            <Panel className="reveal-item">
               <div className="stat">{String(data.low_stock_products ?? 0)}</div>
               <div className="muted">Low stock SKUs</div>
             </Panel>
           </div>
 
-          <Panel title="Quick actions" className="dashboard-actions">
+          <Panel title="Quick actions" className="reveal-item dashboard-actions">
             <div className="dashboard-actions__grid">
-              {QUICK_ACTIONS.map((action) => (
+              {QUICK_ACTIONS.map((action, i) => (
                 <Link
                   key={action.to}
                   to={action.to}
-                  className="dashboard-action-card"
+                  className={`dashboard-action-card reveal-item`}
+                  style={{ animationDelay: `${0.06 * (i + 1)}s` }}
                 >
                   <span className="dashboard-action-card__label">
                     {action.label}

@@ -99,7 +99,7 @@ class KycLandingScreen extends ConsumerWidget {
                         : 'Back to profile',
                     isFullWidth: true,
                     onTap: cooldown == null
-                        ? () => context.push(AppRoutes.profileKycAadhaar)
+                        ? () => context.push(AppRoutes.profileKycPan)
                         : () => context.go(AppRoutes.profile),
                   ),
                 ],
@@ -125,7 +125,7 @@ class KycLandingScreen extends ConsumerWidget {
                 PrimaryButton(
                   label: 'Start verification',
                   isFullWidth: true,
-                  onTap: () => context.push(AppRoutes.profileKycAadhaar),
+                  onTap: () => context.push(AppRoutes.profileKycPan),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 GhostButton(

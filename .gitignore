@@ -20,6 +20,7 @@ secrets.txt
 **/.secrets-generated.txt
 .render-api-key
 PRODUCTION_ENV.txt
+PRODUCTION_ENV_RENDER.txt
 !PRODUCTION_ENV.example.txt
 CRM_ADMIN_CREDENTIALS.txt
 STAGING_ENV.txt

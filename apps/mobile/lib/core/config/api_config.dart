@@ -21,14 +21,14 @@ String resolveApiBaseUrl() {
   }
 
   if (kIsWeb) {
-    return 'http://localhost:3080/v1';
+    return 'https://moozhayilapp-prod.onrender.com/v1';
   }
 
   if (!kIsWeb && Platform.isAndroid) {
-    return 'http://10.0.2.2:3080/v1';
+    return 'https://moozhayilapp-prod.onrender.com/v1';
   }
 
-  return 'http://localhost:3080/v1';
+  return 'https://moozhayilapp-prod.onrender.com/v1';
 }
 
 /// Whether push registration should use Firebase in this build.

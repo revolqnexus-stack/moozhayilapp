@@ -107,12 +107,13 @@ export class AuthService {
       },
     });
 
-    void sendOtpSms({ phone: input.phone, otp }).catch(async (err: unknown) => {
+    await sendOtpSms({ phone: input.phone, otp }).catch(async (err: unknown) => {
       logger.error("OTP SMS dispatch failed", {
         phone: input.phone.slice(0, 4) + "****",
         error: err instanceof Error ? err.message : String(err),
       });
       await prisma.otpSession.delete({ where: { id: otpSession.id } }).catch(() => undefined);
+      throw err;
     });
 
     return {

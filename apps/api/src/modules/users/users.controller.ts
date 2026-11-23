@@ -23,14 +23,22 @@ export class UsersController {
   }
 
   async updateMe(req: Request, res: Response): Promise<void> {
+    console.log('📝 PATCH /user/me - Request body:', JSON.stringify(req.body));
+    console.log('📝 PATCH /user/me - User ID:', req.user?.userId);
     const input = updateMeSchema.parse(req.body);
+    console.log('📝 PATCH /user/me - Parsed input:', JSON.stringify(input));
     const result = await usersService.updateMe(requireUserId(req), input);
+    console.log('📝 PATCH /user/me - Success:', JSON.stringify(result));
     res.status(200).json(result);
   }
 
   async saveIntent(req: Request, res: Response): Promise<void> {
+    console.log('🎯 POST /user/intent - Request body:', JSON.stringify(req.body));
+    console.log('🎯 POST /user/intent - User ID:', req.user?.userId);
     const input = saveIntentSchema.parse(req.body);
+    console.log('🎯 POST /user/intent - Parsed input:', JSON.stringify(input));
     const result = await usersService.saveIntents(requireUserId(req), input);
+    console.log('🎯 POST /user/intent - Success:', JSON.stringify(result));
     res.status(200).json(result);
   }
 

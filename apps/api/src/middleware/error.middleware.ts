@@ -73,7 +73,15 @@ export function errorMiddleware(
   res: Response,
   _next: NextFunction,
 ): void {
+  console.error('❌ Error caught in middleware:', {
+    path: req.path,
+    method: req.method,
+    error: err instanceof Error ? err.message : String(err),
+    stack: err instanceof Error ? err.stack : undefined,
+  });
+
   if (err instanceof AppError) {
+    console.error('❌ AppError:', err.code, err.message, err.details);
     res.status(err.statusCode).json(
       buildErrorResponse(req, err.code, err.message, err.details),
     );
@@ -81,6 +89,7 @@ export function errorMiddleware(
   }
 
   if (err instanceof ZodError) {
+    console.error('❌ ZodError:', JSON.stringify(err.flatten().fieldErrors));
     res.status(422).json(
       buildErrorResponse(req, "UNPROCESSABLE", "Validation error", {
         fields: err.flatten().fieldErrors,

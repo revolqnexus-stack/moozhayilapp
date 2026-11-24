@@ -225,7 +225,23 @@ export class KycService {
   async getStatus(userId: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      include: { kycDocument: true },
+      // Select only what the status needs. Loading the whole record breaks
+      // this endpoint (and the app's Profile tab) whenever the database is
+      // missing a newer audit column.
+      select: {
+        kycStatus: true,
+        deletedAt: true,
+        kycDocument: {
+          select: {
+            aadhaarVerified: true,
+            panVerified: true,
+            selfieVerified: true,
+            submittedAt: true,
+            reviewedAt: true,
+            rejectionReason: true,
+          },
+        },
+      },
     });
 
     if (!user || user.deletedAt) {

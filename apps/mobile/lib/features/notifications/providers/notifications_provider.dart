@@ -90,8 +90,7 @@ Future<NotificationsListResponse> notificationsList(
   Ref ref, {
   bool unreadOnly = false,
 }) async {
-  final auth = ref.watch(authControllerProvider);
-  if (auth.value?.step != AuthFlowStep.signedIn) {
+  if (watchSignedInUserId(ref) == null) {
     return const NotificationsListResponse(
       data: [],
       unreadCount: 0,
@@ -106,8 +105,7 @@ Future<NotificationsListResponse> notificationsList(
 
 @riverpod
 Future<NotificationPreferences> notificationPreferences(Ref ref) async {
-  final auth = ref.watch(authControllerProvider);
-  if (auth.value?.step != AuthFlowStep.signedIn) {
+  if (watchSignedInUserId(ref) == null) {
     return const NotificationPreferences(
       pushEnabled: true,
       contributionsEnabled: true,

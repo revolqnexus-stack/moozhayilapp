@@ -5,6 +5,7 @@ import '../../../core/config/dev_preview.dart';
 import '../../../core/models/kyc_status.dart';
 import '../../../core/services/api_service.dart';
 import '../../auth/providers/auth_provider.dart';
+import 'profile_provider.dart';
 
 part 'kyc_provider.g.dart';
 
@@ -162,13 +163,15 @@ KycRepository kycRepository(Ref ref) {
 
 @riverpod
 Future<KycStatusResponse> kycStatus(Ref ref) async {
-  final auth = ref.watch(authControllerProvider);
-  if (auth.value?.step != AuthFlowStep.signedIn) {
+  final userId = watchSignedInUserId(ref);
+  if (userId == null) {
     return const KycStatusResponse(kycStatus: 'not_started');
   }
 
-  if (DevPreview.enabled && auth.value?.user?.id == DevPreview.previewUser.id) {
-    return KycStatusResponse(kycStatus: auth.value!.user!.kycStatus);
+  if (DevPreview.enabled && userId == DevPreview.previewUser.id) {
+    return KycStatusResponse(
+      kycStatus: ref.read(authControllerProvider).value!.user!.kycStatus,
+    );
   }
 
   return ref.watch(kycRepositoryProvider).status();
@@ -239,6 +242,7 @@ class KycFlowActions extends _$KycFlowActions {
   Future<KycSubmitResponse> submit() async {
     final result = await ref.read(kycRepositoryProvider).submit();
     ref.invalidate(kycStatusProvider);
+    ref.invalidate(profileUserProvider);
     await ref.read(authControllerProvider.notifier).refreshMe();
     return result;
   }

@@ -121,8 +121,7 @@ GoalsRepository goalsRepository(Ref ref) {
 
 @riverpod
 Future<GoalsListResponse> goalsList(Ref ref, {String status = 'all'}) async {
-  final auth = ref.watch(authControllerProvider);
-  if (auth.value?.step != AuthFlowStep.signedIn) {
+  if (watchSignedInUserId(ref) == null) {
     return GoalsListResponse(
       goals: const [],
       summary: GoalsSummary(

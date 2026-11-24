@@ -159,6 +159,9 @@ class AuthService {
   }
 
   bool _isTransientError(ApiException error) {
+    if (error.code == 'RATE_LIMITED') {
+      return true;
+    }
     final message = error.message.toLowerCase();
     return message.contains('internet') ||
         message.contains('waking up') ||

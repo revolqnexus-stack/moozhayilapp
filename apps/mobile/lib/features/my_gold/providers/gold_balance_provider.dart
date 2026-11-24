@@ -71,8 +71,7 @@ GoldBalanceRepository goldBalanceRepository(Ref ref) {
 
 @riverpod
 Future<GoldBalance> goldBalance(Ref ref) async {
-  final auth = ref.watch(authControllerProvider);
-  if (auth.value?.step != AuthFlowStep.signedIn) {
+  if (watchSignedInUserId(ref) == null) {
     return GoldBalance(
       totalGrams: '0.0000',
       totalGramsDisplay: IndianFormat.formatGrams('0'),
@@ -92,8 +91,7 @@ Future<GoldBalance> goldBalance(Ref ref) async {
 
 @riverpod
 Future<GoldLedgerResponse> goldLedger(Ref ref) async {
-  final auth = ref.watch(authControllerProvider);
-  if (auth.value?.step != AuthFlowStep.signedIn) {
+  if (watchSignedInUserId(ref) == null) {
     return const GoldLedgerResponse(data: [], hasMore: false);
   }
 
@@ -102,8 +100,7 @@ Future<GoldLedgerResponse> goldLedger(Ref ref) async {
 
 @riverpod
 Future<List<Product>> redeemableProducts(Ref ref) async {
-  final auth = ref.watch(authControllerProvider);
-  if (auth.value?.step != AuthFlowStep.signedIn) {
+  if (watchSignedInUserId(ref) == null) {
     return const [];
   }
 
@@ -112,8 +109,7 @@ Future<List<Product>> redeemableProducts(Ref ref) async {
 
 @riverpod
 Future<PendingContributionsResponse> pendingContributions(Ref ref) async {
-  final auth = ref.watch(authControllerProvider);
-  if (auth.value?.step != AuthFlowStep.signedIn) {
+  if (watchSignedInUserId(ref) == null) {
     return const PendingContributionsResponse(pending: []);
   }
 

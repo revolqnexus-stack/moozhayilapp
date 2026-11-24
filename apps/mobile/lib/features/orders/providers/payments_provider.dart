@@ -73,8 +73,7 @@ PaymentsRepository paymentsRepository(Ref ref) {
 
 @riverpod
 Future<List<PaymentMethod>> paymentMethods(Ref ref) async {
-  final auth = ref.watch(authControllerProvider);
-  if (auth.value?.step != AuthFlowStep.signedIn) {
+  if (watchSignedInUserId(ref) == null) {
     return const [];
   }
 

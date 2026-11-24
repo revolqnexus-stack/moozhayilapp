@@ -37,12 +37,14 @@ class StorageService {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 FlutterSecureStorage secureStorage(Ref ref) => const FlutterSecureStorage(
   aOptions: AndroidOptions(encryptedSharedPreferences: true),
 );
 
-@riverpod
+// keepAlive: one shared instance so [StorageService.onTokensCleared] (wired in
+// app.dart) is set on the same object the API client uses.
+@Riverpod(keepAlive: true)
 StorageService storageService(Ref ref) {
   return StorageService(ref.watch(secureStorageProvider));
 }

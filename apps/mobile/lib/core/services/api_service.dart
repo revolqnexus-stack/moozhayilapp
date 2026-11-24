@@ -94,26 +94,41 @@ class ApiService {
       return;
     }
 
+    // A plain Dio (no queued interceptors) for both the refresh call and the
+    // retry. Retrying through `_dio` would deadlock: if the retried request
+    // also fails, its onError is queued behind this still-running handler,
+    // so the original request never completes (endless spinner).
+    final plainDio = Dio(_dio.options)
+      ..httpClientAdapter = _dio.httpClientAdapter;
+
+    final String accessToken;
     try {
-      final refreshDio = Dio(_dio.options);
-      final response = await refreshDio.post<Map<String, dynamic>>(
+      final response = await plainDio.post<Map<String, dynamic>>(
         '/auth/refresh',
         data: {'refresh_token': refreshToken},
       );
-      final result = RefreshTokenResult.fromJson(response.data!);
-      await _storageService.saveAccessToken(result.accessToken);
-
-      final request = error.requestOptions;
-      request.extra['auth_retry'] = true;
-      request.headers['Authorization'] = 'Bearer ${result.accessToken}';
-
-      final retried = await _dio.fetch<dynamic>(request);
-      handler.resolve(retried);
+      accessToken = RefreshTokenResult.fromJson(response.data!).accessToken;
+      await _storageService.saveAccessToken(accessToken);
     } on DioException catch (refreshError) {
       if (_refreshFailureInvalidatesSession(refreshError)) {
         await _storageService.clearTokens();
       }
       handler.next(refreshError);
+      return;
+    } catch (_) {
+      handler.next(error);
+      return;
+    }
+
+    // Failures of the retried request are ordinary API errors (e.g. a 403 from
+    // a KYC-gated route) and must not wipe the freshly refreshed session.
+    final request = error.requestOptions;
+    request.extra['auth_retry'] = true;
+    request.headers['Authorization'] = 'Bearer $accessToken';
+    try {
+      handler.resolve(await plainDio.fetch<dynamic>(request));
+    } on DioException catch (retryError) {
+      handler.next(retryError);
     } catch (_) {
       handler.next(error);
     }
@@ -139,7 +154,7 @@ class ApiService {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 Dio dio(Ref ref) {
   final clock = ref.watch(serverClockProvider);
   final client = Dio(
@@ -167,7 +182,8 @@ Dio dio(Ref ref) {
   return client;
 }
 
-@riverpod
+// keepAlive: a single client so token refreshes are queued in one place.
+@Riverpod(keepAlive: true)
 ApiService apiService(Ref ref) {
   return ApiService(
     dio: ref.watch(dioProvider),

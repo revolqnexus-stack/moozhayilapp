@@ -109,8 +109,7 @@ AuraRepository auraRepository(Ref ref) {
 
 @riverpod
 Future<AuraInsightResponse> auraInsight(Ref ref) async {
-  final auth = ref.watch(authControllerProvider);
-  if (auth.value?.step != AuthFlowStep.signedIn) {
+  if (watchSignedInUserId(ref) == null) {
     return const AuraInsightResponse(
       insightText:
           'Sign in to get personalised gold insights and jewellery guidance.',

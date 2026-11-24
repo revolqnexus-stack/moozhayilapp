@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/models/auth_models.dart';
@@ -28,6 +29,24 @@ abstract class AuthState with _$AuthState {
     @Default(false) bool otpVerifyInProgress,
     Object? verifyOtpError,
   }) = _AuthState;
+}
+
+/// The signed-in user's id, or null when signed out / still restoring.
+///
+/// Data providers should watch this instead of the whole
+/// [authControllerProvider]: they then refetch only on sign-in, sign-out or an
+/// account switch, not on every auth state change (OTP typing, profile
+/// refresh), which used to refetch every user screen at once.
+String? watchSignedInUserId(Ref ref) {
+  return ref.watch(
+    authControllerProvider.select((auth) {
+      final state = auth.value;
+      if (state?.step != AuthFlowStep.signedIn) {
+        return null;
+      }
+      return state?.user?.id ?? '';
+    }),
+  );
 }
 
 @Riverpod(keepAlive: true)
@@ -172,12 +191,21 @@ class AuthController extends _$AuthController {
     }
   }
 
+  /// Re-reads the signed-in user after a profile/KYC change.
+  ///
+  /// Best-effort: on failure the current session is kept. Putting this
+  /// keep-alive state into AsyncError would make the router treat the user as
+  /// signed out and every user-scoped provider fall back to empty data.
   Future<void> refreshMe() async {
-    final previous = state.value ?? const AuthState();
-    state = await AsyncValue.guard(() async {
+    try {
       final user = await ref.read(authServiceProvider).me();
-      return previous.copyWith(step: AuthFlowStep.signedIn, user: user);
-    });
+      final current = state.value ?? const AuthState();
+      state = AsyncData(
+        current.copyWith(step: AuthFlowStep.signedIn, user: user),
+      );
+    } catch (_) {
+      // Keep the existing session; callers refresh their own data separately.
+    }
   }
 
   Future<void> logout() async {

@@ -110,8 +110,7 @@ VaultRepository vaultRepository(Ref ref) {
 
 @riverpod
 Future<VaultListResponse> vaultItems(Ref ref) async {
-  final auth = ref.watch(authControllerProvider);
-  if (auth.value?.step != AuthFlowStep.signedIn) {
+  if (watchSignedInUserId(ref) == null) {
     return const VaultListResponse(items: [], count: 0);
   }
 
@@ -175,8 +174,7 @@ class GuestVaultStore extends _$GuestVaultStore {
 
 @riverpod
 Future<Set<String>> effectiveVaultProductIds(Ref ref) async {
-  final auth = ref.watch(authControllerProvider);
-  if (auth.value?.step == AuthFlowStep.signedIn) {
+  if (watchSignedInUserId(ref) != null) {
     return ref.watch(vaultProductIdsProvider.future);
   }
   return ref.watch(guestVaultStoreProvider.future);

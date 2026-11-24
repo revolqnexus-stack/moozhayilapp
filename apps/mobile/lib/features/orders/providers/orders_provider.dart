@@ -88,8 +88,7 @@ OrdersRepository ordersRepository(Ref ref) {
 
 @riverpod
 Future<OrdersListResponse> ordersList(Ref ref, {String status = 'all'}) async {
-  final auth = ref.watch(authControllerProvider);
-  if (auth.value?.step != AuthFlowStep.signedIn) {
+  if (watchSignedInUserId(ref) == null) {
     return const OrdersListResponse(data: [], hasMore: false);
   }
 

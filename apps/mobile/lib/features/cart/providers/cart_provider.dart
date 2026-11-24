@@ -108,8 +108,7 @@ CartRepository cartRepository(Ref ref) {
 
 @riverpod
 Future<CartSummary> cartSummary(Ref ref) async {
-  final auth = ref.watch(authControllerProvider);
-  if (auth.value?.step != AuthFlowStep.signedIn) {
+  if (watchSignedInUserId(ref) == null) {
     return CartSummary(
       items: const [],
       subtotalPaise: 0,

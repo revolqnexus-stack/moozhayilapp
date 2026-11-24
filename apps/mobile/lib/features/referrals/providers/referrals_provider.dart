@@ -54,8 +54,7 @@ ReferralsRepository referralsRepository(Ref ref) {
 
 @riverpod
 Future<ReferralCodeResponse> referralCode(Ref ref) async {
-  final auth = ref.watch(authControllerProvider);
-  if (auth.value?.step != AuthFlowStep.signedIn) {
+  if (watchSignedInUserId(ref) == null) {
     throw const ApiException('Sign in to view your referral code');
   }
 
@@ -64,8 +63,7 @@ Future<ReferralCodeResponse> referralCode(Ref ref) async {
 
 @riverpod
 Future<ReferralHistoryResponse> referralHistory(Ref ref) async {
-  final auth = ref.watch(authControllerProvider);
-  if (auth.value?.step != AuthFlowStep.signedIn) {
+  if (watchSignedInUserId(ref) == null) {
     return const ReferralHistoryResponse(referrals: []);
   }
 

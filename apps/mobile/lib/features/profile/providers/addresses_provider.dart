@@ -78,8 +78,7 @@ AddressesRepository addressesRepository(Ref ref) {
 
 @riverpod
 Future<List<UserAddress>> userAddresses(Ref ref) async {
-  final auth = ref.watch(authControllerProvider);
-  if (auth.value?.step != AuthFlowStep.signedIn) {
+  if (watchSignedInUserId(ref) == null) {
     return const [];
   }
 

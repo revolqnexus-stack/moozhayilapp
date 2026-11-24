@@ -50,13 +50,13 @@ ProfileRepository profileRepository(Ref ref) {
 
 @riverpod
 Future<User> profileUser(Ref ref) async {
-  final auth = ref.watch(authControllerProvider);
-  if (auth.value?.step != AuthFlowStep.signedIn) {
+  final userId = watchSignedInUserId(ref);
+  if (userId == null) {
     throw const ApiException('Sign in to view profile');
   }
 
-  if (DevPreview.enabled && auth.value?.user?.id == DevPreview.previewUser.id) {
-    return auth.value!.user!;
+  if (DevPreview.enabled && userId == DevPreview.previewUser.id) {
+    return ref.read(authControllerProvider).value!.user!;
   }
 
   return ref.watch(profileRepositoryProvider).me();

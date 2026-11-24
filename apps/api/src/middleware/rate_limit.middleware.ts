@@ -104,17 +104,20 @@ export function rateLimit(options: RateLimitOptions) {
   };
 }
 
+// Applied globally to every route. Mobile carriers put many customers behind one
+// IP (CGNAT), and a single app launch fires ~15–25 requests, so this is a coarse
+// abuse ceiling only. Sensitive routes (OTP, admin, aura) have their own limits.
 export const publicIpRateLimit = rateLimit({
   name: "public_ip",
   windowMs: 60_000,
-  max: 20,
+  max: 600,
   keyGenerator: (req) => req.ip ?? "unknown",
 });
 
 export const authenticatedUserRateLimit = rateLimit({
   name: "auth_user",
   windowMs: 60_000,
-  max: 100,
+  max: 300,
   keyGenerator: (req) => req.user?.userId ?? req.ip ?? "unknown",
 });
 

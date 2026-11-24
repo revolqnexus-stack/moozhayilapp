@@ -15,7 +15,11 @@ function client(): Redis | null {
   try {
     redis = new Redis(loadEnv().REDIS_URL, {
       lazyConnect: true,
-      maxRetriesPerRequest: null,
+      // The cache is best-effort: a slow or dropped Redis connection must turn
+      // into a cache miss quickly, never a hung API request.
+      maxRetriesPerRequest: 1,
+      commandTimeout: 1_500,
+      connectTimeout: 5_000,
       enableOfflineQueue: false,
       retryStrategy: (times) => {
         console.log(`[redis] retry attempt ${times}`);

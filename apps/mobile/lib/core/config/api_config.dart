@@ -15,9 +15,7 @@ String resolveApiBaseUrl() {
   }
 
   if (kReleaseMode) {
-    throw StateError(
-      'API_BASE_URL dart-define is required for release builds.',
-    );
+    return 'https://moozhayilapp-prod.onrender.com/v1';
   }
 
   if (kIsWeb) {

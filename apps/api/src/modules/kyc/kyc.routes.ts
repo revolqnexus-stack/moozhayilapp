@@ -42,13 +42,14 @@ kycRouter.post("/debug-test-pan", async (_req, res) => {
     const { kycProviderClient } = await import("./kyc_provider.client");
     const result = await kycProviderClient.verifyPan("ABCDE1234F", "Test User");
     res.json({ success: true, result });
-  } catch (error: any) {
+  } catch (error) {
+    const err = error as { message?: string; code?: string; statusCode?: number; details?: unknown };
     res.status(500).json({ 
       success: false, 
-      error: error.message,
-      code: error.code,
-      statusCode: error.statusCode,
-      details: error.details,
+      error: err.message,
+      code: err.code,
+      statusCode: err.statusCode,
+      details: err.details,
     });
   }
 });
@@ -66,9 +67,10 @@ kycRouter.get("/debug-users", async (_req, res) => {
       },
     });
     res.json({ users, count: users.length });
-  } catch (error: any) {
+  } catch (error) {
+    const err = error as Error;
     res.status(500).json({ 
-      error: error.message,
+      error: err.message,
     });
   }
 });
@@ -91,12 +93,13 @@ kycRouter.post("/debug-auth-pan", async (req, res): Promise<void> => {
     });
     
     res.json({ success: true, result });
-  } catch (error: any) {
+  } catch (error) {
+    const err = error as { message?: string; code?: string; stack?: string; name?: string };
     res.status(500).json({ 
-      error: error.message,
-      code: error.code,
-      stack: error.stack,
-      name: error.name,
+      error: err.message,
+      code: err.code,
+      stack: err.stack,
+      name: err.name,
     });
   }
 });

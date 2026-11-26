@@ -42,7 +42,16 @@ export const createGoalSchema = z
       "other",
     ]),
     name: z.string().trim().min(1).max(255),
-    target_product_id: z.string().uuid().optional(),
+    // Older app builds send "browse-later" when the customer skips linking a
+    // piece. Treat anything that is not a real product id as "no product".
+    target_product_id: z.preprocess(
+      (value) =>
+        typeof value === "string" &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)
+          ? value
+          : undefined,
+      z.string().uuid().optional(),
+    ),
     target_amount_paise: z.number().int().positive().optional(),
     monthly_amount_paise: z.number().int().positive(),
     duration_months: z.number().int().positive(),

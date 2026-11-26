@@ -10,6 +10,7 @@ import '../../../core/constants/colors.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/constants/typography.dart';
 import '../../../core/constants/customer_copy.dart';
+import '../../../core/services/api_service.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/utils/indian_format.dart';
 import '../providers/goal_create_provider.dart';
@@ -44,7 +45,10 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
             monthlyAmountPaise: draft.monthlyAmountPaise,
             durationMonths: draft.durationMonths,
             startDate: draft.startDate!,
-            targetProductId: draft.targetProductId,
+            // "Skip for now" stores a placeholder id; never send it.
+            targetProductId: draft.targetProductId == 'browse-later'
+                ? null
+                : draft.targetProductId,
           );
 
       ref.invalidate(goalsListProvider);
@@ -69,7 +73,15 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
       });
     } catch (error) {
       if (!mounted) return;
-      showPremiumSnackBar(context, CustomerCopy.planStartError, haptic: false);
+      // Show the server's reason (e.g. KYC required, amount limit) so the
+      // customer knows what to fix; fall back to the generic copy.
+      final message = error is ApiException &&
+              error.statusCode != null &&
+              error.statusCode! < 500 &&
+              error.message.trim().isNotEmpty
+          ? error.message
+          : CustomerCopy.planStartError;
+      showPremiumSnackBar(context, message, haptic: false);
       setState(() => _submitting = false);
     }
   }
@@ -124,7 +136,8 @@ class _ConfirmationScreenState extends ConsumerState<ConfirmationScreen> {
                 style: AppTypography.uiBodySM.copyWith(color: AppColors.gold),
               ),
             ],
-            if (draft.targetProductName != null)
+            if (draft.targetProductName != null &&
+                draft.targetProductId != 'browse-later')
               Text('Toward ${draft.targetProductName}'),
             const Spacer(),
             PrimaryButton(

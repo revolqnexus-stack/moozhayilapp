@@ -36,7 +36,14 @@ import {
 } from "../stampmitra/stampmitra.client";
 
 function piiSecret(): string {
-  return loadEnv().PII_ENCRYPTION_SECRET;
+  const secret = loadEnv().PII_ENCRYPTION_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error(
+      "PII_ENCRYPTION_SECRET is not configured or is too short (min 32 chars). " +
+        "Set it in the Render dashboard env vars for moozhayilapp-prod.",
+    );
+  }
+  return secret;
 }
 
 function hashKycOtp(userId: string, otp: string): string {

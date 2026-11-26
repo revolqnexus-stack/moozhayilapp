@@ -179,7 +179,9 @@ Future<KycStatusResponse> kycStatus(Ref ref) async {
   return ref.watch(kycRepositoryProvider).status();
 }
 
-@riverpod
+// keepAlive: screens only `ref.read` this notifier, so an auto-dispose
+// provider was torn down mid-request and `ref.invalidate` then threw.
+@Riverpod(keepAlive: true)
 class KycFlowActions extends _$KycFlowActions {
   String? _aadhaarSessionId;
 

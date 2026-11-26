@@ -89,7 +89,7 @@ final class KycStatusProvider
   }
 }
 
-String _$kycStatusHash() => r'bcd818a199ece0fbc4ca86e8a0ac983f8ab71ebe';
+String _$kycStatusHash() => r'1303f1f9c9d148bbafb25a8cdfcef1034a10480d';
 
 @ProviderFor(KycFlowActions)
 const kycFlowActionsProvider = KycFlowActionsProvider._();
@@ -102,7 +102,7 @@ final class KycFlowActionsProvider
         argument: null,
         retry: null,
         name: r'kycFlowActionsProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -115,7 +115,7 @@ final class KycFlowActionsProvider
   KycFlowActions create() => KycFlowActions();
 }
 
-String _$kycFlowActionsHash() => r'3d2eeda94332304ec2cf482879d6255e01bd2ce6';
+String _$kycFlowActionsHash() => r'8de47eb9d648c97e6aff16f150b3e462a7aebcb2';
 
 abstract class _$KycFlowActions extends $AsyncNotifier<void> {
   FutureOr<void> build();

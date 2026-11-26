@@ -76,12 +76,7 @@ function requireIdempotencyKey(req: Request): string {
 export class AdminController {
   async login(req: Request, res: Response): Promise<void> {
     const input = adminLoginSchema.parse(req.body);
-    // TEMP DEBUG header (remove after admin login issue is resolved)
-    const debug = req.get("x-moozh-debug") === "d7f3a91c2b";
-    if (debug) {
-      res.set("x-build", (process.env.RENDER_GIT_COMMIT ?? "unknown").slice(0, 7));
-    }
-    res.status(200).json(await adminAuthService.login(input, debug));
+    res.status(200).json(await adminAuthService.login(input));
   }
 
   async stepUp(req: Request, res: Response): Promise<void> {

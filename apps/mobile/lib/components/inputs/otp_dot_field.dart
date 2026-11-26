@@ -2,10 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/constants/colors.dart';
+import '../../core/constants/motion.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/constants/typography.dart';
+import '../../core/utils/app_haptics.dart';
+import '../../core/utils/motion_preferences.dart';
 
 /// Fancy / Nymira §2.6 — six-dot OTP entry with hidden numeric field.
+///
+/// When [hasError] turns true (e.g. the server rejected the code) the dots
+/// switch to the error colour and the row gives one small horizontal shake.
+/// The shake is skipped when reduced motion is on.
 class OtpDotField extends StatefulWidget {
   const OtpDotField({
     super.key,
@@ -13,6 +20,7 @@ class OtpDotField extends StatefulWidget {
     required this.onChanged,
     this.length = 6,
     this.onCompleted,
+    this.hasError = false,
   });
 
   final String value;
@@ -20,19 +28,33 @@ class OtpDotField extends StatefulWidget {
   final int length;
   final VoidCallback? onCompleted;
 
+  /// Shows the error state; each false → true change triggers one shake.
+  final bool hasError;
+
   @override
   State<OtpDotField> createState() => _OtpDotFieldState();
 }
 
-class _OtpDotFieldState extends State<OtpDotField> {
+class _OtpDotFieldState extends State<OtpDotField>
+    with SingleTickerProviderStateMixin {
   late final TextEditingController _controller;
   late final FocusNode _focusNode;
+  late final AnimationController _shake;
+  late final Animation<double> _shakeOffset;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.value);
     _focusNode = FocusNode();
+    _shake = AnimationController(vsync: this, duration: AppMotion.errorShake);
+    // Damped oscillation, max 6 px: noticeable without feeling jittery.
+    _shakeOffset = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0, end: -6), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -6, end: 6), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: 6, end: -3), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: -3, end: 0), weight: 1),
+    ]).animate(CurvedAnimation(parent: _shake, curve: AppMotion.decelerate));
   }
 
   @override
@@ -41,12 +63,17 @@ class _OtpDotFieldState extends State<OtpDotField> {
     if (widget.value != oldWidget.value && widget.value != _controller.text) {
       _controller.text = widget.value;
     }
+    if (widget.hasError && !oldWidget.hasError) {
+      AppHaptics.medium();
+      if (premiumMotionEnabled(context)) _shake.forward(from: 0);
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
     _focusNode.dispose();
+    _shake.dispose();
     super.dispose();
   }
 
@@ -95,12 +122,22 @@ class _OtpDotFieldState extends State<OtpDotField> {
               onChanged: _handleChanged,
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              for (var i = 0; i < widget.length; i++)
-                _OtpDot(filled: i < widget.value.length),
-            ],
+          AnimatedBuilder(
+            animation: _shakeOffset,
+            builder: (context, child) => Transform.translate(
+              offset: Offset(_shakeOffset.value, 0),
+              child: child,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                for (var i = 0; i < widget.length; i++)
+                  _OtpDot(
+                    filled: i < widget.value.length,
+                    hasError: widget.hasError,
+                  ),
+              ],
+            ),
           ),
         ],
       ),
@@ -109,21 +146,23 @@ class _OtpDotFieldState extends State<OtpDotField> {
 }
 
 class _OtpDot extends StatelessWidget {
-  const _OtpDot({required this.filled});
+  const _OtpDot({required this.filled, required this.hasError});
 
   final bool filled;
+  final bool hasError;
 
   @override
   Widget build(BuildContext context) {
+    final fill = hasError ? AppColors.errorFill : AppColors.maroon;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
       width: AppSpacing.lg,
       height: AppSpacing.lg,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: filled ? AppColors.maroon : AppColors.pureWhite,
+        color: filled ? fill : AppColors.pureWhite,
         border: Border.all(
-          color: filled ? AppColors.maroon : AppColors.smokeLine,
+          color: hasError || filled ? fill : AppColors.smokeLine,
           width: 1.5,
         ),
       ),

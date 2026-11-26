@@ -6,6 +6,7 @@ import '../../../components/buttons/primary_button.dart';
 import '../../../components/feedback/error_state.dart';
 import '../../../components/feedback/loading_shimmer.dart';
 import '../../../components/navigation/top_app_bar.dart';
+import '../../../core/animations/gold_pulse.dart';
 import '../../../core/animations/luxury_success.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/spacing.dart';
@@ -53,16 +54,7 @@ class _OrderConfirmationScreenState
             });
             return const Scaffold(
               backgroundColor: AppColors.warmIvory,
-              body: Center(
-                child: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 1.5,
-                    color: AppColors.antiqueGold,
-                  ),
-                ),
-              ),
+              body: Center(child: GoldPulse(size: 10)),
             );
           }
 
@@ -83,16 +75,7 @@ class _OrderConfirmationScreenState
         },
         loading: () => const Scaffold(
           backgroundColor: AppColors.warmIvory,
-          body: Center(
-            child: SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(
-                strokeWidth: 1.5,
-                color: AppColors.antiqueGold,
-              ),
-            ),
-          ),
+          body: Center(child: GoldPulse(size: 10)),
         ),
         error: (_, _) {
           // On error skip success and fall through to the detail screen.

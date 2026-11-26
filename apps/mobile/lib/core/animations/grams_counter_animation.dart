@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../constants/animations.dart';
+import '../constants/motion.dart';
 import '../constants/colors.dart';
 import '../utils/indian_format.dart';
 
@@ -36,15 +36,12 @@ class _GramsCounterAnimationState extends State<GramsCounterAnimation>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: AnimationPresets.gramsCredit,
+      duration: AppMotion.gramsCredit,
     );
 
     _counter = Tween<double>(begin: widget.startValue, end: widget.endValue)
         .animate(
-          CurvedAnimation(
-            parent: _controller,
-            curve: AnimationPresets.gramsCreditCurve,
-          ),
+          CurvedAnimation(parent: _controller, curve: AppMotion.decelerate),
         );
 
     _controller.forward();
@@ -56,10 +53,7 @@ class _GramsCounterAnimationState extends State<GramsCounterAnimation>
     if (oldWidget.endValue != widget.endValue) {
       _counter = Tween<double>(begin: oldWidget.endValue, end: widget.endValue)
           .animate(
-            CurvedAnimation(
-              parent: _controller,
-              curve: AnimationPresets.gramsCreditCurve,
-            ),
+            CurvedAnimation(parent: _controller, curve: AppMotion.decelerate),
           );
       _controller.forward(from: 0);
     }
@@ -125,10 +119,7 @@ class _AmountCounterAnimationState extends State<AmountCounterAnimation>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: AppAnimations.numberCounter,
-    );
+    _controller = AnimationController(vsync: this, duration: AppMotion.countUp);
 
     _counter = IntTween(
       begin: widget.startAmountPaise,

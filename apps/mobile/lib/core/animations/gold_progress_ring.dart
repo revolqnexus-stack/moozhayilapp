@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import '../constants/animations.dart';
+import '../constants/motion.dart';
 import '../constants/colors.dart';
 
 /// Premium circular gold progress ring that fills smoothly.
@@ -41,16 +41,13 @@ class _GoldProgressRingState extends State<GoldProgressRing>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: AnimationPresets.goalProgressFill,
+      duration: AppMotion.progressFill,
     );
 
-    _progressAnimation =
-        Tween<double>(begin: 0.0, end: widget.percent.clamp(0.0, 1.0)).animate(
-          CurvedAnimation(
-            parent: _controller,
-            curve: AnimationPresets.goalProgressCurve,
-          ),
-        );
+    _progressAnimation = Tween<double>(
+      begin: 0.0,
+      end: widget.percent.clamp(0.0, 1.0),
+    ).animate(CurvedAnimation(parent: _controller, curve: AppMotion.organic));
 
     if (widget.animateOnMount) {
       _controller.forward();
@@ -63,16 +60,10 @@ class _GoldProgressRingState extends State<GoldProgressRing>
   void didUpdateWidget(GoldProgressRing oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.percent != widget.percent) {
-      _progressAnimation =
-          Tween<double>(
-            begin: oldWidget.percent.clamp(0.0, 1.0),
-            end: widget.percent.clamp(0.0, 1.0),
-          ).animate(
-            CurvedAnimation(
-              parent: _controller,
-              curve: AnimationPresets.goalProgressCurve,
-            ),
-          );
+      _progressAnimation = Tween<double>(
+        begin: oldWidget.percent.clamp(0.0, 1.0),
+        end: widget.percent.clamp(0.0, 1.0),
+      ).animate(CurvedAnimation(parent: _controller, curve: AppMotion.organic));
       _controller.forward(from: 0);
     }
   }

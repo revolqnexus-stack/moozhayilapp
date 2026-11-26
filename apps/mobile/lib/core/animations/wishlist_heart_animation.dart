@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../constants/animations.dart';
+import '../constants/motion.dart';
 import '../constants/colors.dart';
 
 /// Premium wishlist heart animation: heart fills with molten gold effect.
@@ -32,7 +32,7 @@ class _WishlistHeartAnimationState extends State<WishlistHeartAnimation>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: AnimationPresets.wishlistAdd,
+      duration: AppMotion.wishlistHeartFill,
     );
 
     _fillProgress = Tween<double>(begin: 0.0, end: 1.0).animate(

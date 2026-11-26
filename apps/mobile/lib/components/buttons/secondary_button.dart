@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/animations.dart';
+import '../../core/constants/motion.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/radii.dart';
 import '../../core/constants/spacing.dart';
@@ -48,7 +48,7 @@ class _SecondaryButtonState extends State<SecondaryButton>
     super.initState();
     _scaleCtrl = AnimationController(
       vsync: this,
-      duration: AppAnimations.buttonPress,
+      duration: AppMotion.buttonPress,
     );
     _scale = Tween<double>(
       begin: 1.0,
@@ -86,7 +86,7 @@ class _SecondaryButtonState extends State<SecondaryButton>
       child: ScaleTransition(
         scale: _scale,
         child: AnimatedContainer(
-          duration: AppAnimations.xs,
+          duration: AppMotion.buttonStateChange,
           height: 48,
           decoration: BoxDecoration(
             color: _bgColor,

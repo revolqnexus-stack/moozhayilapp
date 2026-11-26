@@ -409,13 +409,13 @@ Do not use DM Sans for product names, goal names, Aura text, or hero headings.
 ```dart
 // Standard progress ring animation
 AnimationController(
-  duration: AppAnimations.ringFill, // 600ms
+  duration: AppMotion.progressFill, // 800ms
   vsync: this,
 )..forward();
 
 CurvedAnimation(
   parent: controller,
-  curve: AppAnimations.curveDefault, // Curves.easeOut
+  curve: AppMotion.standardInOut, // Curves.easeInOutCubic
 )
 ```
 

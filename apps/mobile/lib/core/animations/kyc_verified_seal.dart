@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../constants/animations.dart';
+import '../constants/motion.dart';
 import '../constants/colors.dart';
 
 /// Premium KYC verified seal animation: identity card receives gold verified seal.
@@ -26,7 +26,7 @@ class _KycVerifiedSealState extends State<KycVerifiedSeal>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: AnimationPresets.kycApproved,
+      duration: AppMotion.sealDraw,
     );
 
     // Stamp descends (0-30%)

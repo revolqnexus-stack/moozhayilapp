@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/animations.dart';
+import '../../core/constants/motion.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/radii.dart';
 import '../../core/constants/spacing.dart';
@@ -33,7 +33,7 @@ class _DestructiveButtonState extends State<DestructiveButton> {
     return Semantics(
       button: true,
       child: AnimatedContainer(
-        duration: AppAnimations.xs,
+        duration: AppMotion.buttonStateChange,
         height: 48,
         decoration: BoxDecoration(
           color: _pressed ? AppColors.errorFill : Colors.transparent,

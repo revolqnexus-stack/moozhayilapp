@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/constants/animations.dart';
+import '../../core/constants/motion.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/radii.dart';
 import '../../core/constants/shadows.dart';
@@ -43,15 +43,13 @@ class PremiumCard extends StatelessWidget {
       button: interactive,
       enabled: interactive,
       child: AnimatedContainer(
-        duration: AppAnimations.cardPress,
+        duration: AppMotion.pressDuration,
         curve: Curves.easeOutCubic,
         decoration: BoxDecoration(
           color: AppColors.paper,
           borderRadius: BorderRadius.circular(radius),
           border: Border.all(
-            color: glow
-                ? AppColors.gold.withValues(alpha: 0.55)
-                : borderColor,
+            color: glow ? AppColors.gold.withValues(alpha: 0.55) : borderColor,
             width: glow ? 1.2 : 0.5,
           ),
           boxShadow: interactive
@@ -73,10 +71,7 @@ class PremiumCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(radius),
             splashColor: AppColors.gold.withValues(alpha: 0.10),
             highlightColor: Colors.transparent,
-            child: Padding(
-              padding: EdgeInsets.all(padding),
-              child: child,
-            ),
+            child: Padding(padding: EdgeInsets.all(padding), child: child),
           ),
         ),
       ),

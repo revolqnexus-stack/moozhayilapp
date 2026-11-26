@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import '../constants/animations.dart';
+import '../constants/motion.dart';
 import '../constants/colors.dart';
 
 /// Premium Aura thinking animation: elegant flowing gold line (not bouncing dots).
@@ -24,7 +24,7 @@ class _AuraThinkingAnimationState extends State<AuraThinkingAnimation>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: AnimationPresets.auraThinking,
+      duration: AppMotion.auraThinking,
     )..repeat();
   }
 

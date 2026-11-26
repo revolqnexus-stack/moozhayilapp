@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../constants/animations.dart';
+import '../constants/motion.dart';
 import '../utils/motion_preferences.dart';
 
 /// Animates a numeric value from its previous value (or from zero on first
@@ -18,7 +18,7 @@ class AnimatedCounter extends StatefulWidget {
     required this.value,
     required this.formatter,
     this.style,
-    this.duration = AppAnimations.goldCountUp,
+    this.duration = AppMotion.countUp,
     this.curve = Curves.easeOutCubic,
     this.beginAt = 0.0,
     this.builder,

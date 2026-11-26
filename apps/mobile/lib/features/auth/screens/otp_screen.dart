@@ -175,6 +175,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                             .read(authControllerProvider.notifier)
                             .setOtp,
                         onCompleted: () => _verify(),
+                        hasError: verifyError != null,
                       ),
                       if (sendError != null) ...[
                         const SizedBox(height: AppSpacing.md),

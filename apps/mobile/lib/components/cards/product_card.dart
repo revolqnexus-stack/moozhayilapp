@@ -5,7 +5,7 @@ import '../../../components/product/vault_icon_button.dart';
 import '../../core/animations/fade_slide_in.dart';
 import '../../core/animations/premium_pressable.dart';
 
-import '../../core/constants/animations.dart';
+import '../../core/constants/motion.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/spacing.dart';
 
@@ -61,7 +61,7 @@ class ProductCard extends StatelessWidget {
       label: item.name,
       child: FadeSlideIn(
         delay: staggerDelay,
-        duration: AppAnimations.sm,
+        duration: AppMotion.cardReveal,
         offsetY: 16,
         curve: Curves.easeOutCubic,
         child: PremiumCard(

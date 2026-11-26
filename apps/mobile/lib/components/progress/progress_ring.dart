@@ -2,16 +2,17 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../core/constants/animations.dart';
+import '../../core/constants/motion.dart';
 import '../../core/constants/colors.dart';
 
 /// Animated circular progress ring.
 /// Source: 02-design-system.md § Progress Components
 /// Source: 03-component-library.md § ProgressRing
 ///
-/// Rule 10 (09-cursor-rules.md): uses [AppAnimations.ringFill] + easeOut.
+/// Rule 10 (09-cursor-rules.md): uses [AppMotion.progressFill] +
+/// [AppMotion.standardInOut].
 ///
-/// On first mount the arc animates from 0 → [percent] (600 ms).
+/// On first mount the arc animates from 0 → [percent] (800 ms).
 /// On [percent] change the arc transitions smoothly.
 class ProgressRing extends StatefulWidget {
   const ProgressRing({
@@ -43,14 +44,11 @@ class _ProgressRingState extends State<ProgressRing>
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: AppAnimations.ringFill);
-    _progress =
-        Tween<double>(
-          begin: 0,
-          end: widget.percent.clamp(0, 100) / 100.0,
-        ).animate(
-          CurvedAnimation(parent: _ctrl, curve: AppAnimations.curveDefault),
-        );
+    _ctrl = AnimationController(vsync: this, duration: AppMotion.progressFill);
+    _progress = Tween<double>(
+      begin: 0,
+      end: widget.percent.clamp(0, 100) / 100.0,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: AppMotion.standardInOut));
     _ctrl.forward();
   }
 
@@ -59,13 +57,10 @@ class _ProgressRingState extends State<ProgressRing>
     super.didUpdateWidget(old);
     if (old.percent != widget.percent) {
       final from = _progress.value;
-      _progress =
-          Tween<double>(
-            begin: from,
-            end: widget.percent.clamp(0, 100) / 100.0,
-          ).animate(
-            CurvedAnimation(parent: _ctrl, curve: AppAnimations.curveDefault),
-          );
+      _progress = Tween<double>(
+        begin: from,
+        end: widget.percent.clamp(0, 100) / 100.0,
+      ).animate(CurvedAnimation(parent: _ctrl, curve: AppMotion.standardInOut));
       _ctrl
         ..reset()
         ..forward();

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/constants/animations.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/motion.dart';
 import '../../core/utils/app_haptics.dart';
@@ -142,7 +141,7 @@ class _VaultIconButtonState extends State<VaultIconButton>
                       child: AnimatedSwitcher(
                         duration: _unsaving
                             ? AppMotion.normal
-                            : AppAnimations.sm,
+                            : AppMotion.vaultIconSwap,
                         switchInCurve: Curves.easeOutCubic,
                         switchOutCurve: Curves.easeInCubic,
                         transitionBuilder: (child, anim) => FadeTransition(

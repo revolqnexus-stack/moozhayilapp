@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../constants/animations.dart';
+import '../constants/motion.dart';
 import '../constants/colors.dart';
 
 /// Premium gold rate ticker: digits roll vertically like a market ticker.
@@ -31,7 +31,7 @@ class _GoldRateTickerState extends State<GoldRateTicker>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: AnimationPresets.rateRoll,
+      duration: AppMotion.rateRoll,
     );
     _controller.forward();
   }
@@ -76,7 +76,7 @@ class _GoldRateTickerState extends State<GoldRateTicker>
                 alignment: Alignment.lerp(
                   Alignment.bottomCenter,
                   Alignment.center,
-                  AnimationPresets.rateRollCurve.transform(_controller.value),
+                  AppMotion.decelerate.transform(_controller.value),
                 )!,
                 heightFactor: 1.0,
                 child: Text(
@@ -197,7 +197,7 @@ class _GoldBellAnimationState extends State<GoldBellAnimation>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: AnimationPresets.rateAlert,
+      duration: AppMotion.rateAlert,
     );
 
     _rotation = TweenSequence<double>([

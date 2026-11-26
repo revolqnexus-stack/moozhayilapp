@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/constants/animations.dart';
+import '../../core/constants/motion.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/radii.dart';
 
@@ -36,7 +36,7 @@ class _LinearProgressBarState extends State<LinearProgressBar>
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: AppAnimations.ringFill);
+    _ctrl = AnimationController(vsync: this, duration: AppMotion.progressFill);
     _fill = Tween<double>(
       begin: 0,
       end: widget.percent.clamp(0, 100) / 100.0,

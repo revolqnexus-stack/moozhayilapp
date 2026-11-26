@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../constants/animations.dart';
+import '../constants/motion.dart';
 import '../constants/colors.dart';
 
 /// Premium order tracking timeline with animated progress.
@@ -27,7 +27,10 @@ class _OrderTimelineAnimationState extends State<OrderTimelineAnimation>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: AppAnimations.xl);
+    _controller = AnimationController(
+      vsync: this,
+      duration: AppMotion.timelineReveal,
+    );
 
     if (widget.animate) {
       _controller.forward();
@@ -116,7 +119,7 @@ class _TimelineStepWidget extends StatelessWidget {
       children: [
         // Icon circle
         AnimatedContainer(
-          duration: AppAnimations.md,
+          duration: AppMotion.timelineStepChange,
           width: 48,
           height: 48,
           decoration: BoxDecoration(

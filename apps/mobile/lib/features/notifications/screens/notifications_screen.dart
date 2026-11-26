@@ -105,7 +105,13 @@ class NotificationsScreen extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Padding(
+          padding: EdgeInsets.all(AppSpacing.screenPadding),
+          child: LoadingShimmer(
+            width: double.infinity,
+            height: AppSpacing.x3l * 2,
+          ),
+        ),
         error: (error, _) => ErrorState(body: CustomerErrorCopy.message(error)),
       ),
     );

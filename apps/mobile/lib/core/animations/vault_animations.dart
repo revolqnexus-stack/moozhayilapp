@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../constants/animations.dart';
+import '../constants/motion.dart';
 import '../constants/colors.dart';
 import '../utils/indian_format.dart';
 
@@ -34,7 +34,7 @@ class _VaultOpeningAnimationState extends State<VaultOpeningAnimation>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: AnimationPresets.schemeMature,
+      duration: AppMotion.vaultOpen,
     );
 
     // Vault door opens (0-40%)
@@ -239,15 +239,13 @@ class _ShrinkToVaultAnimationState extends State<ShrinkToVaultAnimation>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: AnimationPresets.vaultAdd,
+      duration: AppMotion.vaultAdd,
     );
 
-    _scale = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: AnimationPresets.vaultAddCurve,
-      ),
-    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: AppMotion.exit));
 
     _fadeOut = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/animations.dart';
+import '../../core/constants/motion.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/radii.dart';
 
@@ -48,7 +48,7 @@ class _LoadingShimmerState extends State<LoadingShimmer>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: AppAnimations.shimmer,
+      duration: AppMotion.shimmerCycle,
     )..repeat();
     _animation = _controller;
   }

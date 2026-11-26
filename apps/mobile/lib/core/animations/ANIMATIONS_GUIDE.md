@@ -271,7 +271,7 @@ PremiumPressable(
 
 ```dart
 FadeSlideIn(
-  duration: AppMotions.md,
+  duration: AppMotion.normal,
   offsetY: 12,
   delay: Duration(milliseconds: 80),
   child: Text('Hero Text'),
@@ -292,39 +292,43 @@ SectionReveal(
 
 ## Animation Constants
 
-All durations and curves defined in `constants/animations.dart`:
+All durations and curves live in `AppMotion` (`core/constants/motion.dart`).
+Never hardcode a `Duration` or `Curve` in a widget.
 
 ```dart
-// Durations
-AppAnimations.xs       // 150ms - microinteractions
-AppAnimations.sm       // 200ms - button press
-AppAnimations.md       // 300ms - standard transitions
-AppAnimations.lg       // 400ms - cards, modals
-AppAnimations.xl       // 500ms - hero transitions
-AppAnimations.cinematic // 800ms - hero banners
+// General scale
+AppMotion.instant      // 80ms   - press feedback
+AppMotion.fast         // 140ms  - icon / badge state changes
+AppMotion.normal       // 220ms  - sheets, cross-fades, section reveals
+AppMotion.slow         // 380ms  - confirmation draw sequences
+AppMotion.cinematic    // 700ms  - hero moments
+AppMotion.hero         // 1000ms
 
 // Curves
-AppAnimations.standard    // easeInOutCubic - most transitions
-AppAnimations.decelerate  // easeOut - cards settling
-AppAnimations.emphasize   // easeInOutQuart - vault, seal
-AppAnimations.organic     // easeInOutSine - gold flow
+AppMotion.standard       // easeOutCubic   - most transitions
+AppMotion.standardInOut  // easeInOutCubic - rings, banners, cart flight
+AppMotion.emphasized     // easeOutQuart
+AppMotion.decelerate     // easeOut        - counters, rolling digits
+AppMotion.organic        // easeInOutSine  - gold filling a ring
+AppMotion.exit           // easeInCubic    - things leaving the screen
 ```
 
 ---
 
-## Animation Presets
+## Feature Tokens
 
-Specialized presets in `AnimationPresets`:
+Component- and feature-specific tokens, also in `AppMotion`:
 
 ```dart
-AnimationPresets.addToCartFlight     // 500ms
-AnimationPresets.paymentSuccess      // 700ms
-AnimationPresets.goalProgressFill    // 800ms
-AnimationPresets.schemeMature        // 1000ms
-AnimationPresets.gramsCredit         // 600ms
-AnimationPresets.kycApproved         // 700ms
-AnimationPresets.auraThinking        // 1200ms
-AnimationPresets.wishlistAdd         // 400ms
+AppMotion.cartFlight         // 500ms
+AppMotion.sealDraw           // 700ms  - payment success, KYC approved
+AppMotion.progressFill       // 800ms  - all progress rings and bars
+AppMotion.vaultOpen          // 1000ms
+AppMotion.gramsCredit        // 600ms
+AppMotion.countUp            // 400ms
+AppMotion.auraThinking       // 1200ms
+AppMotion.wishlistHeartFill  // 400ms
+AppMotion.shimmerCycle       // 1200ms
 ```
 
 ---

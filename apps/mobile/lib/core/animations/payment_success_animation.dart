@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../constants/animations.dart';
+import '../constants/motion.dart';
 import '../constants/colors.dart';
 
 /// Premium payment success animation: gold tick draws itself inside a circular seal.
@@ -27,7 +27,7 @@ class _PaymentSuccessAnimationState extends State<PaymentSuccessAnimation>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: AnimationPresets.paymentSuccess,
+      duration: AppMotion.sealDraw,
     );
 
     // Seal appears first

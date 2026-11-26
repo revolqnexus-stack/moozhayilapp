@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../constants/animations.dart';
+import '../constants/motion.dart';
 
 /// Premium add-to-cart animation: product image gently flies into cart icon.
 /// Call `AnimationController.forward()` to trigger the flight.
@@ -32,15 +32,12 @@ class _AddToCartFlyingImageState extends State<AddToCartFlyingImage>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: AnimationPresets.addToCartFlight,
+      duration: AppMotion.cartFlight,
     );
 
     _rectTween = RectTween(begin: widget.startRect, end: widget.endRect)
         .animate(
-          CurvedAnimation(
-            parent: _controller,
-            curve: AnimationPresets.addToCartCurve,
-          ),
+          CurvedAnimation(parent: _controller, curve: AppMotion.standardInOut),
         );
 
     _fadeOut = Tween<double>(begin: 1.0, end: 0.0).animate(

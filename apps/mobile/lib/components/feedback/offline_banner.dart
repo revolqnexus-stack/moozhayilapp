@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/constants/animations.dart';
+import '../../core/constants/motion.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/constants/typography.dart';
@@ -33,13 +33,13 @@ class _OfflineBannerState extends ConsumerState<OfflineBanner>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: AppAnimations.sm);
+    _controller = AnimationController(
+      vsync: this,
+      duration: AppMotion.bannerSlide,
+    );
     _slideAnimation =
         Tween<Offset>(begin: const Offset(0, -1), end: Offset.zero).animate(
-          CurvedAnimation(
-            parent: _controller,
-            curve: AppAnimations.curveDefault,
-          ),
+          CurvedAnimation(parent: _controller, curve: AppMotion.standardInOut),
         );
   }
 

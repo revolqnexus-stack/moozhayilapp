@@ -166,7 +166,10 @@ class _ReferralsScreenState extends ConsumerState<ReferralsScreen> {
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Padding(
+          padding: EdgeInsets.all(AppSpacing.screenPadding),
+          child: LoadingShimmer(width: double.infinity, height: AppSpacing.x3l),
+        ),
         error: (error, _) => ErrorState(body: CustomerErrorCopy.message(error)),
       ),
     );

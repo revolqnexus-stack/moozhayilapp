@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../constants/animations.dart';
+import '../constants/motion.dart';
 import '../constants/colors.dart';
 import 'dart:math' as math;
 
@@ -24,7 +24,7 @@ class _PaymentProcessingAnimationState extends State<PaymentProcessingAnimation>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: AnimationPresets.paymentProcessing,
+      duration: AppMotion.paymentProcessingCycle,
     )..repeat();
   }
 

@@ -111,7 +111,7 @@ function logFailure(error: StampMitraError, alert: boolean): void {
 }
 
 export class StampMitraClient {
-  private readonly fetchImpl: typeof fetch;
+  private readonly _fetchImpl?: typeof fetch;
   private readonly sleep: (ms: number) => Promise<void>;
   private readonly random: () => number;
   private readonly env: NodeJS.ProcessEnv;

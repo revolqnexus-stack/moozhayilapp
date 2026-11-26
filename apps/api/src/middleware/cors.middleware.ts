@@ -4,6 +4,7 @@ import { loadEnv, parseCorsOrigins } from "../config/env";
 /** CRM on Vercel — always allow in production even if env drifted. */
 const PRODUCTION_CORS_FALLBACK_ORIGINS = [
   "https://moozhayil-gold-diamonds.vercel.app",
+  "https://moozhayilapp.vercel.app",
 ];
 
 function resolveAllowedOrigins(env: ReturnType<typeof loadEnv>): string[] {

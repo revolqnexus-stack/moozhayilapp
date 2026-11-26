@@ -117,7 +117,7 @@ export class StampMitraClient {
   private readonly env: NodeJS.ProcessEnv;
 
   constructor(options: StampMitraClientOptions = {}) {
-    this.fetchImpl = options.fetch ?? fetch;
+    this._fetchImpl = options.fetch;
     this.sleep = options.sleep ?? defaultSleep;
     this.random = options.random ?? Math.random;
     this.env = options.env ?? process.env;
@@ -170,7 +170,7 @@ export class StampMitraClient {
     for (;;) {
       let response: Response;
       try {
-        response = await this.fetchImpl(`${STAMPMITRA_BASE_URL}${path}`, {
+        response = await (this._fetchImpl ?? fetch)(`${STAMPMITRA_BASE_URL}${path}`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${apiKey}`,

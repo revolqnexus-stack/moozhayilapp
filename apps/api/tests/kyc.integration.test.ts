@@ -158,7 +158,7 @@ describe("Phase 6 KYC and admin review", () => {
 
     const originalFetch = global.fetch;
     process.env.STAMPMITRA_API_KEY = "sk_test_xxx";
-    global.fetch = jest.fn(async (input: RequestInfo | URL) => {
+    global.fetch = jest.fn(async (input: string | URL) => {
       const url = String(input);
       if (!url.includes("api-b2b.stampmitra.in")) {
         return originalFetch(input);

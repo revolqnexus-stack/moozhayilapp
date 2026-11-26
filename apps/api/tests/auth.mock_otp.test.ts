@@ -26,6 +26,7 @@ describe("Auth mock SMS OTP (staging behaviour)", () => {
   beforeAll(() => {
     process.env.NODE_ENV = "development";
     process.env.SMS_PROVIDER_MODE = "mock";
+    process.env.STAMPMITRA_API_KEY = "sk_test_xxx";
     delete process.env.TEST_OTP_CODE;
   });
 

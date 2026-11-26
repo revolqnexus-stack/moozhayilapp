@@ -398,6 +398,17 @@ export class KycService {
       throw error;
     }
 
+    // StampMitra's boolean `nameMatch` returned false for an exact name, so
+    // compare against the registered name ourselves when we have it.
+    if (input.name && providerResult.registeredName) {
+      providerResult = {
+        ...providerResult,
+        nameMatchResult: namesMatch(input.name, providerResult.registeredName)
+          ? "MATCH"
+          : "NO_MATCH",
+      };
+    }
+
     const nameMismatch = isPanNameMismatch(
       input.name,
       providerResult.nameMatchResult,

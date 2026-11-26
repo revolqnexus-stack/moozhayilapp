@@ -100,6 +100,21 @@ export function errorMiddleware(
 
   captureException(err, { path: req.path, method: req.method });
 
+  // TEMPORARY (remove once KYC PAN is stable): Render logs are not available,
+  // so surface the real cause for KYC routes only. No stack trace is sent.
+  if (req.originalUrl.includes("/kyc/")) {
+    const name = err instanceof Error ? err.name : "Error";
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(500).json(
+      buildErrorResponse(
+        req,
+        "SERVER_ERROR",
+        `Server error: ${name}: ${message.slice(0, 300)}`,
+      ),
+    );
+    return;
+  }
+
   res.status(500).json(
     buildErrorResponse(req, "SERVER_ERROR", "An unexpected error occurred"),
   );

@@ -5,6 +5,7 @@ import {
   listKycReviews,
   rejectKyc,
   type KycReview,
+  type KycVerifiedCustomer,
 } from "../api/kyc";
 import { Button } from "../components/Button";
 import { EmptyState } from "../components/EmptyState";
@@ -13,10 +14,10 @@ import { LoadingState } from "../components/LoadingState";
 import { PageHeader } from "../components/PageHeader";
 import { Panel } from "../components/Panel";
 import { StatusBadge } from "../components/StatusBadge";
-import { KycSelfiePreview } from "../components/KycSelfiePreview";
 
 export function KycPage() {
   const [reviews, setReviews] = useState<KycReview[]>([]);
+  const [verified, setVerified] = useState<KycVerifiedCustomer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -30,6 +31,7 @@ export function KycPage() {
     try {
       const result = await listKycReviews();
       setReviews(result.reviews);
+      setVerified(result.verified ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load KYC queue");
     } finally {
@@ -78,27 +80,69 @@ export function KycPage() {
     <div className="page">
       <PageHeader
         eyebrow="Operations"
-        title="KYC Reviews"
-        subtitle="Review pending submissions. Approve and reject require a step-up token from Settings."
+        title="KYC"
+        subtitle="Customers are verified automatically when their PAN is valid and the name matches. Approve and reject require a step-up token from Settings."
       />
 
       {loading ? <LoadingState label="Loading KYC queue…" /> : null}
       {error ? <p className="error">{error}</p> : null}
       {actionError ? <p className="error">{actionError}</p> : null}
 
-      {!loading && !error && reviews.length === 0 ? (
-        <EmptyState title="Queue clear" description="No customers awaiting KYC review." />
+      {!loading && !error ? (
+        <Panel title={`Verified customers (${verified.length})`}>
+          {verified.length === 0 ? (
+            <EmptyState title="No verified customers yet" description="Customers appear here after PAN verification." />
+          ) : (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Phone</th>
+                  <th>Status</th>
+                  <th>Verified</th>
+                  <th>Checks</th>
+                </tr>
+              </thead>
+              <tbody>
+                {verified.map((customer) => (
+                  <tr key={customer.user_id}>
+                    <td>
+                      <Link to={`/users/${customer.user_id}`}>
+                        {customer.name ?? "Member"}
+                      </Link>
+                    </td>
+                    <td>{customer.phone}</td>
+                    <td>
+                      <StatusBadge tone="success">Verified</StatusBadge>
+                    </td>
+                    <td>
+                      {customer.verified_at
+                        ? new Date(customer.verified_at).toLocaleString()
+                        : "—"}
+                    </td>
+                    <td>
+                      <div className="status-row">
+                        <StatusBadge tone={customer.pan_verified ? "success" : "pending"}>
+                          PAN
+                        </StatusBadge>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </Panel>
       ) : null}
 
       {!loading && reviews.length > 0 ? (
-        <Panel title="Pending reviews">
+        <Panel title="Pending manual review">
           <table className="data-table">
             <thead>
               <tr>
                 <th>Customer</th>
                 <th>Phone</th>
                 <th>Submitted</th>
-                <th>Selfie</th>
                 <th>Checks</th>
                 <th>Actions</th>
               </tr>
@@ -118,22 +162,12 @@ export function KycPage() {
                       : "—"}
                   </td>
                   <td>
-                    {review.selfie_preview_available ? (
-                      <KycSelfiePreview userId={review.user_id} />
-                    ) : (
-                      <span className="muted">—</span>
-                    )}
-                  </td>
-                  <td>
                     <div className="status-row">
                       <StatusBadge tone={review.aadhaar_verified ? "success" : "pending"}>
                         Aadhaar
                       </StatusBadge>
                       <StatusBadge tone={review.pan_verified ? "success" : "pending"}>
                         PAN
-                      </StatusBadge>
-                      <StatusBadge tone={review.selfie_verified ? "success" : "pending"}>
-                        Selfie
                       </StatusBadge>
                     </div>
                   </td>

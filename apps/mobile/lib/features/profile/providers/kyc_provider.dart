@@ -219,6 +219,9 @@ class KycFlowActions extends _$KycFlowActions {
         .read(kycRepositoryProvider)
         .verifyPan(panNumber: panNumber, name: name);
     ref.invalidate(kycStatusProvider);
+    // PAN verification completes KYC on the server; refresh the cached user
+    // so Scheme / checkout screens see the new status without a restart.
+    await ref.read(authControllerProvider.notifier).refreshMe();
     return result;
   }
 

@@ -20,8 +20,20 @@ export interface KycReview {
   selfie_preview_available: boolean;
 }
 
+export interface KycVerifiedCustomer {
+  user_id: string;
+  name: string | null;
+  phone: string;
+  kyc_status: string;
+  verified_at: string | null;
+  pan_verified: boolean;
+  aadhaar_verified: boolean;
+}
+
 export async function listKycReviews() {
-  return api<{ reviews: KycReview[] }>("/v1/admin/kyc/reviews");
+  return api<{ reviews: KycReview[]; verified?: KycVerifiedCustomer[] }>(
+    "/v1/admin/kyc/reviews",
+  );
 }
 
 export async function approveKyc(userId: string) {

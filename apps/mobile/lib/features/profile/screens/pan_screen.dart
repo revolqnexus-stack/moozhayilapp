@@ -143,7 +143,6 @@ class _PanScreenState extends ConsumerState<PanScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final status = ref.watch(kycStatusProvider);
     final submitting = _state == _PanUiState.submitting;
 
     return Scaffold(
@@ -241,20 +240,6 @@ class _PanScreenState extends ConsumerState<PanScreen> {
               ),
             ],
             const SizedBox(height: AppSpacing.sm),
-            status.when(
-              data: (kyc) {
-                if (kyc.aadhaarVerified && _state != _PanUiState.verified) {
-                  return PrimaryButton(
-                    label: 'Skip to selfie',
-                    isFullWidth: true,
-                    onTap: () => context.push(AppRoutes.profileKycSelfie),
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-              loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
-            ),
           ],
         ),
       ),

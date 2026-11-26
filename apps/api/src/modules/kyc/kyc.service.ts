@@ -257,8 +257,32 @@ export class KycService {
 
     const doc = user.kycDocument;
 
+    // Customers who verified PAN before PAN auto-approval shipped are stuck
+    // at in_progress. Promote them the first time they open the app.
+    let kycStatus = user.kycStatus;
+    if (
+      doc?.panVerified &&
+      (kycStatus === "not_started" ||
+        kycStatus === "in_progress" ||
+        kycStatus === "basic_verified")
+    ) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { kycStatus: "enhanced_verified", kycVerifiedAt: new Date() },
+      });
+      await writeAuditLog({
+        actorType: "system",
+        action: "kyc_approved",
+        entityType: "user",
+        entityId: userId,
+        before: { kyc_status: kycStatus },
+        after: { kyc_status: "enhanced_verified", method: "pan_backfill" },
+      });
+      kycStatus = "enhanced_verified";
+    }
+
     return {
-      kyc_status: user.kycStatus,
+      kyc_status: kycStatus,
       aadhaar_verified: doc?.aadhaarVerified ?? false,
       pan_verified: doc?.panVerified ?? false,
       selfie_verified: doc?.selfieVerified ?? false,
@@ -439,8 +463,8 @@ export class KycService {
       ...acceptedFields,
     };
 
-    // A valid PAN with a matching name verifies the customer straight away.
-    // No selfie or admin review step.
+    // A valid PAN with a matching name fully verifies the customer straight
+    // away (schemes, contributions, checkout). No selfie or admin review step.
     await prisma.$transaction(async (tx) => {
       await tx.kycDocument.upsert({
         where: { userId },
@@ -451,7 +475,7 @@ export class KycService {
       if (accepted) {
         await tx.user.update({
           where: { id: userId },
-          data: { kycStatus: "basic_verified", kycVerifiedAt: checkedAt },
+          data: { kycStatus: "enhanced_verified", kycVerifiedAt: checkedAt },
         });
       }
     });
@@ -463,7 +487,7 @@ export class KycService {
         entityType: "user",
         entityId: userId,
         after: {
-          kyc_status: "basic_verified",
+          kyc_status: "enhanced_verified",
           method: "pan_auto",
           reference_id: providerResult.referenceId,
         },
@@ -495,7 +519,7 @@ export class KycService {
       message: providerResult.message,
       pan_masked: maskPan(input.pan_number),
       name_mismatch: nameMismatch,
-      kyc_status: accepted ? "basic_verified" : "in_progress",
+      kyc_status: accepted ? "enhanced_verified" : "in_progress",
     };
   }
 
@@ -615,10 +639,6 @@ export class KycService {
       throw new AppError(409, "CONFLICT", "KYC is already submitted for review");
     }
 
-    if (!doc.selfieVerified) {
-      throw new AppError(422, "UNPROCESSABLE", "Selfie verification is required");
-    }
-
     if (!doc.aadhaarVerified && !doc.panVerified) {
       throw new AppError(
         422,
@@ -668,10 +688,6 @@ export class KycService {
     nameOnAadhaarEncrypted: string | null;
     nameOnPanEncrypted: string | null;
   }): KycStatus {
-    if (!doc.selfieVerified) {
-      throw new AppError(422, "UNPROCESSABLE", "Selfie verification is missing");
-    }
-
     const hasAadhaar = doc.aadhaarVerified;
     const hasPan = doc.panVerified;
 
@@ -694,7 +710,12 @@ export class KycService {
       return "enhanced_verified";
     }
 
-    if ((hasAadhaar && doc.selfieVerified) || (hasPan && doc.selfieVerified)) {
+    // Selfie is no longer part of KYC. A verified PAN is full verification.
+    if (hasPan) {
+      return "enhanced_verified";
+    }
+
+    if (hasAadhaar) {
       return "basic_verified";
     }
 

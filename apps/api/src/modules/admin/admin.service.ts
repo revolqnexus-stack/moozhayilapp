@@ -28,7 +28,33 @@ export class AdminService {
       orderBy: { updatedAt: "asc" },
     });
 
+    const verified = await prisma.user.findMany({
+      where: {
+        kycStatus: { in: ["basic_verified", "enhanced_verified"] },
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        kycStatus: true,
+        kycVerifiedAt: true,
+        kycDocument: { select: { panVerified: true, aadhaarVerified: true } },
+      },
+      orderBy: { kycVerifiedAt: { sort: "desc", nulls: "last" } },
+      take: 200,
+    });
+
     return {
+      verified: verified.map((user) => ({
+        user_id: user.id,
+        name: user.name,
+        phone: user.phone,
+        kyc_status: user.kycStatus,
+        verified_at: user.kycVerifiedAt?.toISOString() ?? null,
+        pan_verified: user.kycDocument?.panVerified ?? false,
+        aadhaar_verified: user.kycDocument?.aadhaarVerified ?? false,
+      })),
       reviews: pending.map((user) => ({
         user_id: user.id,
         name: user.name,

@@ -48,6 +48,38 @@ beforeAll(() => {
 });
 
 describe("StampMitra PAN client", () => {
+  // Exact live 200 body from StampMitra (name redacted). No `message`, boolean `nameMatch`.
+  const livePan = {
+    referenceId: "SMV-20261126-QWZU5LF",
+    valid: true,
+    panStatus: "VALID",
+    registeredName: "TEST HOLDER",
+    nameMatch: false,
+    panType: "INDIVIDUAL",
+    panTypeCode: "P",
+    aadhaarSeeded: true,
+  };
+
+  it("reads the real live PAN response (no message, boolean nameMatch)", async () => {
+    const fetchImpl = jest.fn(async () => jsonResponse(200, livePan));
+    const result = await client(fetchImpl).verifyPan({ pan: "ABCDE1234F", name: "Someone Else" });
+
+    expect(result).toEqual({
+      referenceId: "SMV-20261126-QWZU5LF",
+      valid: true,
+      registeredName: "TEST HOLDER",
+      panStatus: "VALID",
+      nameMatchResult: "NO_MATCH",
+      message: "",
+    });
+  });
+
+  it("maps nameMatch true to MATCH", async () => {
+    const fetchImpl = jest.fn(async () => jsonResponse(200, { ...livePan, nameMatch: true }));
+    const result = await client(fetchImpl).verifyPan({ pan: "ABCDE1234F", name: "Test Holder" });
+    expect(result.nameMatchResult).toBe("MATCH");
+  });
+
   it("reads a sandbox PAN verification response", async () => {
     const fetchImpl = jest.fn(async () => jsonResponse(200, samplePan));
     const result = await client(fetchImpl).verifyPan({

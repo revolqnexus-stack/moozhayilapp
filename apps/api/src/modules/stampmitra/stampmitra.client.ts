@@ -320,6 +320,10 @@ async function readError(response: Response): Promise<StampMitraError> {
   });
 }
 
+// Real StampMitra 200 body (captured 2026-11-26):
+// {"referenceId":"SMV-...","valid":true,"panStatus":"VALID","registeredName":"...",
+//  "nameMatch":false,"panType":"INDIVIDUAL","panTypeCode":"P","aadhaarSeeded":true}
+// There is no `message`, and the name check is a boolean `nameMatch`.
 function readPanVerification(payload: unknown): PanVerification {
   if (!payload || typeof payload !== "object") {
     throw new StampMitraError(
@@ -330,12 +334,10 @@ function readPanVerification(payload: unknown): PanVerification {
   }
 
   const body = payload as Record<string, unknown>;
-  if (
-    typeof body.referenceId !== "string" ||
-    typeof body.valid !== "boolean" ||
-    typeof body.panStatus !== "string" ||
-    typeof body.message !== "string"
-  ) {
+  if (typeof body.referenceId !== "string" || typeof body.valid !== "boolean") {
+    logger.error("StampMitra PAN response shape not recognised", {
+      keys: Object.keys(body),
+    });
     throw new StampMitraError(
       502,
       "BAD_RESPONSE",
@@ -343,15 +345,21 @@ function readPanVerification(payload: unknown): PanVerification {
     );
   }
 
+  let nameMatchResult: string | null = null;
+  if (typeof body.nameMatch === "boolean") {
+    nameMatchResult = body.nameMatch ? "MATCH" : "NO_MATCH";
+  } else if (typeof body.nameMatchResult === "string") {
+    nameMatchResult = body.nameMatchResult;
+  }
+
   return {
     referenceId: body.referenceId,
     valid: body.valid,
     registeredName:
       typeof body.registeredName === "string" ? body.registeredName : null,
-    panStatus: body.panStatus,
-    nameMatchResult:
-      typeof body.nameMatchResult === "string" ? body.nameMatchResult : null,
-    message: body.message,
+    panStatus: typeof body.panStatus === "string" ? body.panStatus : "",
+    nameMatchResult,
+    message: typeof body.message === "string" ? body.message : "",
   };
 }
 

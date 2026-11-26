@@ -108,9 +108,9 @@ class _StackedProductContent extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(flex: 4, child: image),
+            Expanded(flex: 3, child: image),
             Expanded(
-              flex: 2,
+              flex: 3,
               child: Padding(
                 padding: const EdgeInsets.only(top: AppSpacing.sm),
                 child: _ProductText(product: product),
@@ -279,6 +279,8 @@ class _ProductText extends StatelessWidget {
         Text(
           product.price.totalDisplay,
           style: AppTypography.priceMD.copyWith(color: AppColors.textPrimary),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );

@@ -94,9 +94,7 @@ class _PanScreenState extends ConsumerState<PanScreen> {
       setState(() {
         _state = _PanUiState.verified;
         _maskPanField = true;
-        _statusMessage = result.message.isEmpty
-            ? 'PAN is valid'
-            : result.message;
+        _statusMessage = 'PAN verified. Your KYC is complete.';
       });
     } catch (error) {
       if (!mounted) return;
@@ -238,7 +236,8 @@ class _PanScreenState extends ConsumerState<PanScreen> {
               PrimaryButton(
                 label: 'Continue',
                 isFullWidth: true,
-                onTap: () => context.push(AppRoutes.profileKycSelfie),
+                // PAN verification now completes KYC; no selfie step.
+                onTap: () => context.go(AppRoutes.profileKyc),
               ),
             ],
             const SizedBox(height: AppSpacing.sm),

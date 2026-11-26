@@ -431,24 +431,44 @@ export class KycService {
           panVerified: false,
         };
 
-    await prisma.kycDocument.upsert({
-      where: { userId },
-      create: {
-        userId,
-        panReferenceId: providerResult.referenceId,
-        panValid: providerResult.valid,
-        panCheckedAt: checkedAt,
-        panVerified: accepted,
-        ...acceptedFields,
-      },
-      update: {
-        panReferenceId: providerResult.referenceId,
-        panValid: providerResult.valid,
-        panCheckedAt: checkedAt,
-        panVerified: accepted,
-        ...acceptedFields,
-      },
+    const docData = {
+      panReferenceId: providerResult.referenceId,
+      panValid: providerResult.valid,
+      panCheckedAt: checkedAt,
+      panVerified: accepted,
+      ...acceptedFields,
+    };
+
+    // A valid PAN with a matching name verifies the customer straight away.
+    // No selfie or admin review step.
+    await prisma.$transaction(async (tx) => {
+      await tx.kycDocument.upsert({
+        where: { userId },
+        create: { userId, ...docData },
+        update: docData,
+      });
+
+      if (accepted) {
+        await tx.user.update({
+          where: { id: userId },
+          data: { kycStatus: "basic_verified", kycVerifiedAt: checkedAt },
+        });
+      }
     });
+
+    if (accepted) {
+      await writeAuditLog({
+        actorType: "system",
+        action: "kyc_approved",
+        entityType: "user",
+        entityId: userId,
+        after: {
+          kyc_status: "basic_verified",
+          method: "pan_auto",
+          reference_id: providerResult.referenceId,
+        },
+      });
+    }
 
     await writeAuditLog({
       actorType: "user",
@@ -475,6 +495,7 @@ export class KycService {
       message: providerResult.message,
       pan_masked: maskPan(input.pan_number),
       name_mismatch: nameMismatch,
+      kyc_status: accepted ? "basic_verified" : "in_progress",
     };
   }
 

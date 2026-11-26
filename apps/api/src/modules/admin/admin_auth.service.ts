@@ -9,37 +9,42 @@ import {
 import type { AdminLoginInput } from "./admin.schema";
 
 export class AdminAuthService {
-  async login(input: AdminLoginInput) {
+  async login(input: AdminLoginInput, debug = false) {
     const admin = await prisma.adminUser.findUnique({
       where: { email: input.email.toLowerCase() },
     });
 
     // TEMP DEBUG (remove after admin login issue is resolved)
-    const debugFail = (reason: string) => {
+    const fail = (reason: string): never => {
       let dbHost = "unparseable";
       try {
         dbHost = new URL(process.env.DATABASE_URL ?? "").hostname;
       } catch {
         // ignore
       }
-      logger.warn("[admin-login-debug] rejected", {
+      const info = {
         reason,
         email: input.email.toLowerCase(),
         dbHost,
         hashLen: admin?.passwordHash?.length,
         hashPrefix: admin?.passwordHash?.slice(0, 8),
         passwordLen: input.password.length,
-      });
+      };
+      logger.warn("[admin-login-debug] rejected", info);
+      throw new AppError(
+        401,
+        "UNAUTHORIZED",
+        "Invalid admin credentials",
+        debug ? { debug: info } : undefined,
+      );
     };
 
     if (!admin || admin.disabledAt || !admin.passwordHash) {
-      debugFail(!admin ? "not_found" : admin.disabledAt ? "disabled" : "no_hash");
-      throw new AppError(401, "UNAUTHORIZED", "Invalid admin credentials");
+      return fail(!admin ? "not_found" : admin.disabledAt ? "disabled" : "no_hash");
     }
 
     if (!verifyPassword(input.password, admin.passwordHash)) {
-      debugFail("password_mismatch");
-      throw new AppError(401, "UNAUTHORIZED", "Invalid admin credentials");
+      return fail("password_mismatch");
     }
 
     await prisma.adminUser.update({

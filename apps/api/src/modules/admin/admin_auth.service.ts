@@ -1,6 +1,7 @@
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/error.middleware";
 import { hashPassword, verifyPassword } from "../../utils/password";
+import { logger } from "../../utils/logger";
 import {
   signAdminStepUpToken,
   signAdminToken,
@@ -13,11 +14,31 @@ export class AdminAuthService {
       where: { email: input.email.toLowerCase() },
     });
 
+    // TEMP DEBUG (remove after admin login issue is resolved)
+    const debugFail = (reason: string) => {
+      let dbHost = "unparseable";
+      try {
+        dbHost = new URL(process.env.DATABASE_URL ?? "").hostname;
+      } catch {
+        // ignore
+      }
+      logger.warn("[admin-login-debug] rejected", {
+        reason,
+        email: input.email.toLowerCase(),
+        dbHost,
+        hashLen: admin?.passwordHash?.length,
+        hashPrefix: admin?.passwordHash?.slice(0, 8),
+        passwordLen: input.password.length,
+      });
+    };
+
     if (!admin || admin.disabledAt || !admin.passwordHash) {
+      debugFail(!admin ? "not_found" : admin.disabledAt ? "disabled" : "no_hash");
       throw new AppError(401, "UNAUTHORIZED", "Invalid admin credentials");
     }
 
     if (!verifyPassword(input.password, admin.passwordHash)) {
+      debugFail("password_mismatch");
       throw new AppError(401, "UNAUTHORIZED", "Invalid admin credentials");
     }
 

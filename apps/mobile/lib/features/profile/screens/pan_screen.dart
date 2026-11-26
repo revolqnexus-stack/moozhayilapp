@@ -65,10 +65,9 @@ class _PanScreenState extends ConsumerState<PanScreen> {
     });
 
     try {
-      final result = await ref.read(kycFlowActionsProvider.notifier).verifyPan(
-            panNumber: pan,
-            name: name,
-          );
+      final result = await ref
+          .read(kycFlowActionsProvider.notifier)
+          .verifyPan(panNumber: pan, name: name);
       if (!mounted) return;
 
       if (!result.valid) {
@@ -95,7 +94,9 @@ class _PanScreenState extends ConsumerState<PanScreen> {
       setState(() {
         _state = _PanUiState.verified;
         _maskPanField = true;
-        _statusMessage = result.message.isEmpty ? 'PAN is valid' : result.message;
+        _statusMessage = result.message.isEmpty
+            ? 'PAN is valid'
+            : result.message;
       });
     } catch (error) {
       if (!mounted) return;
@@ -179,9 +180,9 @@ class _PanScreenState extends ConsumerState<PanScreen> {
               onChanged: submitting || _maskPanField
                   ? (_) {}
                   : (value) => setState(() {
-                        _pan = value.toUpperCase();
-                        _panError = null;
-                      }),
+                      _pan = value.toUpperCase();
+                      _panError = null;
+                    }),
             ),
             if (_maskPanField && !submitting)
               Align(
@@ -201,15 +202,15 @@ class _PanScreenState extends ConsumerState<PanScreen> {
               onChanged: submitting
                   ? (_) {}
                   : (value) => setState(() {
-                        _name = value;
-                        _nameError = null;
-                        if (_state == _PanUiState.nameMismatch ||
-                            _state == _PanUiState.notValid ||
-                            _state == _PanUiState.error) {
-                          _state = _PanUiState.idle;
-                          _statusMessage = null;
-                        }
-                      }),
+                      _name = value;
+                      _nameError = null;
+                      if (_state == _PanUiState.nameMismatch ||
+                          _state == _PanUiState.notValid ||
+                          _state == _PanUiState.error) {
+                        _state = _PanUiState.idle;
+                        _statusMessage = null;
+                      }
+                    }),
             ),
             if (_statusMessage != null) ...[
               const SizedBox(height: AppSpacing.md),
@@ -224,7 +225,9 @@ class _PanScreenState extends ConsumerState<PanScreen> {
             ],
             const SizedBox(height: AppSpacing.lg),
             PrimaryButton(
-              label: _state == _PanUiState.verified ? 'PAN verified' : 'Verify PAN',
+              label: _state == _PanUiState.verified
+                  ? 'PAN verified'
+                  : 'Verify PAN',
               isFullWidth: true,
               isLoading: submitting,
               isDisabled: _state == _PanUiState.verified,

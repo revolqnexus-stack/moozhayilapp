@@ -11,13 +11,29 @@ import 'storage_service.dart';
 part 'api_service.g.dart';
 
 class ApiException implements Exception {
-  const ApiException(this.message, {this.code, this.details});
+  const ApiException(
+    this.message, {
+    this.code,
+    this.details,
+    this.statusCode,
+    this.isTransient = false,
+  });
 
   final String message;
   final String? code;
   final Map<String, dynamic>? details;
 
+  /// HTTP status, when the server responded.
+  final int? statusCode;
+
+  /// Network failure, timeout, 429 or 5xx: retrying later may succeed.
+  /// Other errors (401/403/404/422...) will fail the same way again.
+  final bool isTransient;
+
   factory ApiException.fromDio(DioException error) {
+    final status = error.response?.statusCode;
+    final transientStatus = status != null && (status == 429 || status >= 500);
+
     final data = error.response?.data;
     if (data is Map<String, dynamic>) {
       final apiError = data['error'];
@@ -26,22 +42,32 @@ class ApiException implements Exception {
           apiError['message'] as String? ?? 'Something went wrong',
           code: apiError['code'] as String?,
           details: apiError['details'] as Map<String, dynamic>?,
+          statusCode: status,
+          isTransient: transientStatus,
         );
       }
     }
 
     if (error.type == DioExceptionType.connectionError) {
-      return const ApiException('Please check your internet connection');
+      return const ApiException(
+        'Please check your internet connection',
+        isTransient: true,
+      );
     }
     if (error.type == DioExceptionType.connectionTimeout ||
         error.type == DioExceptionType.receiveTimeout ||
         error.type == DioExceptionType.sendTimeout) {
       return const ApiException(
         'The server is waking up. Please wait a moment and try again.',
+        isTransient: true,
       );
     }
 
-    return const ApiException('Something went wrong');
+    return ApiException(
+      'Something went wrong',
+      statusCode: status,
+      isTransient: transientStatus,
+    );
   }
 
   @override

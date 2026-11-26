@@ -54,8 +54,7 @@ class FakeAdapter implements HttpClientAdapter {
   final Responder responder;
   final calls = <RequestOptions>[];
 
-  int countPath(String path) =>
-      calls.where((c) => c.path == path).length;
+  int countPath(String path) => calls.where((c) => c.path == path).length;
 
   @override
   Future<ResponseBody> fetch(
@@ -128,8 +127,16 @@ void main() {
   test('10 concurrent requests with an expired token all succeed', () async {
     final t = build(standardServer);
     const paths = [
-      '/user/me', '/kyc/status', '/cart', '/goals', '/orders',
-      '/gold-balance', '/vault', '/notifications', '/addresses', '/referrals',
+      '/user/me',
+      '/kyc/status',
+      '/cart',
+      '/goals',
+      '/orders',
+      '/gold-balance',
+      '/vault',
+      '/notifications',
+      '/addresses',
+      '/referrals',
     ];
 
     final results = await Future.wait(
@@ -144,30 +151,32 @@ void main() {
     expect(t.adapter.countPath('/auth/refresh'), inInclusiveRange(1, 10));
   });
 
-  test('retried request failing again does not hang (deadlock regression)',
-      () async {
-    final t = build((o) {
-      if (o.path == '/auth/refresh') {
-        return json(200, {'access_token': 'fresh', 'expires_in': 86400});
-      }
-      if (bearer(o) != 'fresh') return apiError(401, 'UNAUTHORIZED');
-      return apiError(500, 'INTERNAL');
-    });
+  test(
+    'retried request failing again does not hang (deadlock regression)',
+    () async {
+      final t = build((o) {
+        if (o.path == '/auth/refresh') {
+          return json(200, {'access_token': 'fresh', 'expires_in': 86400});
+        }
+        if (bearer(o) != 'fresh') return apiError(401, 'UNAUTHORIZED');
+        return apiError(500, 'INTERNAL');
+      });
 
-    final future = t.api.client.get<dynamic>('/user/me');
+      final future = t.api.client.get<dynamic>('/user/me');
 
-    await expectLater(
-      future.timeout(const Duration(seconds: 5)),
-      throwsA(
-        isA<DioException>().having(
-          (e) => e.response?.statusCode,
-          'status',
-          500,
+      await expectLater(
+        future.timeout(const Duration(seconds: 5)),
+        throwsA(
+          isA<DioException>().having(
+            (e) => e.response?.statusCode,
+            'status',
+            500,
+          ),
         ),
-      ),
-    );
-    expect(t.storage.clearCount, 0);
-  });
+      );
+      expect(t.storage.clearCount, 0);
+    },
+  );
 
   test('403 from a KYC-gated route after refresh keeps the session', () async {
     final t = build((o) {

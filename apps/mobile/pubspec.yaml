@@ -50,3 +50,9 @@ flutter:
     # assets/images/brands/
     # assets/images/hero/
     # assets/images/showroom/
+
+dependency_overrides:
+  # Dart 3.14 (Flutter 3.50) bundles analyzer outside riverpod_generator's
+  # >=7.0.0 <9.0.0 constraint. Force a compatible version so pub resolution
+  # succeeds on CI runners.
+  analyzer: ^8.0.0

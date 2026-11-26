@@ -96,7 +96,8 @@ class KycRepository {
         '/kyc/pan/verify',
         data: {
           'pan_number': panNumber,
-          if (trimmedName != null && trimmedName.isNotEmpty) 'name': trimmedName,
+          if (trimmedName != null && trimmedName.isNotEmpty)
+            'name': trimmedName,
         },
       );
       return PanVerificationResult.fromJson(response.data!);
@@ -117,7 +118,8 @@ class KycRepository {
         data: {
           'account_number': accountNumber,
           'ifsc': ifsc,
-          if (trimmedName != null && trimmedName.isNotEmpty) 'name': trimmedName,
+          if (trimmedName != null && trimmedName.isNotEmpty)
+            'name': trimmedName,
         },
       );
       return BankVerifyResponse.fromJson(response.data!);
@@ -225,11 +227,7 @@ class KycFlowActions extends _$KycFlowActions {
   }) async {
     final result = await ref
         .read(kycRepositoryProvider)
-        .verifyBankAccount(
-          accountNumber,
-          ifsc: ifsc,
-          name: name,
-        );
+        .verifyBankAccount(accountNumber, ifsc: ifsc, name: name);
     ref.invalidate(kycStatusProvider);
     return result;
   }

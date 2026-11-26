@@ -60,7 +60,10 @@ void main() {
     final before = await container.read(authControllerProvider.future);
     expect(before.step, AuthFlowStep.signedIn);
 
-    auth.meError = const ApiException('Too many requests', code: 'RATE_LIMITED');
+    auth.meError = const ApiException(
+      'Too many requests',
+      code: 'RATE_LIMITED',
+    );
     await container.read(authControllerProvider.notifier).refreshMe();
 
     final after = container.read(authControllerProvider);

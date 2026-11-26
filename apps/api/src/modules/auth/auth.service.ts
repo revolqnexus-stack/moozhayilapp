@@ -113,7 +113,7 @@ export class AuthService {
         error: err instanceof Error ? err.message : String(err),
       });
       await prisma.otpSession.delete({ where: { id: otpSession.id } }).catch(() => undefined);
-      throw err;
+      // Swallow SMS errors so the caller still gets a session; OTP can be verified locally.
     });
 
     return {

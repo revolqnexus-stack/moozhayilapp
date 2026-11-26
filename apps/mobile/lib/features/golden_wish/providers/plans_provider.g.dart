@@ -88,7 +88,7 @@ final class MyPlanInterestsProvider
   }
 }
 
-String _$myPlanInterestsHash() => r'87aeeb8e87eb9445318c55b8ede65f1004d921be';
+String _$myPlanInterestsHash() => r'd89470511606359f29d4497558b79c80282f8c5b';
 
 @ProviderFor(PlanInterestActions)
 const planInterestActionsProvider = PlanInterestActionsProvider._();
@@ -101,7 +101,7 @@ final class PlanInterestActionsProvider
         argument: null,
         retry: null,
         name: r'planInterestActionsProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );

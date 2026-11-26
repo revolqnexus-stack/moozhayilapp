@@ -391,7 +391,12 @@ GoRouter createAppRouter({
     // Goal creation flow — standalone (multi-step, no tab bar)
     GoRoute(
       path: AppRoutes.goalsCreate,
-      redirect: (context, state) => AppRoutes.goalsCreateMoment,
+      // Only redirect the bare /goals/create path. go_router also runs a
+      // parent's redirect for child routes, so an unconditional redirect sent
+      // every step back to "moment".
+      redirect: (context, state) => state.uri.path == AppRoutes.goalsCreate
+          ? AppRoutes.goalsCreateMoment
+          : null,
       routes: [
         GoRoute(
           path: 'moment',

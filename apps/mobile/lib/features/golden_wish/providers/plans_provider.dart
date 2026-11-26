@@ -53,7 +53,7 @@ Future<List<String>> myPlanInterests(Ref ref) async {
   return ref.watch(plansRepositoryProvider).myInterestSchemes();
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class PlanInterestActions extends _$PlanInterestActions {
   @override
   FutureOr<void> build() {}

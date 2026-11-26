@@ -283,7 +283,9 @@ class _PlanDetailScreenState extends ConsumerState<PlanDetailScreen> {
     if (!allowed || !context.mounted) return;
 
     final scheme = GoldenWishSchemeType.fromApiValue(plan.schemeType);
-    ref.read(goalCreateDraftStoreProvider.notifier).setScheme(scheme);
+    ref.read(goalCreateDraftStoreProvider.notifier)
+      ..reset()
+      ..setScheme(scheme);
     context.push(AppRoutes.goalsCreateMoment);
   }
 }

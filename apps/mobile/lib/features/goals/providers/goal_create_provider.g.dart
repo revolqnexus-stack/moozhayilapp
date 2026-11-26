@@ -20,7 +20,7 @@ final class GoalCreateDraftStoreProvider
         argument: null,
         retry: null,
         name: r'goalCreateDraftStoreProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );

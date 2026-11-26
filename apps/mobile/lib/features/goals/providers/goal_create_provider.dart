@@ -118,7 +118,9 @@ class GoalCreateDraft {
   };
 }
 
-@riverpod
+// keepAlive: the plan screen only `ref.read`s this before navigating, so an
+// auto-dispose store was dropped and every plan showed the default (Aura).
+@Riverpod(keepAlive: true)
 class GoalCreateDraftStore extends _$GoalCreateDraftStore {
   @override
   GoalCreateDraft build() {

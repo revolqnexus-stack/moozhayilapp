@@ -96,7 +96,7 @@ final class PaymentMethodsProvider
   }
 }
 
-String _$paymentMethodsHash() => r'7a8792f5dd06b092bcc5b58f1fbc018431f3cd18';
+String _$paymentMethodsHash() => r'9b4fde16ed8933be4b63337f1c67f340dd6aa198';
 
 @ProviderFor(PaymentMethodActions)
 const paymentMethodActionsProvider = PaymentMethodActionsProvider._();
@@ -109,7 +109,7 @@ final class PaymentMethodActionsProvider
         argument: null,
         retry: null,
         name: r'paymentMethodActionsProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );

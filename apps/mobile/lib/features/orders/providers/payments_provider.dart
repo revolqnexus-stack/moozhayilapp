@@ -81,7 +81,7 @@ Future<List<PaymentMethod>> paymentMethods(Ref ref) async {
   return response.paymentMethods;
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class PaymentMethodActions extends _$PaymentMethodActions {
   @override
   FutureOr<void> build() {}
